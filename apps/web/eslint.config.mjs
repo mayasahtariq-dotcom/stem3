@@ -13,6 +13,12 @@ const config = [
       "react/no-unknown-property": "off",
     },
   },
+  {
+    // The farm worlds mutate three.js objects every frame (materials, uniforms,
+    // bones), the standard R3F pattern the React Compiler rules don't model.
+    files: ["src/three/worlds/**"],
+    rules: { "react-hooks/immutability": "off", "react-hooks/refs": "off" },
+  },
 ];
 
 export default config;

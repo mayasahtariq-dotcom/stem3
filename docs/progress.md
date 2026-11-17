@@ -12,3 +12,10 @@
 - [x] M8 Leagues (pods of 10, 5 tiers, weekly reset logic), quests (daily/weekly/revision), 43 badges
 - [x] M9 Golu Pot, mascot growth, outfits/freeze/hearts spending, guardrails, WSS /realtime
 - [ ] Scheduler for the weekly league reset (Procrastinate job) lands in M12
+
+## Web: farm worlds (frontend-sandra)
+- [x] Five explorable 3D fields that unlock by XP, with a Meadow Levels screen and unlock card
+- [x] Farm Store (5 categories, 3D preview, gem prices, idempotent buy) and My items
+- [x] Free placement per field: drag, rotate, confirm, cancel, move, put away, validated (water, paths, buildings, slope, bounds, overlap)
+- [x] Layouts saved per field with version conflicts handled (fake backend)
+- [ ] Real backend endpoints (see docs/web/backend-handoff.md)

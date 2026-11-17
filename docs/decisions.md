@@ -16,3 +16,14 @@
 - The web app (apps/web), its design tokens and API client (packages/tokens, packages/api-client) were brought over from the earlier `stem` repo, where they were built and tested. Planning and handoff notes are in docs/web/.
 - The web app runs on its built-in fake backend (`NEXT_PUBLIC_USE_FAKES=true`). Its API types were generated from the `stem` backend's contract, which has no `/v1` prefix. This repo's packages/api-client/openapi.json (with `/v1`) is kept as is. Pointing the web app at this backend means regenerating the client from it; see docs/web/backend-handoff.md.
 - docs/translations-to-review.md now holds the full list of Hindi/Kannada drafts the web app uses.
+
+## Farm worlds, Farm Store and placement (web)
+- Five explorable fields (Starter Meadow, Blossom Meadow, Golden Valley, Woodland Farm, Mountain Paradise) unlock at 0 / 2,000 / 4,000 / 6,000 / 8,000 XP, taken from the product owner's Meadow Levels design; this fits the PRD's 2,000 and 8,000 XP milestones.
+- 3D models are CC0 packs from Quaternius and Kenney, converted to optimised GLB (apps/web/public/models/world, credits in CREDITS.md there). Terrain, water, grass, wind and animal motion are procedural.
+- Gems are the store currency (the design's "coins"). Prices are scaled to real earnings (5 gems per lesson): 6 to 200 gems.
+- The world endpoints (/world, /world/store, /world/inventory, /world/fields/{id}/layout) are served by the fake backend only; see docs/web/backend-handoff.md. Purchases use an Idempotency-Key; layouts are saved whole with a version number (409 LAYOUT_CONFLICT if changed elsewhere).
+- Placement rules (inside the field, not on water, paths, steep ground, buildings or other objects) live in apps/web/src/lib/world/placement.ts and are checked both in the editor and by the fake server.
+- Golu in the new world is the farm cow model at a size that grows with the mascot stage; the old outfit accessory is not shown on it yet.
+- Teacher and parent dashboards do not show field progress yet, because their API responses have no total XP. The store and editing are student-only (other roles get 403 NOT_A_STUDENT).
+- The unlock celebration is a pop-up card with a sound, not a cinematic camera move.
+- The old primitive farm (src/three/world/FarmWorld.tsx) is kept for its scene tests; the student farm now renders src/three/worlds/WorldScene.tsx.
