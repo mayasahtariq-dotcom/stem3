@@ -14,7 +14,8 @@
     "somethingWrong": "कुछ गड़बड़ हो गई। चलो फिर से कोशिश करें।",
     "resetDemo": "डेमो डेटा फिर से शुरू करो",
     "save": "सेव करें",
-    "cancel": "रद्द करें"
+    "cancel": "रद्द करें",
+    "tagline": "खेल-खेल में सीखो"
   },
   "errors": {
     "UNAUTHORIZED": "कृपया फिर से साइन इन करें।",
@@ -392,7 +393,10 @@
     "step_outlining": "पाठों की योजना",
     "step_terms": "मुख्य शब्द ढूँढ रहा है",
     "step_lesson_1": "पाठ 1 लिख रहा है",
-    "step_ready": "तैयार"
+    "step_ready": "तैयार",
+    "heroTitle": "आपकी क्लास बढ़ रही है!",
+    "heroJoin": "क्लास की {key}",
+    "topLearners": "सबसे आगे"
   },
   "parent": {
     "title": "माता-पिता",
@@ -470,7 +474,8 @@
     "parentApproved": "मंज़ूर",
     "parentNotYet": "अभी मंज़ूरी नहीं",
     "removeParent": "{name} को हटाओ",
-    "parentsLoadFailed": "माता-पिता की सूची नहीं खुली। बाद में कोशिश करो।"
+    "parentsLoadFailed": "माता-पिता की सूची नहीं खुली। बाद में कोशिश करो।",
+    "heroTitle": "उन्हें बढ़ते देखें"
   },
   "lesson": {
     "loading": "तुम्हारा पाठ तैयार हो रहा है…",

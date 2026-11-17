@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import type { Schemas } from "@mooshala/api-client";
+import { IconBubble } from "@/components/playful";
 import { BilingualText, Card, ChunkyButton, Dialog, ErrorState, LoadingState, Pill, StickerIcon, type StickerIconName } from "@/components/ui";
 import { useBilingual } from "@/lib/i18n/use-bilingual";
 import { useTri } from "@/lib/i18n/use-tri";
@@ -53,9 +54,9 @@ export function ChildScreen(p: ChildScreenProps) {
   return (
     <div className="flex flex-col gap-4">
       {back}
-      <header className="flex items-center gap-3">
-        <StickerIcon name="backpack" size={40} />
-        <h1 className="text-2xl font-extrabold">{d.child.name}</h1>
+      <header className="relative flex items-center gap-3 overflow-hidden rounded-[24px] bg-gradient-to-r from-[#e3dbff] via-[#efeaff] to-[#f7f5ff] p-4 shadow-[0_8px_22px_rgb(80_60_160/0.10)]">
+        <IconBubble icon="backpack" pastel="lavender" size={36} />
+        <h1 className="text-3xl font-extrabold">{d.child.name}</h1>
         <span className="ml-auto">
           <Pill tone={consentTone(status)}>{t(`consent_${status}`).regional}</Pill>
         </span>
