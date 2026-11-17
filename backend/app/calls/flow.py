@@ -195,7 +195,7 @@ def plan_call(db: Connection, sess: dict[str, Any]) -> dict[str, Any]:
     if lesson is None:
         return {"queue": []}
     qs = db.execute(text("select id from questions where lesson_id=:le and call_safe and "
-                         "kind in ('mcq','true_false') order by id limit :n"),
+                         "kind in ('mcq','true_false') order by position, id limit :n"),
                     {"le": lesson["id"], "n": CALL_QUESTIONS}).scalars().all()
     warm = db.execute(text(
         "select a.question_id from answer_attempts a join questions q on q.id=a.question_id "
@@ -336,8 +336,8 @@ def consent(db: Connection, sid: str, digit: str) -> str:
 def record_call_answer(db: Connection, sess: dict[str, Any], state: dict[str, Any], qid: str,
                        chosen: Any, now: datetime) -> dict[str, Any]:
     lid = sess["learner_id"]
-    q = db.execute(text("select kind, answer, concept, lesson_id from questions where id=:q"),
-                   {"q": qid}).mappings().one()
+    q = db.execute(text("select kind, answer, concept, lesson_id, prompt from questions "
+                        "where id=:q"), {"q": qid}).mappings().one()
     first_try = state["seen"].get(qid, 0) == 0
     state["seen"][qid] = state["seen"].get(qid, 0) + 1
     correct = check_answer(q["kind"], q["answer"], chosen)
@@ -375,7 +375,7 @@ def record_call_answer(db: Connection, sess: dict[str, Any], state: dict[str, An
     state["xp"] += total
     state["badges"] += ctx["extras"].get("badges", [])
     return {"correct": correct, "xp": total, "answer": q["answer"], "kind": q["kind"],
-            "combo_hit": ctx["combo_hit"]}
+            "combo_hit": ctx["combo_hit"], "prompt": q["prompt"]}
 
 
 def answer(db: Connection, sid: str, digit: str) -> str:
@@ -421,6 +421,10 @@ def confirm(db: Connection, sid: str, digit: str) -> str:
     state.pop("pending", None)
     res = record_call_answer(db, sess, state, state["queue"][state["i"]], pending["value"],
                              engine.utcnow())
+    _event(db, sess["id"], "answer", {
+        "question": _text(res["prompt"], "en"), "chosen": _text(pending["value"], "en")
+        if not isinstance(pending["value"], bool) else ("True" if pending["value"] else "False"),
+        "correct": res["correct"], "xp": res["xp"], "combo": res["combo_hit"]})
     if res["correct"]:
         parts = [tw.say(line(lang, "correct", xp=res["xp"]), lang)]
         if res["combo_hit"]:

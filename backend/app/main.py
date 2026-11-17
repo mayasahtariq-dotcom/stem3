@@ -2,7 +2,7 @@ from fastapi import FastAPI
 
 from app.game.setup import register_all
 from app.logging_setup import setup_logging
-from app.routers import admin, auth, calls, game, parent, realtime, student, teacher
+from app.routers import admin, auth, calls, demo, game, parent, realtime, student, teacher
 
 setup_logging()
 register_all()
@@ -15,6 +15,8 @@ app.include_router(parent.router, prefix="/v1")
 app.include_router(admin.router, prefix="/v1")
 app.include_router(realtime.router, prefix="/v1")
 app.include_router(calls.router, prefix="/v1")
+app.include_router(demo.router, prefix="/v1")
+app.include_router(demo.page)
 
 
 @app.get("/health")

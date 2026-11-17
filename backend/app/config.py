@@ -17,6 +17,9 @@ class Settings(BaseSettings):
     twilio_number: str = ""
     call_hours_enforced: bool = True
     quiet_hours_enforced: bool = True
+    demo_mode: bool = False
+    demo_phone: str = ""
+    demo_parent_phone: str = ""
     supabase_url: str = ""
     supabase_jwt_secret: str = "dev-only-secret-change-me-32-bytes!!"
 

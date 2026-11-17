@@ -17,3 +17,5 @@
 - Key 0 ("simpler explanation") repeats the question for now; questions have no explanation field yet.
 - The 5-minute scheduler, retries, missed-call callback and weekly SMS are not built yet (M10/M11 remainder).
 - Parent SMS on course completion: sent once per course to linked parents (or a call student's parent phone), only with consent and outside 9 pm to 7 am IST; quiet-hour texts are marked queued_quiet until the M12 scheduler sends them. A failed SMS never undoes the lesson. Sent inline in the request (move after commit or to a job in M12).
+- Demo console (/demo) and /v1/demo/* exist only with DEMO_MODE=true. /v1/demo/login gives the demo teacher's token without a password, so turn DEMO_MODE off after the hackathon (the tunnel URL is public).
+- Questions now have a position, so lessons and calls play them in the order they were written.

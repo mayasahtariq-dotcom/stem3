@@ -6,3 +6,6 @@ consent, consent_yes, consent_no, greet, hint, option, true_false, correct, comb
 
 ## Parent course-complete SMS (backend/app/notify.py), drafts
 The Hindi and Kannada messages in MESSAGES are drafts.
+
+## Demo course content (backend/app/demo.py), drafts
+The Hindi and Kannada question and option text in COURSES ("1. Cells", "2. Force") are drafts.
