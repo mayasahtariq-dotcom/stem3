@@ -12,6 +12,10 @@ class Settings(BaseSettings):
     use_fake_speech: bool = True
     use_fake_telephony: bool = True
     use_fake_sms: bool = True
+    twilio_account_sid: str = ""
+    twilio_auth_token: str = ""
+    twilio_number: str = ""
+    call_hours_enforced: bool = True
     supabase_url: str = ""
     supabase_jwt_secret: str = "dev-only-secret-change-me-32-bytes!!"
 

@@ -16,7 +16,7 @@ async def test_fakes_work_without_keys() -> None:
     s = Settings()
     assert (await get_llm(s).complete("hi")).startswith("[fake-llm]")
     assert (await get_speech(s).synthesize("namaste", "hi")).startswith(b"fake-audio:hi")
-    assert (await get_telephony(s).place_call("+919999999999", "s1")) == "fake-call-1"
+    assert get_telephony(s).place_call("+919999999999", "s1") == "fake-call-1"
 
 
 def test_real_providers_not_wired_yet() -> None:

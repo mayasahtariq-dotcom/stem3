@@ -19,4 +19,6 @@ def get_speech(settings: Settings) -> SpeechProvider:
 def get_telephony(settings: Settings) -> TelephonyProvider:
     if settings.use_fake_telephony:
         return FakeTelephonyProvider()
-    raise NotImplementedError("Real Exotel provider is added in Phase 5")
+    from app.calls.twilio import TwilioProvider
+
+    return TwilioProvider(settings)

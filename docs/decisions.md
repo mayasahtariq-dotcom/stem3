@@ -11,3 +11,8 @@
 - Badge titles are English only for now; Hindi/Kannada titles come from P3's copy pass (log in translations-to-review.md).
 - Realtime hub is in-process (one API instance); move to Redis or Postgres NOTIFY when scaling out.
 - Badge checks run on lesson completion and on combos or comebacks, not on every answer, to keep requests fast.
+- Hackathon: call mode runs on **Twilio** (instant trial) instead of Exotel (weeks to activate). The engine talks to a `TelephonyProvider` interface, so Exotel can replace Twilio later without changing the call logic.
+- Twilio voices: Google `hi-IN-Standard-A` and `kn-IN-Standard-A` via TwiML <Say> (live text-to-speech, not pre-recorded Sarvam audio yet). Calls are never recorded.
+- Call now is enforced inside 9 am to 9 pm IST; `CALL_HOURS_ENFORCED=false` exists only for testing on your own verified number.
+- Key 0 ("simpler explanation") repeats the question for now; questions have no explanation field yet.
+- The 5-minute scheduler, retries, missed-call callback and weekly SMS are not built yet (M10/M11 remainder).
