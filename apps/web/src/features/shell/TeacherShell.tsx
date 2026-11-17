@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
+import { PlayfulPage } from "@/components/playful";
 import { BilingualText, StickerIcon } from "@/components/ui";
 import { useSelectedClass } from "@/features/teacher/api";
 import { useClassStore } from "@/features/teacher/class-store";
@@ -20,17 +21,19 @@ export function TeacherShell({ children }: { children: ReactNode }) {
   const setClassId = useClassStore((s) => s.setClassId);
 
   return (
-    <div className="min-h-dvh bg-cloud">
-      <header className="border-b-2 border-line bg-white">
+    <PlayfulPage tone="sun">
+      <header className="sticky top-0 z-20 mx-auto max-w-[1440px] px-3 pt-3 tablet:px-5">
+        <div className="rounded-[24px] bg-white/95 shadow-[0_8px_24px_rgb(120_70_20/0.10)] backdrop-blur">
         <div className="mx-auto flex max-w-[1440px] flex-wrap items-center gap-3 px-4 py-3">
-          <span className="flex items-center gap-2 text-xl font-extrabold text-grass-strong">
-            <StickerIcon name="sprout" size={28} /> {c("appName").regional}
+          <span className="flex items-center gap-2 text-2xl font-extrabold text-[#ff7a1a]">
+            <span className="grid size-11 place-items-center rounded-full bg-[#ffe7d4]"><StickerIcon name="sprout" size={28} /></span>
+            <span className="font-display tracking-wide">{c("appName").regional}</span>
           </span>
           <RoleBadge role="teacher" />
           <label className="ml-auto flex items-center gap-2 text-sm font-semibold">
             <span>{n("classSwitcher").regional}</span>
             <select
-              className="min-h-11 rounded-button border-2 border-line bg-white px-3 font-semibold"
+              className="min-h-11 rounded-full border-2 border-[#f3e6da] bg-[#fffaf5] px-4 font-semibold"
               value={selected}
               onChange={(e) => setClassId(e.target.value)}
               disabled={!classes.data?.length}
@@ -48,13 +51,13 @@ export function TeacherShell({ children }: { children: ReactNode }) {
           </label>
           <HudControls tone="plain" />
         </div>
-        <nav aria-label={n("teacherNav").english} className="mx-auto flex max-w-[1440px] gap-1 overflow-x-auto px-4">
+        <nav aria-label={n("teacherNav").english} className="flex gap-2 overflow-x-auto px-3 pb-3">
           {NAV.teacher.map((item) => {
             const active = item.href === "/teacher" ? pathname === item.href : pathname.startsWith(item.href);
             const available = isAvailable(item);
             const cls = cn(
-              "flex min-h-11 items-center gap-2 border-b-4 px-4 font-bold",
-              active ? "border-grass-strong text-ink" : "border-transparent text-stone",
+              "flex min-h-11 shrink-0 items-center gap-2 rounded-full px-4 font-bold transition-colors",
+              active ? "bg-[#ff8a3d] text-white shadow-[0_4px_0_#d96a1f] [&_span]:!text-white" : "bg-[#fff4ea] text-stone hover:bg-[#ffe7d4]",
               !available && "cursor-not-allowed opacity-60",
             );
             const body = (
@@ -75,8 +78,9 @@ export function TeacherShell({ children }: { children: ReactNode }) {
             );
           })}
         </nav>
+        </div>
       </header>
       <main className="mx-auto max-w-[1440px] p-4 tablet:p-6">{children}</main>
-    </div>
+    </PlayfulPage>
   );
 }

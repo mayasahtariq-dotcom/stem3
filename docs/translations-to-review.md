@@ -1374,3 +1374,12 @@ Run `python scripts/export_translations.py` (from backend/) to regenerate `docs/
 | errors.INVALID_PLACEMENT | Not quite: something can't stand where it is. Move it and try again. | अभी नहीं: कोई चीज़ अपनी जगह पर नहीं रह सकती। हटाकर फिर कोशिश करें। | ಇನ್ನೂ ಇಲ್ಲ: ಏನೋ ಅದರ ಜಾಗದಲ್ಲಿ ನಿಲ್ಲದು. ಸರಿಸಿ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ. | [ ] |
 | errors.DUPLICATE_OBJECT | That item was saved twice. Reload and try again. | यह चीज़ दो बार सहेजी गई। दोबारा लोड करके कोशिश करें। | ಈ ವಸ್ತು ಎರಡು ಬಾರಿ ಉಳಿಯಿತು. ಮತ್ತೆ ಲೋಡ್ ಮಾಡಿ ಪ್ರಯತ್ನಿಸಿ. | [ ] |
 | errors.UNKNOWN_ITEM | That item isn't in the Farm Store any more. | यह चीज़ अब फ़ार्म स्टोर में नहीं है। | ಈ ವಸ್ತು ಈಗ ಫಾರ್ಮ್ ಅಂಗಡಿಯಲ್ಲಿಲ್ಲ. | [ ] |
+
+## Playful look (sign-in, teacher, parent)
+| Key | English | Hindi | Kannada | Reviewed |
+|---|---|---|---|---|
+| common.tagline | Learn through play | खेल-खेल में सीखो | ಆಟವಾಡುತ್ತಾ ಕಲಿ | [ ] |
+| teacher.heroTitle | Your class is growing! | आपकी क्लास बढ़ रही है! | ನಿಮ್ಮ ತರಗತಿ ಬೆಳೆಯುತ್ತಿದೆ! | [ ] |
+| teacher.heroJoin | Class key {key} | क्लास की {key} | ತರಗತಿ ಕೀ {key} | [ ] |
+| teacher.topLearners | Top learners | सबसे आगे | ಮುಂಚೂಣಿಯವರು | [ ] |
+| parent.heroTitle | Watch them grow | उन्हें बढ़ते देखें | ಅವರು ಬೆಳೆಯುವುದನ್ನು ನೋಡಿ | [ ] |

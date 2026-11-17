@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils/cn";
 
 /** Cream card on a soft lip: the default content surface. */
 export function Card({ className, ...rest }: HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn("rounded-card border-2 border-line bg-cream p-5 shadow-[0_4px_0_var(--color-line)]", className)} {...rest} />;
+  return <div data-surface="card" className={cn("rounded-card border-2 border-line bg-cream p-5 shadow-[0_4px_0_var(--color-line)]", className)} {...rest} />;
 }
 
 /**

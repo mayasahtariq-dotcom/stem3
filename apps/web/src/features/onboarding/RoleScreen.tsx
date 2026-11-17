@@ -43,11 +43,11 @@ export function useRoleScreen() {
 }
 
 const ICON: Record<Role, StickerIconName> = { student: "backpack", teacher: "teacher", parent: "people" };
-const TILE: Record<Role, string> = { student: "bg-grass/20 border-grass-strong", teacher: "bg-sky-soft border-sky-strong", parent: "bg-coral/15 border-coral-strong" };
+const TILE: Record<Role, string> = { student: "bg-[#ddf7e3]", teacher: "bg-[#ffe7d4]", parent: "bg-[#ece6ff]" };
 
 function RoleArt({ role }: { role: Role }) {
   return (
-    <span className={`grid size-16 shrink-0 place-items-center rounded-card border-2 ${TILE[role]}`}>
+    <span className={`grid size-16 shrink-0 place-items-center rounded-full ${TILE[role]}`}>
       <StickerIcon name={ICON[role]} size={44} />
     </span>
   );

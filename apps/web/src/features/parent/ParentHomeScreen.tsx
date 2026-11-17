@@ -1,7 +1,8 @@
 "use client";
 import Link from "next/link";
 import type { Schemas } from "@mooshala/api-client";
-import { BilingualText, Card, ChunkyButton, EmptyState, ErrorState, GoluMascot, LoadingState, Pill, SpeechBubble, StickerIcon, TextField } from "@/components/ui";
+import { Hero, IconBubble } from "@/components/playful";
+import { BilingualText, Card, ChunkyButton, EmptyState, ErrorState, GoluMascot, LoadingState, Pill, SpeechBubble, TextField } from "@/components/ui";
 import { asApiError } from "@/lib/api/errors";
 import { useBilingual } from "@/lib/i18n/use-bilingual";
 import { consentTone } from "./progress-view";
@@ -31,16 +32,16 @@ export function ParentHomeScreen(p: ParentHomeScreenProps) {
   if (p.loading || !p.kids) return <LoadingState className="min-h-[50vh]" />;
   return (
     <div className="flex flex-col gap-5">
-      <BilingualText as="h1" size="2xl" text={t("homeTitle")} />
+      <Hero tone="lavender" pose="wave" title={t("homeTitle")} subtitle={t("heroTitle")} />
       {p.kids.length === 0 ? (
         <EmptyState message={t("noChildren")} />
       ) : (
         <ul className="flex flex-col gap-3">
-          {p.kids.map((ch) => (
+          {p.kids.map((ch, i) => (
             <li key={ch.id}>
               <Link href={`/parent/child/${ch.id}`} className="block rounded-card focus-visible:outline-4" data-testid={`child-${ch.id}`}>
-                <Card className="flex items-center gap-3 hover:bg-white">
-                  <StickerIcon name="backpack" size={36} />
+                <Card className="flex items-center gap-3 transition-transform hover:-translate-y-0.5">
+                  <IconBubble icon="backpack" pastel={(["lavender", "peach", "sky", "mint"] as const)[i % 4]} size={34} />
                   <div className="flex-1">
                     <p className="text-lg font-extrabold">{ch.name}</p>
                     <p className="text-sm text-stone">{ch.classes.map((x) => x.name).join(", ")}</p>

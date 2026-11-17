@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import type { Material, TeacherOverview } from "@mooshala/api-client";
+import { Hero } from "@/components/playful";
 import { BilingualText, Card, ErrorState, LoadingState, StickerIcon } from "@/components/ui";
 import { useBilingual } from "@/lib/i18n/use-bilingual";
 import { useTri } from "@/lib/i18n/use-tri";
@@ -16,7 +17,7 @@ export function AllClassesPanel({ data, loading, error, onRetry, formatTime }: {
   if (error || !data) return <ErrorState error={error} onRetry={onRetry} />;
   return (
     <section aria-labelledby="all-classes" className="mb-6 flex flex-col gap-4" data-testid="all-classes">
-      <BilingualText as="h2" size="xl" text={t("title")} />
+      <Hero tone="sun" pose="cool" titleAs="h2" eyebrow={t("title")} title={tt("heroTitle")} subtitle={data.classes[0] ? tt("heroJoin", { key: data.classes[0].join_key }) : undefined} />
       <span id="all-classes" className="sr-only">
         {t("title").english}
       </span>

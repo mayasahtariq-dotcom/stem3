@@ -1,10 +1,11 @@
 "use client";
 import type { Schemas } from "@mooshala/api-client";
+import { Hero } from "@/components/playful";
 import { BilingualText, Card, ChunkyButton, EmptyState, ErrorState, LoadingState, ProgressBar, StickerIcon } from "@/components/ui";
 import { useBilingual } from "@/lib/i18n/use-bilingual";
 import { useTri } from "@/lib/i18n/use-tri";
 import { needsHelp } from "./students";
-import { PageTitle, Pill, StatTile, pct } from "./shared";
+import { Pill, StatTile, pct } from "./shared";
 
 export interface OverviewScreenProps {
   data: Schemas["DashboardOut"] | undefined;
@@ -28,7 +29,7 @@ export function OverviewScreen(p: OverviewScreenProps) {
   const help = needsHelp(d.students);
   return (
     <div className="flex flex-col gap-5">
-      <PageTitle text={{ regional: d.name, english: t("overviewTitle").english }} icon="chart" />
+      <Hero tone="sun" pose="cool" eyebrow={{ regional: d.name, english: t("overviewTitle").english }} title={t("heroTitle")} subtitle={t("heroJoin", { key: d.join_key })} />
       <section aria-label={t("thisWeek").english} className="grid grid-cols-2 gap-3 desktop:grid-cols-4">
         <StatTile icon="people" value={`${d.tiles.active_this_week}/${d.tiles.student_count}`} label={t("activeThisWeek")} />
         <StatTile icon="target" value={pct(d.tiles.accuracy)} label={t("classAccuracy")} />
@@ -40,6 +41,7 @@ export function OverviewScreen(p: OverviewScreenProps) {
         <EmptyState message={t("noStudents", { key: d.join_key })} />
       ) : (
         <div className="grid gap-5 desktop:grid-cols-2">
+          <TopLearners students={d.students} onOpen={p.onOpenStudent} />
           <Card>
             <BilingualText as="h2" size="lg" text={t("needsHelp")} className="mb-3" />
             {help.length === 0 ? (
@@ -111,5 +113,36 @@ export function OverviewScreen(p: OverviewScreenProps) {
         </Card>
       </div>
     </div>
+  );
+}
+
+const MEDAL = ["bg-[#ffc83d] text-[#7a4a00]", "bg-[#d9dde3] text-[#4a5160]", "bg-[#f2a66b] text-[#6b3300]"];
+
+/** Leaderboard of the class's most accurate learners (top five). */
+function TopLearners({ students, onOpen }: { students: Schemas["DashboardOut"]["students"]; onOpen: (id: string) => void }) {
+  const t = useBilingual("teacher");
+  const top = [...students].filter((s) => s.accuracy !== null).sort((a, b) => (b.accuracy ?? 0) - (a.accuracy ?? 0)).slice(0, 5);
+  if (top.length === 0) return null;
+  return (
+    <Card className="desktop:col-span-2" data-testid="top-learners">
+      <div className="mb-3 flex items-center gap-2">
+        <StickerIcon name="trophy" size={30} />
+        <BilingualText as="h2" size="lg" text={t("topLearners")} />
+      </div>
+      <ol className="flex flex-col gap-2">
+        {top.map((s, i) => (
+          <li key={s.id}>
+            <button type="button" onClick={() => onOpen(s.id)} className={`flex min-h-12 w-full items-center gap-3 rounded-2xl px-3 py-2 text-left transition-colors ${i === 0 ? "bg-[#fff3c4]" : "bg-[#fffaf5] hover:bg-[#fff1e6]"}`}>
+              <span className={`grid size-8 shrink-0 place-items-center rounded-full text-sm font-extrabold ${MEDAL[i] ?? "bg-white text-stone"}`}>{i + 1}</span>
+              <span className="font-bold">{s.name}</span>
+              {s.streak > 0 && <span className="text-xs font-bold text-flame">{s.streak}d</span>}
+              <span className="ml-auto flex items-center gap-1 font-extrabold tabular-nums">
+                {pct(s.accuracy)} <StickerIcon name="star" size={20} />
+              </span>
+            </button>
+          </li>
+        ))}
+      </ol>
+    </Card>
   );
 }

@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Noto_Sans_Devanagari, Noto_Sans_Kannada, Rubik } from "next/font/google";
+import { Lilita_One, Noto_Sans_Devanagari, Noto_Sans_Kannada, Rubik } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
 import type { ReactNode } from "react";
@@ -8,6 +8,7 @@ import "./globals.css";
 
 const rubik = Rubik({ subsets: ["latin"], variable: "--font-rubik", display: "swap" });
 const devanagari = Noto_Sans_Devanagari({ subsets: ["devanagari"], weight: ["500", "700"], variable: "--font-devanagari", display: "swap" });
+const display = Lilita_One({ subsets: ["latin"], weight: "400", variable: "--font-display", display: "swap" });
 const kannada = Noto_Sans_Kannada({ subsets: ["kannada"], weight: ["500", "700"], variable: "--font-kannada", display: "swap" });
 
 export const metadata: Metadata = {
@@ -21,7 +22,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   const locale = await getLocale();
   const messages = await getMessages();
   return (
-    <html lang={locale} className={`${rubik.variable} ${devanagari.variable} ${kannada.variable}`}>
+    <html lang={locale} className={`${rubik.variable} ${devanagari.variable} ${kannada.variable} ${display.variable}`}>
       <body>
         <NextIntlClientProvider locale={locale} messages={messages}>
           <AppProviders>{children}</AppProviders>

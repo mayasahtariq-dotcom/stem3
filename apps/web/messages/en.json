@@ -14,7 +14,8 @@
     "somethingWrong": "Something went wrong. Let's try again.",
     "resetDemo": "Reset demo data",
     "save": "Save",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "tagline": "Learn through play"
   },
   "errors": {
     "UNAUTHORIZED": "Please sign in again.",
@@ -392,7 +393,10 @@
     "step_outlining": "Planning the lessons",
     "step_terms": "Finding key words",
     "step_lesson_1": "Writing lesson 1",
-    "step_ready": "Ready"
+    "step_ready": "Ready",
+    "heroTitle": "Your class is growing!",
+    "heroJoin": "Class key {key}",
+    "topLearners": "Top learners"
   },
   "parent": {
     "title": "Parent",
@@ -470,7 +474,8 @@
     "parentApproved": "Approved",
     "parentNotYet": "Not approved yet",
     "removeParent": "Remove {name}",
-    "parentsLoadFailed": "Couldn't load your parents. Try again later."
+    "parentsLoadFailed": "Couldn't load your parents. Try again later.",
+    "heroTitle": "Watch them grow"
   },
   "lesson": {
     "loading": "Getting your lesson ready…",

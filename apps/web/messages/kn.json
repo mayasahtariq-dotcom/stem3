@@ -14,7 +14,8 @@
     "somethingWrong": "ಏನೋ ತಪ್ಪಾಯಿತು. ಮತ್ತೆ ಪ್ರಯತ್ನಿಸೋಣ.",
     "resetDemo": "ಡೆಮೊ ಡೇಟಾ ಮರುಹೊಂದಿಸಿ",
     "save": "ಉಳಿಸಿ",
-    "cancel": "ರದ್ದು ಮಾಡಿ"
+    "cancel": "ರದ್ದು ಮಾಡಿ",
+    "tagline": "ಆಟವಾಡುತ್ತಾ ಕಲಿ"
   },
   "errors": {
     "UNAUTHORIZED": "ದಯವಿಟ್ಟು ಮತ್ತೆ ಸೈನ್ ಇನ್ ಮಾಡಿ.",
@@ -392,7 +393,10 @@
     "step_outlining": "ಪಾಠಗಳ ಯೋಜನೆ",
     "step_terms": "ಮುಖ್ಯ ಪದ ಹುಡುಕುತ್ತಿದೆ",
     "step_lesson_1": "ಪಾಠ 1 ಬರೆಯುತ್ತಿದೆ",
-    "step_ready": "ಸಿದ್ಧ"
+    "step_ready": "ಸಿದ್ಧ",
+    "heroTitle": "ನಿಮ್ಮ ತರಗತಿ ಬೆಳೆಯುತ್ತಿದೆ!",
+    "heroJoin": "ತರಗತಿ ಕೀ {key}",
+    "topLearners": "ಮುಂಚೂಣಿಯವರು"
   },
   "parent": {
     "title": "ಪೋಷಕರು",
@@ -470,7 +474,8 @@
     "parentApproved": "ಒಪ್ಪಿದ್ದಾರೆ",
     "parentNotYet": "ಇನ್ನೂ ಒಪ್ಪಿಲ್ಲ",
     "removeParent": "{name} ಅವರನ್ನು ತೆಗೆಯಿರಿ",
-    "parentsLoadFailed": "ಪೋಷಕರ ಪಟ್ಟಿ ತೆರೆಯಲಿಲ್ಲ. ನಂತರ ಪ್ರಯತ್ನಿಸಿ."
+    "parentsLoadFailed": "ಪೋಷಕರ ಪಟ್ಟಿ ತೆರೆಯಲಿಲ್ಲ. ನಂತರ ಪ್ರಯತ್ನಿಸಿ.",
+    "heroTitle": "ಅವರು ಬೆಳೆಯುವುದನ್ನು ನೋಡಿ"
   },
   "lesson": {
     "loading": "ನಿಮ್ಮ ಪಾಠ ಸಿದ್ಧವಾಗುತ್ತಿದೆ…",
