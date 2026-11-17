@@ -51,3 +51,9 @@ def make_world(db: Connection, n_questions: int = 3, n_lessons: int = 2) -> dict
                     "(:l,'school',true)"), {"l": student["learner"]})
     return {"teacher": teacher, "student": student, "classroom": str(cid), "course": str(course),
             "lessons": lessons, "questions": questions}
+
+
+def make_call_safe(db: Connection, course_id: str) -> None:
+    """Mark only this course's questions phone-safe (never touch other tests' rows)."""
+    db.execute(text("update questions set call_safe=true where lesson_id in (select l.id from lessons l "
+                    "join units u on u.id=l.unit_id where u.course_id=:c)"), {"c": course_id})

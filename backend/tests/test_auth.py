@@ -50,7 +50,7 @@ def phone() -> str:
 def test_otp_signup_and_login(client: tuple[TestClient, FakeSmsProvider]) -> None:
     c, sms = client
     p = phone()
-    assert c.post("/v1/auth/otp", json={"phone": p}).status_code == 204
+    assert c.post("/v1/auth/otp", json={"phone": p}).status_code == 200
     r = c.post("/v1/auth/verify", json={"phone": p, "code": sms.last_code(p),
                                          "role": "teacher", "name": "Asha"})
     assert r.status_code == 200, r.text
@@ -94,7 +94,7 @@ def test_otp_send_cap_per_phone(client: tuple[TestClient, FakeSmsProvider]) -> N
     c, _ = client
     p = phone()
     codes = [c.post("/v1/auth/otp", json={"phone": p}).status_code for _ in range(6)]
-    assert codes[:5] == [204] * 5
+    assert codes[:5] == [200] * 5
     assert codes[5] == 429
 
 
