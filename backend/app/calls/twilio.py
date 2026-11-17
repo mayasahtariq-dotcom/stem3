@@ -42,8 +42,13 @@ def valid_signature(token: str, url: str, params: dict[str, str], given: str) ->
 
 # ---------- TwiML ----------
 def say(text: str, lang: str) -> str:
+    """Twilio's voice by default; inside a call step with Sarvam on, a placeholder for a clip."""
     voice, code = VOICES.get(lang, VOICES["hi"])
-    return f"<Say voice={quoteattr(voice)} language={quoteattr(code)}>{escape(text)}</Say>"
+    xml = f"<Say voice={quoteattr(voice)} language={quoteattr(code)}>{escape(text)}</Say>"
+    from app.calls.voice import CURRENT  # local import: voice.py needs settings and speech
+
+    collector = CURRENT.get()
+    return collector.add(text, lang, xml) if collector is not None else xml
 
 
 def gather(inner: str, action: str) -> str:

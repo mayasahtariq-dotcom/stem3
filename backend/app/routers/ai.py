@@ -1,5 +1,4 @@
 """P3 AI routes: notes upload to course, question generation, doubt chatbot, text to speech."""
-import hashlib
 import json
 import re
 from collections.abc import Callable
@@ -25,8 +24,9 @@ from app.auth.service import rate_limit
 from app.config import get_settings
 from app.db.session import get_engine
 from app.deps import DbDep, Student, Teacher, UserDep, learner_id_for
-from app.providers import get_llm, get_speech
+from app.providers import get_llm
 from app.routers.teacher import _own_question, own_course
+from app.speech import cache as speech_cache
 
 router = APIRouter(tags=["ai"])
 ALLOWED = {"image/jpeg": ".jpg", "image/png": ".png", "image/webp": ".webp", "application/pdf": ".pdf"}
@@ -242,21 +242,11 @@ class AudioIn(BaseModel):
 def make_audio(body: AudioIn, db: DbDep, user: UserDep) -> dict[str, str]:
     """Cached Sarvam audio. The same text and language is only synthesised once."""
     rate_limit(f"audio:{user.id}", 120, 3600)
-    s = get_settings()
-    key = hashlib.sha256(f"{s.sarvam_model}|{s.sarvam_speaker}|{body.text}".encode()).hexdigest()
-    row = db.execute(text("select id from audio_cache where text_hash=:h and language=:l"),
-                     {"h": key, "l": body.language}).scalar()
-    if row is None:
-        try:
-            wav = get_speech(s).synthesize(body.text, body.language)
-        except Exception as exc:
-            raise HTTPException(503, "Audio is not available right now.") from exc
-        path = storage.save(wav, ".wav", folder="audio")
-        row = db.execute(text("insert into audio_cache(text_hash, language, storage_path) values "
-                              "(:h,:l,:p) on conflict (text_hash, language) do update set "
-                              "storage_path=excluded.storage_path returning id"),
-                         {"h": key, "l": body.language, "p": path}).scalar_one()
-    return {"id": str(row), "url": f"/v1/audio/{row}"}
+    try:
+        audio_id = speech_cache.get_or_make(db, body.text, body.language, speech_cache.WEB_RATE)
+    except Exception as exc:
+        raise HTTPException(503, "Audio is not available right now.") from exc
+    return {"id": str(audio_id), "url": f"/v1/audio/{audio_id}"}
 
 
 @router.get("/audio/{audio_id}")

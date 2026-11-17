@@ -9,6 +9,7 @@ from starlette.concurrency import run_in_threadpool
 from app.calls import flow
 from app.calls.provider import TelephonyProvider
 from app.calls.twilio import valid_signature
+from app.calls.voice import with_voice
 from app.config import get_settings
 from app.db.session import get_db
 from app.deps import DbDep, Teacher
@@ -75,7 +76,7 @@ def _xml(body: str) -> Response:
 
 
 async def _run(db: Connection, fn: Callable[..., str], *args: Any) -> Response:
-    return _xml(await run_in_threadpool(fn, db, *args))
+    return _xml(await run_in_threadpool(with_voice, fn, db, *args))
 
 
 DbRaw = Annotated[Connection, Depends(get_db)]
@@ -115,7 +116,7 @@ async def tw_answer(request: Request, s: str, db: DbRaw) -> Response:
 async def tw_incoming(request: Request, db: DbRaw) -> Response:
     """Set as the Twilio number's "A call comes in" webhook."""
     form = await _verified_form(request)
-    return _xml(await run_in_threadpool(flow.incoming, db, form.get("From", ""),
+    return _xml(await run_in_threadpool(with_voice, flow.incoming, db, form.get("From", ""),
                                         form.get("CallSid", ""), engine.utcnow()))
 
 

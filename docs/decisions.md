@@ -25,3 +25,4 @@
 - Notes upload pipeline runs as a FastAPI background task (Procrastinate job later). Course stays a draft; questions under 0.7 confidence, or from pages read under 0.7, are flagged for review.
 - Doubt chatbot answers only from the class notes (OCR pages ranked by word overlap, plus terms) and cites the page; embeddings (BGE-M3) can replace the ranking later.
 - Speech: Sarvam bulbul:v3 (speaker shubh), cached per text+language in audio_cache; files on local disk (UPLOAD_DIR) until Supabase Storage is wired.
+- Call voice: Sarvam clips (8 kHz WAV) played with Twilio <Play>. Fixed lines are pre-recorded when a course is published (or with scripts/prewarm_calls.py); live lines are made in parallel within 7 s, and any slow or failed line falls back to Twilio <Say>. CALL_VOICE=twilio turns it off. Needs PUBLIC_BASE_URL so Twilio can fetch the clips.
