@@ -548,18 +548,40 @@ def t_upload_create(body: UploadIn, request: Request, db: DbDep, user: UserDep) 
             db.execute(text("insert into upload_pages(upload_id, page_no, storage_path, mime) values (:u,:n,:p,'text/plain')"),
                        {"u": uid, "n": i + 1, "p": path})
             targets.append({"index": i, "upload_url": None, "method": "PUT", "headers": {}})
-        else:
-            targets.append({"index": i, "upload_url": f"{base}/web/uploads/{uid}/pages/{i}", "method": "PUT",
-                            "headers": {}})
+        else:                          # signed link, like a storage URL: no bearer token needed
+            exp = int(engine.utcnow().timestamp()) + UPLOAD_LINK_SECONDS
+            sig = _page_sig(str(uid), i, exp)
+            targets.append({"index": i, "upload_url": f"{base}/web/uploads/{uid}/pages/{i}?exp={exp}&sig={sig}",
+                            "method": "PUT", "headers": {}})
     return {"id": str(uid), "pages": targets}
 
 
+UPLOAD_LINK_SECONDS = 3600
+
+
+def _page_sig(upload_id: str, index: int, exp: int) -> str:
+    import hashlib
+    import hmac
+
+    from app.config import get_settings
+    key = get_settings().supabase_jwt_secret.encode()
+    return hmac.new(key, f"upload:{upload_id}:{index}:{exp}".encode(), hashlib.sha256).hexdigest()[:32]
+
+
 @router.put("/uploads/{upload_id}/pages/{index}", status_code=204)
-async def t_upload_page(upload_id: str, index: int, request: Request, db: DbDep, user: UserDep) -> None:
-    _teacher(user)
-    if db.execute(text("select 1 from uploads where id=:u and teacher_id=:t and started_at is null"),
-                  {"u": upload_id, "t": user.id}).scalar() is None:
+async def t_upload_page(upload_id: str, index: int, request: Request, db: DbDep, exp: int = 0,
+                        sig: str = "") -> None:
+    """Receives one page at the signed link handed out by POST /uploads (no bearer token)."""
+    import hmac
+    if exp < engine.utcnow().timestamp() or not hmac.compare_digest(sig, _page_sig(upload_id, index, exp)):
+        raise HTTPException(403, {"code": "LINK_EXPIRED_OR_INVALID"})
+    if db.execute(text("select 1 from uploads where id=:u and started_at is null"),
+                  {"u": upload_id}).scalar() is None:
         raise HTTPException(404, {"code": "NOT_FOUND"})
+    if db.execute(text("select 1 from upload_pages where upload_id=:u and page_no=:n"),
+                  {"u": upload_id, "n": index + 1}).scalar() is not None:
+        db.execute(text("delete from upload_pages where upload_id=:u and page_no=:n"),   # "try this page again"
+                   {"u": upload_id, "n": index + 1})
     mime = (request.headers.get("content-type") or "").split(";")[0].lower()
     if mime not in ai_routes.ALLOWED:
         raise HTTPException(415, {"code": "UNSUPPORTED_FILE"})

@@ -114,10 +114,14 @@ def test_upload_pages_then_start_makes_a_course(conn: Connection, client: TestCl
         t = make_user(conn, "teacher")
         h = t["headers"]
         up = client.post("/web/uploads", headers=h, json={"pages": [{"kind": "photo"}, {"kind": "text", "text": "Cells are tiny."}]}).json()
-        assert up["pages"][0]["upload_url"].endswith(f"/web/uploads/{up['id']}/pages/0") and up["pages"][1]["upload_url"] is None
+        assert f"/web/uploads/{up['id']}/pages/0?exp=" in up["pages"][0]["upload_url"] and up["pages"][1]["upload_url"] is None
         assert client.get(f"/web/uploads/{up['id']}", headers=h).json()["status"] == "created"
         path = up["pages"][0]["upload_url"].split("testserver")[-1]
-        assert client.put(path, headers={**h, "Content-Type": "image/png"}, content=b"\x89PNGfake").status_code == 204
+        bad = path.split("&sig=")[0] + "&sig=bad"
+        assert client.put(bad, headers={"Content-Type": "image/png"}, content=b"x").status_code == 403
+        # signed link: no bearer token, like a storage URL; "try this page again" replaces the page
+        assert client.put(path, headers={"Content-Type": "image/png"}, content=b"fake-png").status_code == 204
+        assert client.put(path, headers={"Content-Type": "image/png"}, content=b"fake-png-2").status_code == 204
         client.post(f"/web/uploads/{up['id']}/start", headers=h)
         st: dict[str, Any] = client.get(f"/web/uploads/{up['id']}", headers=h).json()
         assert st["status"] == "ready" and st["course_id"] and st["first_lesson_id"] and st["page_count"] == 2
