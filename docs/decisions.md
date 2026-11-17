@@ -19,3 +19,9 @@
 - Parent SMS on course completion: sent once per course to linked parents (or a call student's parent phone), only with consent and outside 9 pm to 7 am IST; quiet-hour texts are marked queued_quiet until the M12 scheduler sends them. A failed SMS never undoes the lesson. Sent inline in the request (move after commit or to a job in M12).
 - Demo console (/demo) and /v1/demo/* exist only with DEMO_MODE=true. /v1/demo/login gives the demo teacher's token without a password, so turn DEMO_MODE off after the hackathon (the tunnel URL is public).
 - Questions now have a position, so lessons and calls play them in the order they were written.
+- P3 AI: Gemini (Google AI Studio free tier) behind LLMProvider, model GEMINI_MODEL (default gemini-3.8-flash) with fallbacks; Google retired gemini-2.5-flash for new keys. Not open-source: swap for an open model after the hackathon. Free tier may use prompts for training, so only demo notes, never real student data.
+- Gemini calls retry busy (429/5xx) and retired (404) models, but stop after an 80-second overall deadline so the app never hangs.
+- OCR is done by Gemini vision (photos and PDFs in one call) instead of Surya, for speed on a laptop.
+- Notes upload pipeline runs as a FastAPI background task (Procrastinate job later). Course stays a draft; questions under 0.7 confidence, or from pages read under 0.7, are flagged for review.
+- Doubt chatbot answers only from the class notes (OCR pages ranked by word overlap, plus terms) and cites the page; embeddings (BGE-M3) can replace the ranking later.
+- Speech: Sarvam bulbul:v3 (speaker shubh), cached per text+language in audio_cache; files on local disk (UPLOAD_DIR) until Supabase Storage is wired.

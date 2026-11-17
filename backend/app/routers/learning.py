@@ -1,16 +1,10 @@
 """Terms (glossary, saved terms) and doubt chat that cites the notes."""
-import asyncio
-import json
-import re
 from typing import Any
 
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel, Field
 from sqlalchemy import text
 
-from app.config import get_settings
 from app.deps import DbDep, Student, learner_id_for
-from app.providers import get_llm
 
 router = APIRouter(tags=["learning"])
 
@@ -54,56 +48,3 @@ def save_term(term_id: str, db: DbDep, user: Student) -> None:
 def unsave_term(term_id: str, db: DbDep, user: Student) -> None:
     db.execute(text("delete from saved_terms where learner_id=:l and term_id=:t"),
                {"l": learner_id_for(db, user.id), "t": term_id})
-
-
-class DoubtIn(BaseModel):
-    text: str = Field(min_length=2, max_length=500)
-    lesson_id: str | None = None
-
-
-def _def_text(d: Any, lang: str) -> str:
-    if isinstance(d, dict):
-        return str(d.get(lang) or d.get("en") or d.get("english") or next(iter(d.values()), ""))
-    return str(d or "")
-
-
-@router.post("/doubts")
-def ask_doubt(body: DoubtIn, db: DbDep, user: Student) -> dict[str, Any]:
-    """Answers from the class notes first (term definitions) and says where it came from.
-    Falls back to the AI provider (P3's real model when configured). Doubt text stays private."""
-    lid = learner_id_for(db, user.id)
-    q = body.text.lower()
-    words = set(re.findall(r"\w+", q))
-    terms = db.execute(text(
-        f"select t.regional, t.english, t.definition, c.title from terms t "
-        f"join courses c on c.id=t.course_id where {ACCESSIBLE}"), {"u": user.id}).mappings().all()
-    best = next((t for t in terms if t["english"].lower() in q or t["regional"] in body.text
-                 or t["english"].lower() in words), None)
-    citation: dict[str, Any] | None = None
-    if best is not None:
-        answer = (f"{best['english']} ({best['regional']}): "
-                  f"{_def_text(best['definition'], user.language)}").strip(": ")
-        citation = {"course": best["title"], "term": best["english"]}
-    elif get_settings().use_fake_ai:
-        answer = "I could not find this in your class notes yet. Ask your teacher, or try other words."
-    else:
-        answer = asyncio.run(get_llm(get_settings()).complete(body.text))
-    if body.lesson_id and citation is None:
-        page = db.execute(text(
-            "select p.page_no from questions q join upload_pages p on p.id=q.source_page_id "
-            "where q.lesson_id=:l limit 1"), {"l": body.lesson_id}).scalar()
-        if page is not None:
-            citation = {"page": page}
-    did = db.execute(text("insert into doubts(learner_id, text, lesson_id, answer, citation) "
-                          "values (:l,:t,:le,:a,cast(:c as jsonb)) returning id"),
-                     {"l": lid, "t": body.text, "le": body.lesson_id, "a": answer,
-                      "c": json.dumps(citation) if citation else None}).scalar_one()
-    return {"id": str(did), "answer": answer, "citation": citation}
-
-
-@router.get("/doubts")
-def my_doubts(db: DbDep, user: Student) -> list[dict[str, Any]]:
-    rows = db.execute(text("select id, text, answer, citation, created_at from doubts "
-                           "where learner_id=:l order by created_at desc limit 30"),
-                      {"l": learner_id_for(db, user.id)}).mappings().all()
-    return [{**dict(x), "id": str(x["id"])} for x in rows]
