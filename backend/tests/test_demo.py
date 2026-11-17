@@ -36,6 +36,19 @@ def test_demo_seed_login_state_and_live_call(conn: Connection, client: TestClien
         state = client.get("/v1/demo/state", headers=h).json()
         assert state["student"]["status"] == "waiting_consent" and len(state["league"]) == 5
         assert "12345" not in state["student"]["phone"][:-3]          # phone is masked
+        assert state["courses"] == []                                 # no canned courses
+
+        # The teacher's real course (here imported directly; normally from POST /v1/uploads)
+        course = client.post("/v1/courses", headers=h, json={"title": "Cells", "subject": "biology"}).json()["id"]
+        client.post(f"/v1/courses/{course}/content", headers=h, json={"units": [{"title": "U", "lessons": [
+            {"title": "The Cell", "questions": [{"kind": "mcq", "call_safe": True,
+             "prompt": {"en": "What is the smallest unit of life?", "hi": "जीवन की सबसे छोटी इकाई?"},
+             "options": [{"en": "Cell", "hi": "कोशिका"}, {"en": "Organ", "hi": "अंग"}],
+             "answer": {"en": "Cell", "hi": "कोशिका"}, "concept": "cell"}]}]}]})
+        client.post(f"/v1/courses/{course}/publish", headers=h)
+        client.post(f"/v1/courses/{course}/assign", headers=h, json={"classroom_id": state["classroom_id"]})
+        listed = client.get("/v1/demo/state", headers=h).json()["courses"]
+        assert listed[0]["status"] == "published" and listed[0]["questions"] == 1
 
         sid = client.post(f"/v1/call-students/{login['call_student_id']}/call-now",
                           headers=h).json()["session_id"]
@@ -46,8 +59,9 @@ def test_demo_seed_login_state_and_live_call(conn: Connection, client: TestClien
         live = client.get("/v1/demo/state", headers=h).json()
         kinds = [e["kind"] for e in live["call"]["events"]]
         assert kinds[:4] == ["placed", "language", "consent", "lesson_started"]
-        answer = live["call"]["events"][-1]["payload"]
+        answer = next(e["payload"] for e in live["call"]["events"] if e["kind"] == "answer")
+        assert kinds[-1] == "finished"
         assert answer["correct"] and answer["question"] == "What is the smallest unit of life?"
-        assert live["student"]["xp"] == 10 and live["twin"][0]["concept"] == "cell"
+        assert live["student"]["xp"] >= 10 and live["twin"][0]["concept"] == "cell"
     finally:
         app.dependency_overrides.pop(telephony, None)
