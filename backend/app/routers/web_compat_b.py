@@ -35,6 +35,7 @@ from app.routers.web_compat import (
     tri,
 )
 from app.twin import model as twin
+from app.twin import read as twin_read
 
 router = APIRouter(prefix="/web", tags=["web-compat"])
 CODE_SUBJECT = {v: k for k, v in SUBJECT_CODE.items()}
@@ -459,21 +460,19 @@ def _student_row(db: Connection, s: Any, now: datetime) -> dict[str, Any]:
 def t_dashboard(classroom_id: str, db: DbDep, user: UserDep) -> dict[str, Any]:
     c = _own_class(db, user, classroom_id)
     now = engine.utcnow()
-    rows = [_student_row(db, s, now) for s in _students(db, c["id"])]
+    studs = _students(db, c["id"])
+    rows = [_student_row(db, s, now) for s in studs]
     courses = db.execute(text("select c.id, c.title from courses c join course_assignments a on a.course_id=c.id "
                               "where a.classroom_id=:k"), {"k": c["id"]}).mappings().all()
-    weak = db.execute(text(
-        "select t.concept, avg(t.mastery) as m, count(*) as n from twin_concepts t join learners l on l.id=t.learner_id "
-        "join memberships mm on mm.user_id=l.user_id where mm.classroom_id=:k group by t.concept order by avg(t.mastery) "
-        "limit 5"), {"k": c["id"]}).mappings().all()
+    weak = twin_read.class_weak_topics(db, [s["lid"] for s in studs], now)        # with forgetting applied
     accs = [x["accuracy"] for x in rows if x["accuracy"] is not None]
     return {"classroom_id": str(c["id"]), "name": c["name"], "join_key": f"{c['class_key'][:4]}-{c['class_key'][4:]}",
             "school_consent": c["school_consent"], "courses": [{"id": str(x["id"]), "title": tri(x["title"])} for x in courses],
             "tiles": {"active_this_week": sum(1 for x in rows if x["idle_days"] < 7), "student_count": len(rows),
                       "accuracy": round(sum(accs) / len(accs), 2) if accs else None,
                       "behind": sum(1 for x in rows if x["behind"])},
-            "weak_topics": [{"kind": "concept", "key": w["concept"], "name": tri(w["concept"]), "accuracy": round(float(w["m"]), 2),
-                             "attempts": w["n"], "low_mastery_students": w["n"]} for w in weak],
+            "weak_topics": [{"kind": "concept", "key": w["concept"], "name": tri(w["concept"]), "accuracy": round(w["mastery"], 2),
+                             "attempts": w["learners"], "low_mastery_students": w["low"]} for w in weak],
             "students": rows}
 
 
@@ -488,8 +487,7 @@ def t_student(classroom_id: str, student_id: str, db: DbDep, user: UserDep) -> d
     lessons = db.execute(text("select p.lesson_id, l.title, p.completed_at is not null as done, p.accuracy from lesson_progress p "
                               "join lessons l on l.id=p.lesson_id where p.learner_id=:l order by p.started_at"),
                          {"l": s["lid"]}).mappings().all()
-    concepts = db.execute(text("select concept, mastery from twin_concepts where learner_id=:l order by mastery limit 5"),
-                          {"l": s["lid"]}).mappings().all()
+    concepts = twin_read.weakest(db, s["lid"], now, 5)
     conf = db.execute(text("select concept, confused_with, count from twin_confusions where learner_id=:l order by count desc limit 5"),
                       {"l": s["lid"]}).mappings().all()
     hours = db.execute(text("select extract(hour from created_at at time zone 'Asia/Kolkata')::int as h from answer_attempts "
@@ -1203,8 +1201,7 @@ def p_dashboard(child_id: str, db: DbDep, user: UserDep) -> dict[str, Any]:
     a_this, a_last = acc(7, 0), acc(14, 7)
     word = "needs_practice" if (a_this or 0) < 0.5 else ("improving" if a_last is not None and a_this is not None
                                                          and a_this > a_last + 0.05 else "steady")
-    concepts = db.execute(text("select concept, mastery from twin_concepts where learner_id=:l order by mastery"),
-                          {"l": child_id}).mappings().all()
+    concepts = twin_read.weakest(db, child_id, now)
     minutes = round(st["play_seconds_today"] / 60)
     assignments = db.execute(text(
         "select c.id, c.title, k.name as classroom from courses c join course_assignments a on a.course_id=c.id "
