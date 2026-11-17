@@ -11,3 +11,10 @@ __pycache__/
 .env
 .env.local
 *.sqlite3
+
+# web app
+storybook-static/
+playwright-report/
+test-results/
+*.tsbuildinfo
+next-env.d.ts

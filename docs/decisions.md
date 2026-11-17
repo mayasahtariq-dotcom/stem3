@@ -11,3 +11,8 @@
 - Badge titles are English only for now; Hindi/Kannada titles come from P3's copy pass (log in translations-to-review.md).
 - Realtime hub is in-process (one API instance); move to Redis or Postgres NOTIFY when scaling out.
 - Badge checks run on lesson completion and on combos or comebacks, not on every answer, to keep requests fast.
+
+## Mooshala Web frontend added (frontend-sandra)
+- The web app (apps/web), its design tokens and API client (packages/tokens, packages/api-client) were brought over from the earlier `stem` repo, where they were built and tested. Planning and handoff notes are in docs/web/.
+- The web app runs on its built-in fake backend (`NEXT_PUBLIC_USE_FAKES=true`). Its API types were generated from the `stem` backend's contract, which has no `/v1` prefix. This repo's packages/api-client/openapi.json (with `/v1`) is kept as is. Pointing the web app at this backend means regenerating the client from it; see docs/web/backend-handoff.md.
+- docs/translations-to-review.md now holds the full list of Hindi/Kannada drafts the web app uses.
