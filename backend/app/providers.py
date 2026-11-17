@@ -7,13 +7,21 @@ from app.speech.provider import FakeSpeechProvider, SpeechProvider
 def get_llm(settings: Settings) -> LLMProvider:
     if settings.use_fake_ai:
         return FakeLLMProvider()
-    raise NotImplementedError("Real LLM provider is added in Phase 3")
+    if not settings.gemini_api_key:
+        raise NotImplementedError("Set GEMINI_API_KEY (or USE_FAKE_AI=true)")
+    from app.ai.provider import GeminiProvider
+
+    return GeminiProvider(settings.gemini_api_key, settings.gemini_model)
 
 
 def get_speech(settings: Settings) -> SpeechProvider:
     if settings.use_fake_speech:
         return FakeSpeechProvider()
-    raise NotImplementedError("Real speech provider is added in Phase 2")
+    if not settings.sarvam_api_key:
+        raise NotImplementedError("Set SARVAM_API_KEY (or USE_FAKE_SPEECH=true)")
+    from app.speech.provider import SarvamProvider
+
+    return SarvamProvider(settings.sarvam_api_key, settings.sarvam_model, settings.sarvam_speaker)
 
 
 def get_telephony(settings: Settings) -> TelephonyProvider:

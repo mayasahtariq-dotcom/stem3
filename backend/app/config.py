@@ -18,6 +18,12 @@ class Settings(BaseSettings):
     call_hours_enforced: bool = True
     quiet_hours_enforced: bool = True
     demo_mode: bool = False
+    gemini_api_key: str = ""
+    gemini_model: str = "gemini-3.8-flash"
+    sarvam_api_key: str = ""
+    sarvam_model: str = "bulbul:v3"
+    sarvam_speaker: str = "shubh"
+    upload_dir: str = "storage"
     demo_phone: str = ""
     demo_parent_phone: str = ""
     supabase_url: str = ""

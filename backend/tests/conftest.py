@@ -1,11 +1,12 @@
 """Shared fixtures. Tests run on the real database inside a transaction that is rolled back."""
 import os
+import tempfile
 
 # Tests must never reach real phone, SMS or AI services, whatever backend/.env says.
 # Environment variables beat the .env file in pydantic-settings.
 os.environ.update({"USE_FAKE_TELEPHONY": "true", "USE_FAKE_SMS": "true", "USE_FAKE_AI": "true",
                    "USE_FAKE_SPEECH": "true", "TWILIO_AUTH_TOKEN": "", "DEMO_MODE": "false",
-                   "PUBLIC_BASE_URL": ""})
+                   "PUBLIC_BASE_URL": "", "UPLOAD_DIR": tempfile.mkdtemp(prefix="aaroh-test-")})
 
 import uuid
 from collections.abc import Iterator
