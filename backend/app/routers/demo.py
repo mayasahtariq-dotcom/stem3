@@ -52,8 +52,15 @@ def _ids(db: Any) -> dict[str, Any]:
 @router.post("/login")
 def demo_login(db: DbDep) -> dict[str, Any]:
     ids = _ids(db)
+    student = db.execute(text(
+        "select u.id, u.name from users u join memberships m on m.user_id=u.id "
+        "where m.classroom_id=:c and u.role='student' order by u.created_at limit 1"),
+        {"c": ids["classroom"]}).mappings().first()
     return {"token": issue_token(ids["teacher"], "teacher"), "classroom_id": str(ids["classroom"]),
-            "call_student_id": str(ids["cs"]), "twilio_number": get_settings().twilio_number}
+            "call_student_id": str(ids["cs"]), "twilio_number": get_settings().twilio_number,
+            # a smartphone classmate, so the console can show the student chatbot
+            "student_token": issue_token(student["id"], "student") if student else None,
+            "student_name": student["name"] if student else None}
 
 
 @router.post("/reset")
