@@ -1,0 +1,4858 @@
+{
+ "openapi": "3.1.0",
+ "info": {
+  "title": "STEM Tutor API",
+  "version": "0.1.0"
+ },
+ "paths": {
+  "/health": {
+   "get": {
+    "tags": [
+     "health"
+    ],
+    "summary": "Health",
+    "operationId": "health_health_get",
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HealthResponse"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/me": {
+   "get": {
+    "tags": [
+     "me"
+    ],
+    "summary": "Get Me",
+    "operationId": "get_me_me_get",
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/MeResponse"
+        }
+       }
+      }
+     }
+    },
+    "security": [
+     {
+      "HTTPBearer": []
+     }
+    ]
+   },
+   "put": {
+    "tags": [
+     "me"
+    ],
+    "summary": "Put Me",
+    "operationId": "put_me_me_put",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ProfileUpdate"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/MeResponse"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    },
+    "security": [
+     {
+      "HTTPBearer": []
+     }
+    ]
+   }
+  },
+  "/classrooms": {
+   "get": {
+    "tags": [
+     "classrooms"
+    ],
+    "summary": "List Classrooms",
+    "operationId": "list_classrooms_classrooms_get",
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "items": {
+          "$ref": "#/components/schemas/ClassroomOut"
+         },
+         "type": "array",
+         "title": "Response List Classrooms Classrooms Get"
+        }
+       }
+      }
+     }
+    },
+    "security": [
+     {
+      "HTTPBearer": []
+     }
+    ]
+   },
+   "post": {
+    "tags": [
+     "classrooms"
+    ],
+    "summary": "Create Classroom",
+    "operationId": "create_classroom_classrooms_post",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ClassroomCreate"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "201": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ClassroomOut"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    },
+    "security": [
+     {
+      "HTTPBearer": []
+     }
+    ]
+   }
+  },
+  "/classrooms/{classroom_id}": {
+   "get": {
+    "tags": [
+     "classrooms"
+    ],
+    "summary": "Get Classroom",
+    "operationId": "get_classroom_classrooms__classroom_id__get",
+    "security": [
+     {
+      "HTTPBearer": []
+     }
+    ],
+    "parameters": [
+     {
+      "name": "classroom_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "format": "uuid",
+       "title": "Classroom Id"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ClassroomDetail"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/classrooms/preview/{key}": {
+   "get": {
+    "tags": [
+     "classrooms"
+    ],
+    "summary": "Preview Classroom",
+    "operationId": "preview_classroom_classrooms_preview__key__get",
+    "security": [
+     {
+      "HTTPBearer": []
+     }
+    ],
+    "parameters": [
+     {
+      "name": "key",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Key"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ClassroomPreview"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/classrooms/join": {
+   "post": {
+    "tags": [
+     "classrooms"
+    ],
+    "summary": "Join Classroom",
+    "operationId": "join_classroom_classrooms_join_post",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/JoinRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "201": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/StudentClassroomOut"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    },
+    "security": [
+     {
+      "HTTPBearer": []
+     }
+    ]
+   }
+  },
+  "/me/classrooms": {
+   "get": {
+    "tags": [
+     "classrooms"
+    ],
+    "summary": "My Classrooms",
+    "operationId": "my_classrooms_me_classrooms_get",
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "items": {
+          "$ref": "#/components/schemas/StudentClassroomOut"
+         },
+         "type": "array",
+         "title": "Response My Classrooms Me Classrooms Get"
+        }
+       }
+      }
+     }
+    },
+    "security": [
+     {
+      "HTTPBearer": []
+     }
+    ]
+   }
+  },
+  "/uploads": {
+   "post": {
+    "tags": [
+     "courses"
+    ],
+    "summary": "Create Upload",
+    "operationId": "create_upload_uploads_post",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/UploadCreate"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "201": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/UploadCreated"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    },
+    "security": [
+     {
+      "HTTPBearer": []
+     }
+    ]
+   }
+  },
+  "/uploads/{upload_id}/start": {
+   "post": {
+    "tags": [
+     "courses"
+    ],
+    "summary": "Start Upload",
+    "operationId": "start_upload_uploads__upload_id__start_post",
+    "security": [
+     {
+      "HTTPBearer": []
+     }
+    ],
+    "parameters": [
+     {
+      "name": "upload_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "format": "uuid",
+       "title": "Upload Id"
+      }
+     }
+    ],
+    "responses": {
+     "202": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/UploadStatus"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/uploads/{upload_id}": {
+   "get": {
+    "tags": [
+     "courses"
+    ],
+    "summary": "Get Upload",
+    "operationId": "get_upload_uploads__upload_id__get",
+    "security": [
+     {
+      "HTTPBearer": []
+     }
+    ],
+    "parameters": [
+     {
+      "name": "upload_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "format": "uuid",
+       "title": "Upload Id"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/UploadStatus"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/courses": {
+   "get": {
+    "tags": [
+     "courses"
+    ],
+    "summary": "Teacher Courses",
+    "operationId": "teacher_courses_courses_get",
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "items": {
+          "$ref": "#/components/schemas/CourseSummary"
+         },
+         "type": "array",
+         "title": "Response Teacher Courses Courses Get"
+        }
+       }
+      }
+     }
+    },
+    "security": [
+     {
+      "HTTPBearer": []
+     }
+    ]
+   }
+  },
+  "/me/courses": {
+   "get": {
+    "tags": [
+     "courses"
+    ],
+    "summary": "Student Courses",
+    "description": "Personal courses plus class courses assigned to the student's classrooms that have at\nleast one published lesson.",
+    "operationId": "student_courses_me_courses_get",
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "items": {
+          "$ref": "#/components/schemas/CourseSummary"
+         },
+         "type": "array",
+         "title": "Response Student Courses Me Courses Get"
+        }
+       }
+      }
+     }
+    },
+    "security": [
+     {
+      "HTTPBearer": []
+     }
+    ]
+   }
+  },
+  "/courses/{course_id}": {
+   "get": {
+    "tags": [
+     "courses"
+    ],
+    "summary": "Get Course",
+    "operationId": "get_course_courses__course_id__get",
+    "security": [
+     {
+      "HTTPBearer": []
+     }
+    ],
+    "parameters": [
+     {
+      "name": "course_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "format": "uuid",
+       "title": "Course Id"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/CourseOut"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   },
+   "put": {
+    "tags": [
+     "courses"
+    ],
+    "summary": "Update Course Title",
+    "operationId": "update_course_title_courses__course_id__put",
+    "security": [
+     {
+      "HTTPBearer": []
+     }
+    ],
+    "parameters": [
+     {
+      "name": "course_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "format": "uuid",
+       "title": "Course Id"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/TitleUpdate"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/CourseOut"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/lessons/{lesson_id}": {
+   "get": {
+    "tags": [
+     "courses"
+    ],
+    "summary": "Get Lesson",
+    "operationId": "get_lesson_lessons__lesson_id__get",
+    "security": [
+     {
+      "HTTPBearer": []
+     }
+    ],
+    "parameters": [
+     {
+      "name": "lesson_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "format": "uuid",
+       "title": "Lesson Id"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/LessonOut"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/questions/{question_id}": {
+   "put": {
+    "tags": [
+     "courses"
+    ],
+    "summary": "Update Question",
+    "operationId": "update_question_questions__question_id__put",
+    "security": [
+     {
+      "HTTPBearer": []
+     }
+    ],
+    "parameters": [
+     {
+      "name": "question_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "format": "uuid",
+       "title": "Question Id"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/QuestionUpdate"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/QuestionOut"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   },
+   "delete": {
+    "tags": [
+     "courses"
+    ],
+    "summary": "Delete Question",
+    "operationId": "delete_question_questions__question_id__delete",
+    "security": [
+     {
+      "HTTPBearer": []
+     }
+    ],
+    "parameters": [
+     {
+      "name": "question_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "format": "uuid",
+       "title": "Question Id"
+      }
+     }
+    ],
+    "responses": {
+     "204": {
+      "description": "Successful Response"
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/questions/{question_id}/regenerate": {
+   "post": {
+    "tags": [
+     "courses"
+    ],
+    "summary": "Regenerate",
+    "operationId": "regenerate_questions__question_id__regenerate_post",
+    "security": [
+     {
+      "HTTPBearer": []
+     }
+    ],
+    "parameters": [
+     {
+      "name": "question_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "format": "uuid",
+       "title": "Question Id"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/QuestionOut"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/lessons/{lesson_id}/publish": {
+   "post": {
+    "tags": [
+     "courses"
+    ],
+    "summary": "Publish Lesson",
+    "operationId": "publish_lesson_lessons__lesson_id__publish_post",
+    "security": [
+     {
+      "HTTPBearer": []
+     }
+    ],
+    "parameters": [
+     {
+      "name": "lesson_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "format": "uuid",
+       "title": "Lesson Id"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/PublishRequest"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/LessonSummary"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/courses/{course_id}/assign": {
+   "post": {
+    "tags": [
+     "courses"
+    ],
+    "summary": "Assign Course",
+    "operationId": "assign_course_courses__course_id__assign_post",
+    "security": [
+     {
+      "HTTPBearer": []
+     }
+    ],
+    "parameters": [
+     {
+      "name": "course_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "format": "uuid",
+       "title": "Course Id"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/AssignRequest"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/CourseOut"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/me/stats": {
+   "get": {
+    "tags": [
+     "learning"
+    ],
+    "summary": "My Stats",
+    "operationId": "my_stats_me_stats_get",
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/StatsOut"
+        }
+       }
+      }
+     }
+    },
+    "security": [
+     {
+      "HTTPBearer": []
+     }
+    ]
+   }
+  },
+  "/me/daily-goal": {
+   "put": {
+    "tags": [
+     "learning"
+    ],
+    "summary": "Set Daily Goal",
+    "operationId": "set_daily_goal_me_daily_goal_put",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/DailyGoalIn"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/StatsOut"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    },
+    "security": [
+     {
+      "HTTPBearer": []
+     }
+    ]
+   }
+  },
+  "/courses/{course_id}/path": {
+   "get": {
+    "tags": [
+     "learning"
+    ],
+    "summary": "Course Path",
+    "operationId": "course_path_courses__course_id__path_get",
+    "security": [
+     {
+      "HTTPBearer": []
+     }
+    ],
+    "parameters": [
+     {
+      "name": "course_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "format": "uuid",
+       "title": "Course Id"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/PathOut"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/me/home": {
+   "get": {
+    "tags": [
+     "learning"
+    ],
+    "summary": "Home",
+    "operationId": "home_me_home_get",
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HomeOut"
+        }
+       }
+      }
+     }
+    },
+    "security": [
+     {
+      "HTTPBearer": []
+     }
+    ]
+   }
+  },
+  "/lessons/{lesson_id}/start": {
+   "post": {
+    "tags": [
+     "learning"
+    ],
+    "summary": "Start Lesson",
+    "operationId": "start_lesson_lessons__lesson_id__start_post",
+    "security": [
+     {
+      "HTTPBearer": []
+     }
+    ],
+    "parameters": [
+     {
+      "name": "lesson_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "format": "uuid",
+       "title": "Lesson Id"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/StartOut"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/attempts": {
+   "post": {
+    "tags": [
+     "learning"
+    ],
+    "summary": "Submit Attempt",
+    "operationId": "submit_attempt_attempts_post",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/AttemptIn"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/AttemptOut"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    },
+    "security": [
+     {
+      "HTTPBearer": []
+     }
+    ]
+   }
+  },
+  "/lessons/{lesson_id}/complete": {
+   "post": {
+    "tags": [
+     "learning"
+    ],
+    "summary": "Complete Lesson",
+    "operationId": "complete_lesson_lessons__lesson_id__complete_post",
+    "security": [
+     {
+      "HTTPBearer": []
+     }
+    ],
+    "parameters": [
+     {
+      "name": "lesson_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "format": "uuid",
+       "title": "Lesson Id"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/CompleteOut"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/courses/{course_id}/terms": {
+   "get": {
+    "tags": [
+     "learning"
+    ],
+    "summary": "Course Terms",
+    "operationId": "course_terms_courses__course_id__terms_get",
+    "security": [
+     {
+      "HTTPBearer": []
+     }
+    ],
+    "parameters": [
+     {
+      "name": "course_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "format": "uuid",
+       "title": "Course Id"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "array",
+         "items": {
+          "$ref": "#/components/schemas/TermOut"
+         },
+         "title": "Response Course Terms Courses  Course Id  Terms Get"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/me/saved-terms/{course_id}/{key}": {
+   "put": {
+    "tags": [
+     "learning"
+    ],
+    "summary": "Save Term",
+    "operationId": "save_term_me_saved_terms__course_id___key__put",
+    "security": [
+     {
+      "HTTPBearer": []
+     }
+    ],
+    "parameters": [
+     {
+      "name": "course_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "format": "uuid",
+       "title": "Course Id"
+      }
+     },
+     {
+      "name": "key",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Key"
+      }
+     }
+    ],
+    "responses": {
+     "204": {
+      "description": "Successful Response"
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   },
+   "delete": {
+    "tags": [
+     "learning"
+    ],
+    "summary": "Unsave Term",
+    "operationId": "unsave_term_me_saved_terms__course_id___key__delete",
+    "security": [
+     {
+      "HTTPBearer": []
+     }
+    ],
+    "parameters": [
+     {
+      "name": "course_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "format": "uuid",
+       "title": "Course Id"
+      }
+     },
+     {
+      "name": "key",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Key"
+      }
+     }
+    ],
+    "responses": {
+     "204": {
+      "description": "Successful Response"
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/doubts": {
+   "post": {
+    "tags": [
+     "learning"
+    ],
+    "summary": "Ask Doubt",
+    "operationId": "ask_doubt_doubts_post",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/DoubtIn"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DoubtOut"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    },
+    "security": [
+     {
+      "HTTPBearer": []
+     }
+    ]
+   }
+  },
+  "/audio": {
+   "post": {
+    "tags": [
+     "learning"
+    ],
+    "summary": "Get Audio",
+    "operationId": "get_audio_audio_post",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/AudioIn"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/AudioOut"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    },
+    "security": [
+     {
+      "HTTPBearer": []
+     }
+    ]
+   }
+  },
+  "/classrooms/{classroom_id}/dashboard": {
+   "get": {
+    "tags": [
+     "dashboard"
+    ],
+    "summary": "Class Dashboard",
+    "operationId": "class_dashboard_classrooms__classroom_id__dashboard_get",
+    "security": [
+     {
+      "HTTPBearer": []
+     }
+    ],
+    "parameters": [
+     {
+      "name": "classroom_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "format": "uuid",
+       "title": "Classroom Id"
+      }
+     },
+     {
+      "name": "course_id",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string",
+         "format": "uuid"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Course Id"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DashboardOut"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/classrooms/{classroom_id}/students/{student_id}": {
+   "get": {
+    "tags": [
+     "dashboard"
+    ],
+    "summary": "Student Detail",
+    "description": "A student's progress for their teacher. Never their doubt chat.",
+    "operationId": "student_detail_classrooms__classroom_id__students__student_id__get",
+    "security": [
+     {
+      "HTTPBearer": []
+     }
+    ],
+    "parameters": [
+     {
+      "name": "classroom_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "format": "uuid",
+       "title": "Classroom Id"
+      }
+     },
+     {
+      "name": "student_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "format": "uuid",
+       "title": "Student Id"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/StudentDetailOut"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/classrooms/{classroom_id}/school-consent": {
+   "put": {
+    "tags": [
+     "dashboard"
+    ],
+    "summary": "Set School Consent",
+    "description": "The teacher confirms the school has consent forms on file, so students in this class\ndon't need a parent's approval in the app (PRD M4).",
+    "operationId": "set_school_consent_classrooms__classroom_id__school_consent_put",
+    "security": [
+     {
+      "HTTPBearer": []
+     }
+    ],
+    "parameters": [
+     {
+      "name": "classroom_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "format": "uuid",
+       "title": "Classroom Id"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/SchoolConsentIn"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/SchoolConsentOut"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/me/link-code": {
+   "post": {
+    "tags": [
+     "parents"
+    ],
+    "summary": "Create Link Code",
+    "description": "A six-character code (and QR) a parent uses to link. Lasts 24 hours, works once.",
+    "operationId": "create_link_code_me_link_code_post",
+    "responses": {
+     "201": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/LinkCodeOut"
+        }
+       }
+      }
+     }
+    },
+    "security": [
+     {
+      "HTTPBearer": []
+     }
+    ]
+   }
+  },
+  "/me/parents": {
+   "get": {
+    "tags": [
+     "parents"
+    ],
+    "summary": "My Parents",
+    "operationId": "my_parents_me_parents_get",
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "items": {
+          "$ref": "#/components/schemas/ParentOut"
+         },
+         "type": "array",
+         "title": "Response My Parents Me Parents Get"
+        }
+       }
+      }
+     }
+    },
+    "security": [
+     {
+      "HTTPBearer": []
+     }
+    ]
+   }
+  },
+  "/me/parents/{parent_id}": {
+   "delete": {
+    "tags": [
+     "parents"
+    ],
+    "summary": "Remove Parent",
+    "operationId": "remove_parent_me_parents__parent_id__delete",
+    "security": [
+     {
+      "HTTPBearer": []
+     }
+    ],
+    "parameters": [
+     {
+      "name": "parent_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "format": "uuid",
+       "title": "Parent Id"
+      }
+     }
+    ],
+    "responses": {
+     "204": {
+      "description": "Successful Response"
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/parent/link/{code}": {
+   "get": {
+    "tags": [
+     "parents"
+    ],
+    "summary": "Preview Link",
+    "operationId": "preview_link_parent_link__code__get",
+    "security": [
+     {
+      "HTTPBearer": []
+     }
+    ],
+    "parameters": [
+     {
+      "name": "code",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Code"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ChildPreview"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/parent/link": {
+   "post": {
+    "tags": [
+     "parents"
+    ],
+    "summary": "Link Child",
+    "operationId": "link_child_parent_link_post",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/LinkIn"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "201": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ChildOut"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    },
+    "security": [
+     {
+      "HTTPBearer": []
+     }
+    ]
+   }
+  },
+  "/parent/children": {
+   "get": {
+    "tags": [
+     "parents"
+    ],
+    "summary": "My Children",
+    "operationId": "my_children_parent_children_get",
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "items": {
+          "$ref": "#/components/schemas/ChildOut"
+         },
+         "type": "array",
+         "title": "Response My Children Parent Children Get"
+        }
+       }
+      }
+     }
+    },
+    "security": [
+     {
+      "HTTPBearer": []
+     }
+    ]
+   }
+  },
+  "/parent/children/{child_id}/consent": {
+   "post": {
+    "tags": [
+     "parents"
+    ],
+    "summary": "Approve Consent",
+    "description": "\"I approve\": the parent consents to the child's learning data being processed.",
+    "operationId": "approve_consent_parent_children__child_id__consent_post",
+    "security": [
+     {
+      "HTTPBearer": []
+     }
+    ],
+    "parameters": [
+     {
+      "name": "child_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "format": "uuid",
+       "title": "Child Id"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ChildOut"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/parent/children/{child_id}/revoke-consent": {
+   "post": {
+    "tags": [
+     "parents"
+    ],
+    "summary": "Revoke Consent",
+    "description": "Pauses the child's account: no lessons until consent is given again.",
+    "operationId": "revoke_consent_parent_children__child_id__revoke_consent_post",
+    "security": [
+     {
+      "HTTPBearer": []
+     }
+    ],
+    "parameters": [
+     {
+      "name": "child_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "format": "uuid",
+       "title": "Child Id"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ChildOut"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/parent/children/{child_id}": {
+   "delete": {
+    "tags": [
+     "parents"
+    ],
+    "summary": "Unlink Child",
+    "operationId": "unlink_child_parent_children__child_id__delete",
+    "security": [
+     {
+      "HTTPBearer": []
+     }
+    ],
+    "parameters": [
+     {
+      "name": "child_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "format": "uuid",
+       "title": "Child Id"
+      }
+     }
+    ],
+    "responses": {
+     "204": {
+      "description": "Successful Response"
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/parent/children/{child_id}/deletion": {
+   "post": {
+    "tags": [
+     "parents"
+    ],
+    "summary": "Request Deletion",
+    "description": "Deletes the child's account and learning data within seven days (a background job).",
+    "operationId": "request_deletion_parent_children__child_id__deletion_post",
+    "security": [
+     {
+      "HTTPBearer": []
+     }
+    ],
+    "parameters": [
+     {
+      "name": "child_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "format": "uuid",
+       "title": "Child Id"
+      }
+     }
+    ],
+    "responses": {
+     "202": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DeletionOut"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/parent/children/{child_id}/dashboard": {
+   "get": {
+    "tags": [
+     "parents"
+    ],
+    "summary": "Child Dashboard",
+    "operationId": "child_dashboard_parent_children__child_id__dashboard_get",
+    "security": [
+     {
+      "HTTPBearer": []
+     }
+    ],
+    "parameters": [
+     {
+      "name": "child_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "format": "uuid",
+       "title": "Child Id"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ChildDashboard"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  }
+ },
+ "components": {
+  "schemas": {
+   "AccuracyCard": {
+    "properties": {
+     "this_week": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "This Week"
+     },
+     "last_week": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Last Week"
+     },
+     "word": {
+      "type": "string",
+      "enum": [
+       "improving",
+       "steady",
+       "needs_practice"
+      ],
+      "title": "Word"
+     }
+    },
+    "type": "object",
+    "required": [
+     "this_week",
+     "last_week",
+     "word"
+    ],
+    "title": "AccuracyCard"
+   },
+   "AssignRequest": {
+    "properties": {
+     "classroom_ids": {
+      "items": {
+       "type": "string",
+       "format": "uuid"
+      },
+      "type": "array",
+      "minItems": 1,
+      "title": "Classroom Ids"
+     },
+     "due_at": {
+      "anyOf": [
+       {
+        "type": "string",
+        "format": "date-time"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Due At"
+     }
+    },
+    "type": "object",
+    "required": [
+     "classroom_ids"
+    ],
+    "title": "AssignRequest"
+   },
+   "AssignmentOut": {
+    "properties": {
+     "course_id": {
+      "type": "string",
+      "title": "Course Id"
+     },
+     "title": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object",
+      "title": "Title"
+     },
+     "classroom": {
+      "type": "string",
+      "title": "Classroom"
+     },
+     "due_at": {
+      "anyOf": [
+       {
+        "type": "string",
+        "format": "date-time"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Due At"
+     },
+     "status": {
+      "type": "string",
+      "enum": [
+       "done",
+       "pending",
+       "overdue"
+      ],
+      "title": "Status"
+     }
+    },
+    "type": "object",
+    "required": [
+     "course_id",
+     "title",
+     "classroom",
+     "due_at",
+     "status"
+    ],
+    "title": "AssignmentOut"
+   },
+   "AttemptIn": {
+    "properties": {
+     "question_id": {
+      "type": "string",
+      "format": "uuid",
+      "title": "Question Id"
+     },
+     "answer": {
+      "additionalProperties": true,
+      "type": "object",
+      "title": "Answer"
+     },
+     "retry": {
+      "type": "boolean",
+      "title": "Retry",
+      "default": false
+     },
+     "time_ms": {
+      "type": "integer",
+      "maximum": 3600000.0,
+      "minimum": 0.0,
+      "title": "Time Ms",
+      "default": 0
+     }
+    },
+    "type": "object",
+    "required": [
+     "question_id",
+     "answer"
+    ],
+    "title": "AttemptIn"
+   },
+   "AttemptOut": {
+    "properties": {
+     "correct": {
+      "type": "boolean",
+      "title": "Correct"
+     },
+     "correct_answer": {
+      "additionalProperties": true,
+      "type": "object",
+      "title": "Correct Answer"
+     },
+     "explanation": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object",
+      "title": "Explanation"
+     },
+     "xp_delta": {
+      "type": "integer",
+      "title": "Xp Delta"
+     },
+     "heart_lost": {
+      "type": "boolean",
+      "title": "Heart Lost"
+     },
+     "stats": {
+      "$ref": "#/components/schemas/StatsOut"
+     }
+    },
+    "type": "object",
+    "required": [
+     "correct",
+     "correct_answer",
+     "explanation",
+     "xp_delta",
+     "heart_lost",
+     "stats"
+    ],
+    "title": "AttemptOut"
+   },
+   "AudioIn": {
+    "properties": {
+     "text": {
+      "type": "string",
+      "maxLength": 2500,
+      "minLength": 1,
+      "title": "Text"
+     },
+     "language": {
+      "type": "string",
+      "enum": [
+       "hi",
+       "kn",
+       "en"
+      ],
+      "title": "Language"
+     }
+    },
+    "type": "object",
+    "required": [
+     "text",
+     "language"
+    ],
+    "title": "AudioIn"
+   },
+   "AudioOut": {
+    "properties": {
+     "url": {
+      "type": "string",
+      "title": "Url"
+     }
+    },
+    "type": "object",
+    "required": [
+     "url"
+    ],
+    "title": "AudioOut"
+   },
+   "ChildDashboard": {
+    "properties": {
+     "child": {
+      "$ref": "#/components/schemas/ChildOut"
+     },
+     "has_activity": {
+      "type": "boolean",
+      "title": "Has Activity"
+     },
+     "week": {
+      "$ref": "#/components/schemas/WeekCard"
+     },
+     "accuracy": {
+      "$ref": "#/components/schemas/AccuracyCard"
+     },
+     "subjects": {
+      "items": {
+       "$ref": "#/components/schemas/SubjectCard"
+      },
+      "type": "array",
+      "title": "Subjects"
+     },
+     "assignments": {
+      "items": {
+       "$ref": "#/components/schemas/AssignmentOut"
+      },
+      "type": "array",
+      "title": "Assignments"
+     },
+     "classes": {
+      "items": {
+       "$ref": "#/components/schemas/ClassOut"
+      },
+      "type": "array",
+      "title": "Classes"
+     },
+     "summary": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object",
+      "title": "Summary"
+     }
+    },
+    "type": "object",
+    "required": [
+     "child",
+     "has_activity",
+     "week",
+     "accuracy",
+     "subjects",
+     "assignments",
+     "classes",
+     "summary"
+    ],
+    "title": "ChildDashboard"
+   },
+   "ChildOut": {
+    "properties": {
+     "id": {
+      "type": "string",
+      "title": "Id"
+     },
+     "name": {
+      "type": "string",
+      "title": "Name"
+     },
+     "consent_status": {
+      "type": "string",
+      "title": "Consent Status"
+     },
+     "consent_given_by_me": {
+      "type": "boolean",
+      "title": "Consent Given By Me"
+     },
+     "classes": {
+      "items": {
+       "$ref": "#/components/schemas/ClassOut"
+      },
+      "type": "array",
+      "title": "Classes"
+     }
+    },
+    "type": "object",
+    "required": [
+     "id",
+     "name",
+     "consent_status",
+     "consent_given_by_me",
+     "classes"
+    ],
+    "title": "ChildOut"
+   },
+   "ChildPreview": {
+    "properties": {
+     "id": {
+      "type": "string",
+      "title": "Id"
+     },
+     "name": {
+      "type": "string",
+      "title": "Name"
+     },
+     "classes": {
+      "items": {
+       "$ref": "#/components/schemas/ClassOut"
+      },
+      "type": "array",
+      "title": "Classes"
+     }
+    },
+    "type": "object",
+    "required": [
+     "id",
+     "name",
+     "classes"
+    ],
+    "title": "ChildPreview"
+   },
+   "ClassOut": {
+    "properties": {
+     "id": {
+      "type": "string",
+      "title": "Id"
+     },
+     "name": {
+      "type": "string",
+      "title": "Name"
+     },
+     "teacher_name": {
+      "type": "string",
+      "title": "Teacher Name"
+     }
+    },
+    "type": "object",
+    "required": [
+     "id",
+     "name",
+     "teacher_name"
+    ],
+    "title": "ClassOut"
+   },
+   "ClassroomCreate": {
+    "properties": {
+     "name": {
+      "type": "string",
+      "maxLength": 60,
+      "minLength": 1,
+      "title": "Name"
+     },
+     "subject": {
+      "type": "string",
+      "enum": [
+       "BI",
+       "CH",
+       "PH"
+      ],
+      "title": "Subject"
+     },
+     "grade": {
+      "type": "integer",
+      "maximum": 12.0,
+      "minimum": 6.0,
+      "title": "Grade"
+     },
+     "allowed_language_modes": {
+      "items": {
+       "type": "string",
+       "enum": [
+        "hindi",
+        "kannada"
+       ]
+      },
+      "type": "array",
+      "minItems": 1,
+      "title": "Allowed Language Modes",
+      "default": [
+       "hindi",
+       "kannada"
+      ]
+     }
+    },
+    "type": "object",
+    "required": [
+     "name",
+     "subject",
+     "grade"
+    ],
+    "title": "ClassroomCreate"
+   },
+   "ClassroomDetail": {
+    "properties": {
+     "id": {
+      "type": "string",
+      "title": "Id"
+     },
+     "name": {
+      "type": "string",
+      "title": "Name"
+     },
+     "subject": {
+      "type": "string",
+      "enum": [
+       "BI",
+       "CH",
+       "PH"
+      ],
+      "title": "Subject"
+     },
+     "grade": {
+      "type": "integer",
+      "title": "Grade"
+     },
+     "join_key": {
+      "type": "string",
+      "title": "Join Key"
+     },
+     "expires_at": {
+      "anyOf": [
+       {
+        "type": "string",
+        "format": "date-time"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Expires At"
+     },
+     "allowed_language_modes": {
+      "items": {
+       "type": "string",
+       "enum": [
+        "hindi",
+        "kannada"
+       ]
+      },
+      "type": "array",
+      "title": "Allowed Language Modes"
+     },
+     "student_count": {
+      "type": "integer",
+      "title": "Student Count"
+     },
+     "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Created At"
+     },
+     "members": {
+      "items": {
+       "$ref": "#/components/schemas/MemberOut"
+      },
+      "type": "array",
+      "title": "Members"
+     }
+    },
+    "type": "object",
+    "required": [
+     "id",
+     "name",
+     "subject",
+     "grade",
+     "join_key",
+     "expires_at",
+     "allowed_language_modes",
+     "student_count",
+     "created_at",
+     "members"
+    ],
+    "title": "ClassroomDetail"
+   },
+   "ClassroomOut": {
+    "properties": {
+     "id": {
+      "type": "string",
+      "title": "Id"
+     },
+     "name": {
+      "type": "string",
+      "title": "Name"
+     },
+     "subject": {
+      "type": "string",
+      "enum": [
+       "BI",
+       "CH",
+       "PH"
+      ],
+      "title": "Subject"
+     },
+     "grade": {
+      "type": "integer",
+      "title": "Grade"
+     },
+     "join_key": {
+      "type": "string",
+      "title": "Join Key"
+     },
+     "expires_at": {
+      "anyOf": [
+       {
+        "type": "string",
+        "format": "date-time"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Expires At"
+     },
+     "allowed_language_modes": {
+      "items": {
+       "type": "string",
+       "enum": [
+        "hindi",
+        "kannada"
+       ]
+      },
+      "type": "array",
+      "title": "Allowed Language Modes"
+     },
+     "student_count": {
+      "type": "integer",
+      "title": "Student Count"
+     },
+     "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Created At"
+     }
+    },
+    "type": "object",
+    "required": [
+     "id",
+     "name",
+     "subject",
+     "grade",
+     "join_key",
+     "expires_at",
+     "allowed_language_modes",
+     "student_count",
+     "created_at"
+    ],
+    "title": "ClassroomOut"
+   },
+   "ClassroomPreview": {
+    "properties": {
+     "id": {
+      "type": "string",
+      "title": "Id"
+     },
+     "name": {
+      "type": "string",
+      "title": "Name"
+     },
+     "teacher_name": {
+      "type": "string",
+      "title": "Teacher Name"
+     },
+     "subject": {
+      "type": "string",
+      "enum": [
+       "BI",
+       "CH",
+       "PH"
+      ],
+      "title": "Subject"
+     },
+     "grade": {
+      "type": "integer",
+      "title": "Grade"
+     },
+     "student_count": {
+      "type": "integer",
+      "title": "Student Count"
+     },
+     "allowed_language_modes": {
+      "items": {
+       "type": "string",
+       "enum": [
+        "hindi",
+        "kannada"
+       ]
+      },
+      "type": "array",
+      "title": "Allowed Language Modes"
+     }
+    },
+    "type": "object",
+    "required": [
+     "id",
+     "name",
+     "teacher_name",
+     "subject",
+     "grade",
+     "student_count",
+     "allowed_language_modes"
+    ],
+    "title": "ClassroomPreview",
+    "description": "Only safe fields: no member list, no teacher phone."
+   },
+   "CompleteOut": {
+    "properties": {
+     "xp_earned": {
+      "type": "integer",
+      "title": "Xp Earned"
+     },
+     "accuracy": {
+      "type": "number",
+      "title": "Accuracy"
+     },
+     "streak": {
+      "type": "integer",
+      "title": "Streak"
+     },
+     "streak_extended": {
+      "type": "boolean",
+      "title": "Streak Extended"
+     },
+     "stats": {
+      "$ref": "#/components/schemas/StatsOut"
+     }
+    },
+    "type": "object",
+    "required": [
+     "xp_earned",
+     "accuracy",
+     "streak",
+     "streak_extended",
+     "stats"
+    ],
+    "title": "CompleteOut"
+   },
+   "ConceptOut": {
+    "properties": {
+     "kind": {
+      "type": "string",
+      "title": "Kind"
+     },
+     "name": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object",
+      "title": "Name"
+     },
+     "mastery": {
+      "type": "number",
+      "title": "Mastery"
+     }
+    },
+    "type": "object",
+    "required": [
+     "kind",
+     "name",
+     "mastery"
+    ],
+    "title": "ConceptOut"
+   },
+   "ConfusionOut": {
+    "properties": {
+     "expected": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object",
+      "title": "Expected"
+     },
+     "chosen": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object",
+      "title": "Chosen"
+     },
+     "count": {
+      "type": "integer",
+      "title": "Count"
+     }
+    },
+    "type": "object",
+    "required": [
+     "expected",
+     "chosen",
+     "count"
+    ],
+    "title": "ConfusionOut"
+   },
+   "ContinueOut": {
+    "properties": {
+     "course_id": {
+      "type": "string",
+      "title": "Course Id"
+     },
+     "course_title": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object",
+      "title": "Course Title"
+     },
+     "subject": {
+      "type": "string",
+      "title": "Subject"
+     },
+     "lesson_id": {
+      "type": "string",
+      "title": "Lesson Id"
+     },
+     "lesson_title": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object",
+      "title": "Lesson Title"
+     },
+     "lesson_number": {
+      "type": "integer",
+      "title": "Lesson Number"
+     },
+     "lesson_count": {
+      "type": "integer",
+      "title": "Lesson Count"
+     },
+     "generation_status": {
+      "type": "string",
+      "title": "Generation Status"
+     },
+     "due_at": {
+      "anyOf": [
+       {
+        "type": "string",
+        "format": "date-time"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Due At"
+     }
+    },
+    "type": "object",
+    "required": [
+     "course_id",
+     "course_title",
+     "subject",
+     "lesson_id",
+     "lesson_title",
+     "lesson_number",
+     "lesson_count",
+     "generation_status"
+    ],
+    "title": "ContinueOut"
+   },
+   "CourseOut": {
+    "properties": {
+     "id": {
+      "type": "string",
+      "title": "Id"
+     },
+     "title": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object",
+      "title": "Title"
+     },
+     "subject": {
+      "type": "string",
+      "title": "Subject"
+     },
+     "grade": {
+      "type": "integer",
+      "title": "Grade"
+     },
+     "status": {
+      "type": "string",
+      "title": "Status"
+     },
+     "is_personal": {
+      "type": "boolean",
+      "title": "Is Personal"
+     },
+     "ai_made": {
+      "type": "boolean",
+      "title": "Ai Made"
+     },
+     "lesson_count": {
+      "type": "integer",
+      "title": "Lesson Count"
+     },
+     "published_count": {
+      "type": "integer",
+      "title": "Published Count"
+     },
+     "units": {
+      "items": {
+       "$ref": "#/components/schemas/UnitOut"
+      },
+      "type": "array",
+      "title": "Units"
+     },
+     "assigned_classroom_ids": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array",
+      "title": "Assigned Classroom Ids"
+     },
+     "question_count": {
+      "type": "integer",
+      "title": "Question Count"
+     },
+     "edited_count": {
+      "type": "integer",
+      "title": "Edited Count"
+     }
+    },
+    "type": "object",
+    "required": [
+     "id",
+     "title",
+     "subject",
+     "grade",
+     "status",
+     "is_personal",
+     "ai_made",
+     "lesson_count",
+     "published_count",
+     "units",
+     "assigned_classroom_ids",
+     "question_count",
+     "edited_count"
+    ],
+    "title": "CourseOut"
+   },
+   "CourseRef": {
+    "properties": {
+     "id": {
+      "type": "string",
+      "title": "Id"
+     },
+     "title": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object",
+      "title": "Title"
+     }
+    },
+    "type": "object",
+    "required": [
+     "id",
+     "title"
+    ],
+    "title": "CourseRef"
+   },
+   "CourseSummary": {
+    "properties": {
+     "id": {
+      "type": "string",
+      "title": "Id"
+     },
+     "title": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object",
+      "title": "Title"
+     },
+     "subject": {
+      "type": "string",
+      "title": "Subject"
+     },
+     "grade": {
+      "type": "integer",
+      "title": "Grade"
+     },
+     "status": {
+      "type": "string",
+      "title": "Status"
+     },
+     "is_personal": {
+      "type": "boolean",
+      "title": "Is Personal"
+     },
+     "ai_made": {
+      "type": "boolean",
+      "title": "Ai Made"
+     },
+     "lesson_count": {
+      "type": "integer",
+      "title": "Lesson Count"
+     },
+     "published_count": {
+      "type": "integer",
+      "title": "Published Count"
+     }
+    },
+    "type": "object",
+    "required": [
+     "id",
+     "title",
+     "subject",
+     "grade",
+     "status",
+     "is_personal",
+     "ai_made",
+     "lesson_count",
+     "published_count"
+    ],
+    "title": "CourseSummary"
+   },
+   "DailyGoalIn": {
+    "properties": {
+     "goal": {
+      "type": "integer",
+      "enum": [
+       30,
+       50,
+       100
+      ],
+      "title": "Goal"
+     }
+    },
+    "type": "object",
+    "required": [
+     "goal"
+    ],
+    "title": "DailyGoalIn"
+   },
+   "DashboardOut": {
+    "properties": {
+     "classroom_id": {
+      "type": "string",
+      "title": "Classroom Id"
+     },
+     "name": {
+      "type": "string",
+      "title": "Name"
+     },
+     "join_key": {
+      "type": "string",
+      "title": "Join Key"
+     },
+     "school_consent": {
+      "type": "boolean",
+      "title": "School Consent"
+     },
+     "courses": {
+      "items": {
+       "$ref": "#/components/schemas/CourseRef"
+      },
+      "type": "array",
+      "title": "Courses"
+     },
+     "tiles": {
+      "$ref": "#/components/schemas/Tiles"
+     },
+     "weak_topics": {
+      "items": {
+       "$ref": "#/components/schemas/WeakTopic"
+      },
+      "type": "array",
+      "title": "Weak Topics"
+     },
+     "students": {
+      "items": {
+       "$ref": "#/components/schemas/StudentRow"
+      },
+      "type": "array",
+      "title": "Students"
+     }
+    },
+    "type": "object",
+    "required": [
+     "classroom_id",
+     "name",
+     "join_key",
+     "school_consent",
+     "courses",
+     "tiles",
+     "weak_topics",
+     "students"
+    ],
+    "title": "DashboardOut"
+   },
+   "DeletionOut": {
+    "properties": {
+     "request_id": {
+      "type": "string",
+      "title": "Request Id"
+     },
+     "status": {
+      "type": "string",
+      "const": "requested",
+      "title": "Status"
+     },
+     "complete_by": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Complete By"
+     }
+    },
+    "type": "object",
+    "required": [
+     "request_id",
+     "status",
+     "complete_by"
+    ],
+    "title": "DeletionOut"
+   },
+   "DoubtIn": {
+    "properties": {
+     "course_id": {
+      "type": "string",
+      "format": "uuid",
+      "title": "Course Id"
+     },
+     "question_id": {
+      "anyOf": [
+       {
+        "type": "string",
+        "format": "uuid"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Question Id"
+     },
+     "term_key": {
+      "anyOf": [
+       {
+        "type": "string",
+        "maxLength": 60
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Term Key"
+     },
+     "text": {
+      "type": "string",
+      "maxLength": 500,
+      "minLength": 1,
+      "title": "Text"
+     },
+     "mode": {
+      "type": "string",
+      "enum": [
+       "ask",
+       "simpler",
+       "example"
+      ],
+      "title": "Mode",
+      "default": "ask"
+     }
+    },
+    "type": "object",
+    "required": [
+     "course_id",
+     "text"
+    ],
+    "title": "DoubtIn"
+   },
+   "DoubtOut": {
+    "properties": {
+     "id": {
+      "type": "string",
+      "title": "Id"
+     },
+     "answer": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object",
+      "title": "Answer"
+     },
+     "in_notes": {
+      "type": "boolean",
+      "title": "In Notes"
+     },
+     "source_pages": {
+      "items": {
+       "type": "integer"
+      },
+      "type": "array",
+      "title": "Source Pages"
+     },
+     "doubts_left_today": {
+      "type": "integer",
+      "title": "Doubts Left Today"
+     }
+    },
+    "type": "object",
+    "required": [
+     "id",
+     "answer",
+     "in_notes",
+     "source_pages",
+     "doubts_left_today"
+    ],
+    "title": "DoubtOut"
+   },
+   "HTTPValidationError": {
+    "properties": {
+     "detail": {
+      "items": {
+       "$ref": "#/components/schemas/ValidationError"
+      },
+      "type": "array",
+      "title": "Detail"
+     }
+    },
+    "type": "object",
+    "title": "HTTPValidationError"
+   },
+   "HealthResponse": {
+    "properties": {
+     "status": {
+      "type": "string",
+      "title": "Status"
+     },
+     "version": {
+      "type": "string",
+      "title": "Version"
+     }
+    },
+    "type": "object",
+    "required": [
+     "status",
+     "version"
+    ],
+    "title": "HealthResponse"
+   },
+   "HomeClass": {
+    "properties": {
+     "id": {
+      "type": "string",
+      "title": "Id"
+     },
+     "name": {
+      "type": "string",
+      "title": "Name"
+     },
+     "subject": {
+      "type": "string",
+      "title": "Subject"
+     },
+     "teacher_name": {
+      "type": "string",
+      "title": "Teacher Name"
+     },
+     "new_lessons": {
+      "type": "integer",
+      "title": "New Lessons"
+     }
+    },
+    "type": "object",
+    "required": [
+     "id",
+     "name",
+     "subject",
+     "teacher_name",
+     "new_lessons"
+    ],
+    "title": "HomeClass"
+   },
+   "HomeCourse": {
+    "properties": {
+     "id": {
+      "type": "string",
+      "title": "Id"
+     },
+     "title": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object",
+      "title": "Title"
+     },
+     "subject": {
+      "type": "string",
+      "title": "Subject"
+     },
+     "is_personal": {
+      "type": "boolean",
+      "title": "Is Personal"
+     },
+     "ai_made": {
+      "type": "boolean",
+      "title": "Ai Made"
+     },
+     "percent_complete": {
+      "type": "integer",
+      "title": "Percent Complete"
+     },
+     "lesson_count": {
+      "type": "integer",
+      "title": "Lesson Count"
+     }
+    },
+    "type": "object",
+    "required": [
+     "id",
+     "title",
+     "subject",
+     "is_personal",
+     "ai_made",
+     "percent_complete",
+     "lesson_count"
+    ],
+    "title": "HomeCourse"
+   },
+   "HomeOut": {
+    "properties": {
+     "name": {
+      "type": "string",
+      "title": "Name"
+     },
+     "language_mode": {
+      "type": "string",
+      "title": "Language Mode"
+     },
+     "stats": {
+      "$ref": "#/components/schemas/StatsOut"
+     },
+     "continue_lesson": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/ContinueOut"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "classes": {
+      "items": {
+       "$ref": "#/components/schemas/HomeClass"
+      },
+      "type": "array",
+      "title": "Classes"
+     },
+     "courses": {
+      "items": {
+       "$ref": "#/components/schemas/HomeCourse"
+      },
+      "type": "array",
+      "title": "Courses"
+     }
+    },
+    "type": "object",
+    "required": [
+     "name",
+     "language_mode",
+     "stats",
+     "continue_lesson",
+     "classes",
+     "courses"
+    ],
+    "title": "HomeOut"
+   },
+   "JoinRequest": {
+    "properties": {
+     "key": {
+      "type": "string",
+      "maxLength": 12,
+      "minLength": 8,
+      "title": "Key"
+     }
+    },
+    "type": "object",
+    "required": [
+     "key"
+    ],
+    "title": "JoinRequest"
+   },
+   "LessonOut": {
+    "properties": {
+     "id": {
+      "type": "string",
+      "title": "Id"
+     },
+     "course_id": {
+      "type": "string",
+      "title": "Course Id"
+     },
+     "title": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object",
+      "title": "Title"
+     },
+     "generation_status": {
+      "type": "string",
+      "title": "Generation Status"
+     },
+     "published": {
+      "type": "boolean",
+      "title": "Published"
+     },
+     "questions": {
+      "items": {
+       "$ref": "#/components/schemas/QuestionOut"
+      },
+      "type": "array",
+      "title": "Questions"
+     },
+     "terms": {
+      "additionalProperties": {
+       "additionalProperties": true,
+       "type": "object"
+      },
+      "type": "object",
+      "title": "Terms"
+     }
+    },
+    "type": "object",
+    "required": [
+     "id",
+     "course_id",
+     "title",
+     "generation_status",
+     "published",
+     "questions",
+     "terms"
+    ],
+    "title": "LessonOut"
+   },
+   "LessonResultOut": {
+    "properties": {
+     "lesson_id": {
+      "type": "string",
+      "title": "Lesson Id"
+     },
+     "title": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object",
+      "title": "Title"
+     },
+     "completed": {
+      "type": "boolean",
+      "title": "Completed"
+     },
+     "accuracy": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Accuracy"
+     }
+    },
+    "type": "object",
+    "required": [
+     "lesson_id",
+     "title",
+     "completed",
+     "accuracy"
+    ],
+    "title": "LessonResultOut"
+   },
+   "LessonSummary": {
+    "properties": {
+     "id": {
+      "type": "string",
+      "title": "Id"
+     },
+     "position": {
+      "type": "integer",
+      "title": "Position"
+     },
+     "title": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object",
+      "title": "Title"
+     },
+     "generation_status": {
+      "type": "string",
+      "title": "Generation Status"
+     },
+     "published": {
+      "type": "boolean",
+      "title": "Published"
+     },
+     "question_count": {
+      "type": "integer",
+      "title": "Question Count"
+     },
+     "flagged_count": {
+      "type": "integer",
+      "title": "Flagged Count"
+     }
+    },
+    "type": "object",
+    "required": [
+     "id",
+     "position",
+     "title",
+     "generation_status",
+     "published",
+     "question_count",
+     "flagged_count"
+    ],
+    "title": "LessonSummary"
+   },
+   "LinkCodeOut": {
+    "properties": {
+     "code": {
+      "type": "string",
+      "title": "Code"
+     },
+     "expires_at": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Expires At"
+     }
+    },
+    "type": "object",
+    "required": [
+     "code",
+     "expires_at"
+    ],
+    "title": "LinkCodeOut"
+   },
+   "LinkIn": {
+    "properties": {
+     "code": {
+      "type": "string",
+      "maxLength": 10,
+      "minLength": 6,
+      "title": "Code"
+     }
+    },
+    "type": "object",
+    "required": [
+     "code"
+    ],
+    "title": "LinkIn"
+   },
+   "MeResponse": {
+    "properties": {
+     "id": {
+      "type": "string",
+      "title": "Id"
+     },
+     "registered": {
+      "type": "boolean",
+      "title": "Registered",
+      "default": false
+     },
+     "name": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Name"
+     },
+     "phone": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Phone"
+     },
+     "roles": {
+      "items": {
+       "type": "string",
+       "enum": [
+        "student",
+        "teacher",
+        "parent"
+       ]
+      },
+      "type": "array",
+      "title": "Roles",
+      "default": []
+     },
+     "language_mode": {
+      "anyOf": [
+       {
+        "type": "string",
+        "enum": [
+         "hindi",
+         "kannada"
+        ]
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Language Mode"
+     }
+    },
+    "type": "object",
+    "required": [
+     "id"
+    ],
+    "title": "MeResponse"
+   },
+   "MemberOut": {
+    "properties": {
+     "id": {
+      "type": "string",
+      "title": "Id"
+     },
+     "name": {
+      "type": "string",
+      "title": "Name"
+     },
+     "joined_at": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Joined At"
+     }
+    },
+    "type": "object",
+    "required": [
+     "id",
+     "name",
+     "joined_at"
+    ],
+    "title": "MemberOut"
+   },
+   "PageIn": {
+    "properties": {
+     "kind": {
+      "type": "string",
+      "enum": [
+       "photo",
+       "pdf",
+       "text"
+      ],
+      "title": "Kind"
+     },
+     "text": {
+      "anyOf": [
+       {
+        "type": "string",
+        "maxLength": 20000
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Text"
+     },
+     "size_bytes": {
+      "anyOf": [
+       {
+        "type": "integer",
+        "minimum": 1.0
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Size Bytes"
+     }
+    },
+    "type": "object",
+    "required": [
+     "kind"
+    ],
+    "title": "PageIn"
+   },
+   "PageTarget": {
+    "properties": {
+     "index": {
+      "type": "integer",
+      "title": "Index"
+     },
+     "upload_url": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Upload Url"
+     },
+     "method": {
+      "type": "string",
+      "title": "Method",
+      "default": "PUT"
+     },
+     "headers": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object",
+      "title": "Headers",
+      "default": {}
+     }
+    },
+    "type": "object",
+    "required": [
+     "index",
+     "upload_url"
+    ],
+    "title": "PageTarget"
+   },
+   "ParentOut": {
+    "properties": {
+     "id": {
+      "type": "string",
+      "title": "Id"
+     },
+     "name": {
+      "type": "string",
+      "title": "Name"
+     },
+     "phone_last4": {
+      "type": "string",
+      "title": "Phone Last4"
+     },
+     "linked_at": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Linked At"
+     },
+     "consented": {
+      "type": "boolean",
+      "title": "Consented"
+     }
+    },
+    "type": "object",
+    "required": [
+     "id",
+     "name",
+     "phone_last4",
+     "linked_at",
+     "consented"
+    ],
+    "title": "ParentOut"
+   },
+   "PathLesson": {
+    "properties": {
+     "id": {
+      "type": "string",
+      "title": "Id"
+     },
+     "position": {
+      "type": "integer",
+      "title": "Position"
+     },
+     "title": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object",
+      "title": "Title"
+     },
+     "state": {
+      "type": "string",
+      "enum": [
+       "done",
+       "current",
+       "locked"
+      ],
+      "title": "State"
+     },
+     "generation_status": {
+      "type": "string",
+      "title": "Generation Status"
+     },
+     "question_count": {
+      "type": "integer",
+      "title": "Question Count"
+     },
+     "unlocked_by": {
+      "anyOf": [
+       {
+        "additionalProperties": {
+         "type": "string"
+        },
+        "type": "object"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Unlocked By"
+     }
+    },
+    "type": "object",
+    "required": [
+     "id",
+     "position",
+     "title",
+     "state",
+     "generation_status",
+     "question_count"
+    ],
+    "title": "PathLesson"
+   },
+   "PathOut": {
+    "properties": {
+     "course_id": {
+      "type": "string",
+      "title": "Course Id"
+     },
+     "title": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object",
+      "title": "Title"
+     },
+     "subject": {
+      "type": "string",
+      "title": "Subject"
+     },
+     "is_personal": {
+      "type": "boolean",
+      "title": "Is Personal"
+     },
+     "units": {
+      "items": {
+       "$ref": "#/components/schemas/PathUnit"
+      },
+      "type": "array",
+      "title": "Units"
+     },
+     "done_count": {
+      "type": "integer",
+      "title": "Done Count"
+     },
+     "lesson_count": {
+      "type": "integer",
+      "title": "Lesson Count"
+     },
+     "current_lesson_id": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Current Lesson Id"
+     }
+    },
+    "type": "object",
+    "required": [
+     "course_id",
+     "title",
+     "subject",
+     "is_personal",
+     "units",
+     "done_count",
+     "lesson_count",
+     "current_lesson_id"
+    ],
+    "title": "PathOut"
+   },
+   "PathUnit": {
+    "properties": {
+     "id": {
+      "type": "string",
+      "title": "Id"
+     },
+     "title": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object",
+      "title": "Title"
+     },
+     "lessons": {
+      "items": {
+       "$ref": "#/components/schemas/PathLesson"
+      },
+      "type": "array",
+      "title": "Lessons"
+     }
+    },
+    "type": "object",
+    "required": [
+     "id",
+     "title",
+     "lessons"
+    ],
+    "title": "PathUnit"
+   },
+   "ProfileUpdate": {
+    "properties": {
+     "name": {
+      "type": "string",
+      "maxLength": 60,
+      "minLength": 1,
+      "title": "Name"
+     },
+     "language_mode": {
+      "type": "string",
+      "enum": [
+       "hindi",
+       "kannada"
+      ],
+      "title": "Language Mode"
+     },
+     "roles": {
+      "items": {
+       "type": "string",
+       "enum": [
+        "student",
+        "teacher",
+        "parent"
+       ]
+      },
+      "type": "array",
+      "minItems": 1,
+      "title": "Roles"
+     }
+    },
+    "type": "object",
+    "required": [
+     "name",
+     "language_mode",
+     "roles"
+    ],
+    "title": "ProfileUpdate"
+   },
+   "PublishRequest": {
+    "properties": {
+     "classroom_id": {
+      "anyOf": [
+       {
+        "type": "string",
+        "format": "uuid"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Classroom Id"
+     }
+    },
+    "type": "object",
+    "title": "PublishRequest"
+   },
+   "QuestionOut": {
+    "properties": {
+     "id": {
+      "type": "string",
+      "title": "Id"
+     },
+     "position": {
+      "type": "integer",
+      "title": "Position"
+     },
+     "type": {
+      "type": "string",
+      "title": "Type"
+     },
+     "content": {
+      "additionalProperties": true,
+      "type": "object",
+      "title": "Content"
+     },
+     "source_page": {
+      "type": "integer",
+      "title": "Source Page"
+     },
+     "confidence": {
+      "type": "number",
+      "title": "Confidence"
+     },
+     "flag_reason": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Flag Reason"
+     },
+     "call_safe": {
+      "type": "boolean",
+      "title": "Call Safe"
+     },
+     "teacher_edited": {
+      "type": "boolean",
+      "title": "Teacher Edited"
+     }
+    },
+    "type": "object",
+    "required": [
+     "id",
+     "position",
+     "type",
+     "content",
+     "source_page",
+     "confidence",
+     "flag_reason",
+     "call_safe",
+     "teacher_edited"
+    ],
+    "title": "QuestionOut"
+   },
+   "QuestionUpdate": {
+    "properties": {
+     "question": {
+      "additionalProperties": true,
+      "type": "object",
+      "title": "Question"
+     }
+    },
+    "type": "object",
+    "required": [
+     "question"
+    ],
+    "title": "QuestionUpdate"
+   },
+   "SchoolConsentIn": {
+    "properties": {
+     "enabled": {
+      "type": "boolean",
+      "title": "Enabled"
+     }
+    },
+    "type": "object",
+    "required": [
+     "enabled"
+    ],
+    "title": "SchoolConsentIn"
+   },
+   "SchoolConsentOut": {
+    "properties": {
+     "classroom_id": {
+      "type": "string",
+      "title": "Classroom Id"
+     },
+     "school_consent": {
+      "type": "boolean",
+      "title": "School Consent"
+     }
+    },
+    "type": "object",
+    "required": [
+     "classroom_id",
+     "school_consent"
+    ],
+    "title": "SchoolConsentOut"
+   },
+   "StartOut": {
+    "properties": {
+     "lesson": {
+      "$ref": "#/components/schemas/LessonOut"
+     },
+     "stats": {
+      "$ref": "#/components/schemas/StatsOut"
+     },
+     "term_mastery": {
+      "additionalProperties": {
+       "type": "number"
+      },
+      "type": "object",
+      "title": "Term Mastery",
+      "default": {}
+     }
+    },
+    "type": "object",
+    "required": [
+     "lesson",
+     "stats"
+    ],
+    "title": "StartOut"
+   },
+   "StatsOut": {
+    "properties": {
+     "xp_total": {
+      "type": "integer",
+      "title": "Xp Total"
+     },
+     "xp_today": {
+      "type": "integer",
+      "title": "Xp Today"
+     },
+     "daily_goal": {
+      "type": "integer",
+      "title": "Daily Goal"
+     },
+     "hearts": {
+      "type": "integer",
+      "title": "Hearts"
+     },
+     "max_hearts": {
+      "type": "integer",
+      "title": "Max Hearts",
+      "default": 5
+     },
+     "refill_at": {
+      "anyOf": [
+       {
+        "type": "string",
+        "format": "date-time"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Refill At"
+     },
+     "streak": {
+      "type": "integer",
+      "title": "Streak"
+     },
+     "longest_streak": {
+      "type": "integer",
+      "title": "Longest Streak"
+     }
+    },
+    "type": "object",
+    "required": [
+     "xp_total",
+     "xp_today",
+     "daily_goal",
+     "hearts",
+     "refill_at",
+     "streak",
+     "longest_streak"
+    ],
+    "title": "StatsOut"
+   },
+   "StudentClassroomOut": {
+    "properties": {
+     "id": {
+      "type": "string",
+      "title": "Id"
+     },
+     "name": {
+      "type": "string",
+      "title": "Name"
+     },
+     "teacher_name": {
+      "type": "string",
+      "title": "Teacher Name"
+     },
+     "subject": {
+      "type": "string",
+      "enum": [
+       "BI",
+       "CH",
+       "PH"
+      ],
+      "title": "Subject"
+     },
+     "grade": {
+      "type": "integer",
+      "title": "Grade"
+     },
+     "student_count": {
+      "type": "integer",
+      "title": "Student Count"
+     },
+     "joined_at": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Joined At"
+     }
+    },
+    "type": "object",
+    "required": [
+     "id",
+     "name",
+     "teacher_name",
+     "subject",
+     "grade",
+     "student_count",
+     "joined_at"
+    ],
+    "title": "StudentClassroomOut"
+   },
+   "StudentDetailOut": {
+    "properties": {
+     "id": {
+      "type": "string",
+      "title": "Id"
+     },
+     "name": {
+      "type": "string",
+      "title": "Name"
+     },
+     "streak": {
+      "type": "integer",
+      "title": "Streak"
+     },
+     "last_active": {
+      "anyOf": [
+       {
+        "type": "string",
+        "format": "date-time"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Last Active"
+     },
+     "lessons_completed": {
+      "type": "integer",
+      "title": "Lessons Completed"
+     },
+     "lessons": {
+      "items": {
+       "$ref": "#/components/schemas/LessonResultOut"
+      },
+      "type": "array",
+      "title": "Lessons"
+     },
+     "weakest": {
+      "items": {
+       "$ref": "#/components/schemas/ConceptOut"
+      },
+      "type": "array",
+      "title": "Weakest"
+     },
+     "confusions": {
+      "items": {
+       "$ref": "#/components/schemas/ConfusionOut"
+      },
+      "type": "array",
+      "title": "Confusions"
+     },
+     "trend": {
+      "type": "string",
+      "title": "Trend"
+     },
+     "usual_hour": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Usual Hour"
+     }
+    },
+    "type": "object",
+    "required": [
+     "id",
+     "name",
+     "streak",
+     "last_active",
+     "lessons_completed",
+     "lessons",
+     "weakest",
+     "confusions",
+     "trend",
+     "usual_hour"
+    ],
+    "title": "StudentDetailOut"
+   },
+   "StudentRow": {
+    "properties": {
+     "id": {
+      "type": "string",
+      "title": "Id"
+     },
+     "name": {
+      "type": "string",
+      "title": "Name"
+     },
+     "streak": {
+      "type": "integer",
+      "title": "Streak"
+     },
+     "current_lesson": {
+      "anyOf": [
+       {
+        "additionalProperties": {
+         "type": "string"
+        },
+        "type": "object"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Current Lesson"
+     },
+     "accuracy": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Accuracy"
+     },
+     "idle_days": {
+      "type": "integer",
+      "title": "Idle Days"
+     },
+     "idle": {
+      "type": "boolean",
+      "title": "Idle"
+     },
+     "behind": {
+      "type": "boolean",
+      "title": "Behind"
+     },
+     "overdue": {
+      "type": "integer",
+      "title": "Overdue"
+     }
+    },
+    "type": "object",
+    "required": [
+     "id",
+     "name",
+     "streak",
+     "current_lesson",
+     "accuracy",
+     "idle_days",
+     "idle",
+     "behind",
+     "overdue"
+    ],
+    "title": "StudentRow"
+   },
+   "SubjectCard": {
+    "properties": {
+     "subject": {
+      "type": "string",
+      "title": "Subject"
+     },
+     "strongest": {
+      "anyOf": [
+       {
+        "additionalProperties": {
+         "type": "string"
+        },
+        "type": "object"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Strongest"
+     },
+     "weakest": {
+      "anyOf": [
+       {
+        "additionalProperties": {
+         "type": "string"
+        },
+        "type": "object"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Weakest"
+     }
+    },
+    "type": "object",
+    "required": [
+     "subject",
+     "strongest",
+     "weakest"
+    ],
+    "title": "SubjectCard"
+   },
+   "TermOut": {
+    "properties": {
+     "key": {
+      "type": "string",
+      "title": "Key"
+     },
+     "content": {
+      "additionalProperties": true,
+      "type": "object",
+      "title": "Content"
+     },
+     "source_page": {
+      "type": "integer",
+      "title": "Source Page"
+     },
+     "saved": {
+      "type": "boolean",
+      "title": "Saved"
+     },
+     "mastery": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Mastery"
+     }
+    },
+    "type": "object",
+    "required": [
+     "key",
+     "content",
+     "source_page",
+     "saved"
+    ],
+    "title": "TermOut"
+   },
+   "Tiles": {
+    "properties": {
+     "active_this_week": {
+      "type": "integer",
+      "title": "Active This Week"
+     },
+     "student_count": {
+      "type": "integer",
+      "title": "Student Count"
+     },
+     "accuracy": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Accuracy"
+     },
+     "behind": {
+      "type": "integer",
+      "title": "Behind"
+     }
+    },
+    "type": "object",
+    "required": [
+     "active_this_week",
+     "student_count",
+     "accuracy",
+     "behind"
+    ],
+    "title": "Tiles"
+   },
+   "TitleUpdate": {
+    "properties": {
+     "title": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object",
+      "title": "Title"
+     }
+    },
+    "type": "object",
+    "required": [
+     "title"
+    ],
+    "title": "TitleUpdate"
+   },
+   "UnitOut": {
+    "properties": {
+     "id": {
+      "type": "string",
+      "title": "Id"
+     },
+     "title": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object",
+      "title": "Title"
+     },
+     "lessons": {
+      "items": {
+       "$ref": "#/components/schemas/LessonSummary"
+      },
+      "type": "array",
+      "title": "Lessons"
+     }
+    },
+    "type": "object",
+    "required": [
+     "id",
+     "title",
+     "lessons"
+    ],
+    "title": "UnitOut"
+   },
+   "UploadCreate": {
+    "properties": {
+     "pages": {
+      "items": {
+       "$ref": "#/components/schemas/PageIn"
+      },
+      "type": "array",
+      "maxItems": 10,
+      "minItems": 1,
+      "title": "Pages"
+     },
+     "subject": {
+      "anyOf": [
+       {
+        "type": "string",
+        "enum": [
+         "BI",
+         "CH",
+         "PH"
+        ]
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Subject"
+     },
+     "grade": {
+      "anyOf": [
+       {
+        "type": "integer",
+        "maximum": 12.0,
+        "minimum": 6.0
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Grade"
+     },
+     "classroom_id": {
+      "anyOf": [
+       {
+        "type": "string",
+        "format": "uuid"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Classroom Id"
+     },
+     "personal": {
+      "type": "boolean",
+      "title": "Personal",
+      "default": false
+     }
+    },
+    "type": "object",
+    "required": [
+     "pages"
+    ],
+    "title": "UploadCreate"
+   },
+   "UploadCreated": {
+    "properties": {
+     "id": {
+      "type": "string",
+      "title": "Id"
+     },
+     "pages": {
+      "items": {
+       "$ref": "#/components/schemas/PageTarget"
+      },
+      "type": "array",
+      "title": "Pages"
+     }
+    },
+    "type": "object",
+    "required": [
+     "id",
+     "pages"
+    ],
+    "title": "UploadCreated"
+   },
+   "UploadStatus": {
+    "properties": {
+     "id": {
+      "type": "string",
+      "title": "Id"
+     },
+     "status": {
+      "type": "string",
+      "title": "Status"
+     },
+     "steps": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array",
+      "title": "Steps"
+     },
+     "page_count": {
+      "type": "integer",
+      "title": "Page Count"
+     },
+     "error": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Error"
+     },
+     "course_id": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Course Id"
+     },
+     "first_lesson_id": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "First Lesson Id"
+     }
+    },
+    "type": "object",
+    "required": [
+     "id",
+     "status",
+     "steps",
+     "page_count",
+     "error",
+     "course_id",
+     "first_lesson_id"
+    ],
+    "title": "UploadStatus"
+   },
+   "ValidationError": {
+    "properties": {
+     "loc": {
+      "items": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "integer"
+        }
+       ]
+      },
+      "type": "array",
+      "title": "Location"
+     },
+     "msg": {
+      "type": "string",
+      "title": "Message"
+     },
+     "type": {
+      "type": "string",
+      "title": "Error Type"
+     },
+     "input": {
+      "title": "Input"
+     },
+     "ctx": {
+      "type": "object",
+      "title": "Context"
+     }
+    },
+    "type": "object",
+    "required": [
+     "loc",
+     "msg",
+     "type"
+    ],
+    "title": "ValidationError"
+   },
+   "WeakTopic": {
+    "properties": {
+     "kind": {
+      "type": "string",
+      "title": "Kind"
+     },
+     "key": {
+      "type": "string",
+      "title": "Key"
+     },
+     "name": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object",
+      "title": "Name"
+     },
+     "accuracy": {
+      "type": "number",
+      "title": "Accuracy"
+     },
+     "attempts": {
+      "type": "integer",
+      "title": "Attempts"
+     },
+     "low_mastery_students": {
+      "type": "integer",
+      "title": "Low Mastery Students"
+     }
+    },
+    "type": "object",
+    "required": [
+     "kind",
+     "key",
+     "name",
+     "accuracy",
+     "attempts",
+     "low_mastery_students"
+    ],
+    "title": "WeakTopic"
+   },
+   "WeekCard": {
+    "properties": {
+     "lessons_this_week": {
+      "type": "integer",
+      "title": "Lessons This Week"
+     },
+     "lessons_last_week": {
+      "type": "integer",
+      "title": "Lessons Last Week"
+     },
+     "arrow": {
+      "type": "string",
+      "enum": [
+       "up",
+       "down",
+       "same"
+      ],
+      "title": "Arrow"
+     },
+     "minutes_this_week": {
+      "type": "integer",
+      "title": "Minutes This Week"
+     },
+     "streak": {
+      "type": "integer",
+      "title": "Streak"
+     }
+    },
+    "type": "object",
+    "required": [
+     "lessons_this_week",
+     "lessons_last_week",
+     "arrow",
+     "minutes_this_week",
+     "streak"
+    ],
+    "title": "WeekCard"
+   }
+  },
+  "securitySchemes": {
+   "HTTPBearer": {
+    "type": "http",
+    "scheme": "bearer"
+   }
+  }
+ }
+}

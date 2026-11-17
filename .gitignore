@@ -13,3 +13,11 @@ __pycache__/
 *.sqlite3
 backend/storage/
 storage/
+
+
+# web app
+storybook-static/
+playwright-report/
+test-results/
+*.tsbuildinfo
+next-env.d.ts
