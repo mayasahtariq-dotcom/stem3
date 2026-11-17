@@ -2,13 +2,25 @@ from fastapi import FastAPI
 
 from app.game.setup import register_all
 from app.logging_setup import setup_logging
-from app.routers import admin, auth, calls, demo, game, parent, realtime, student, teacher
+from app.routers import (
+    admin,
+    auth,
+    calls,
+    demo,
+    game,
+    learning,
+    parent,
+    realtime,
+    student,
+    teacher,
+)
 
 setup_logging()
 register_all()
 app = FastAPI(title="Aaroh API", version="0.1.0")
 app.include_router(auth.router, prefix="/v1")
 app.include_router(student.router, prefix="/v1")
+app.include_router(learning.router, prefix="/v1")
 app.include_router(game.router, prefix="/v1")
 app.include_router(teacher.router, prefix="/v1")
 app.include_router(parent.router, prefix="/v1")

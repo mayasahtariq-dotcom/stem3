@@ -48,6 +48,65 @@ COURSES = [
 ]
 
 
+EXPLORE_VIDEO = "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4"
+PARTS = [opt("नाभिक", "ನ್ಯೂಕ್ಲಿಯಸ್", "Nucleus"), opt("माइटोकॉन्ड्रिया", "ಮೈಟೋಕಾಂಡ್ರಿಯಾ", "Mitochondria"),
+         opt("कोशिका भित्ति", "ಕೋಶ ಭಿತ್ತಿ", "Cell wall")]
+JOBS = [opt("कोशिका को नियंत्रित करता है", "ಕೋಶವನ್ನು ನಿಯಂತ್ರಿಸುತ್ತದೆ", "Controls the cell"),
+        opt("ऊर्जा बनाता है", "ಶಕ್ತಿ ತಯಾರಿಸುತ್ತದೆ", "Makes energy"),
+        opt("पौधे की कोशिका की रक्षा करती है", "ಸಸ್ಯ ಕೋಶವನ್ನು ರಕ್ಷಿಸುತ್ತದೆ", "Protects plant cells")]
+
+
+def _k(o: dict[str, str]) -> str:
+    """Match keys are the option as compact JSON (what the web player sends)."""
+    return json.dumps(o, ensure_ascii=False, separators=(",", ":"))
+
+
+def seed_explore(db: Connection, teacher: Any, klass: Any) -> None:
+    """A web-only course with video, reading and interactive lessons (not used on calls)."""
+    course = db.execute(text("insert into courses(teacher_id, title, subject, status) values "
+                             "(:t,'3. Explore the Cell','biology','published') returning id"),
+                        {"t": teacher}).scalar_one()
+    unit = db.execute(text("insert into units(course_id, position, title) values "
+                           "(:c,1,'Explore the Cell') returning id"), {"c": course}).scalar_one()
+    lessons = [
+        ("Meet the cell", "video", {"url": EXPLORE_VIDEO, "transcript": opt(
+            "हर पौधा और जानवर छोटी-छोटी कोशिकाओं से बना है। कोशिका जीवन की सबसे छोटी इकाई है।",
+            "ಪ್ರತಿ ಸಸ್ಯ ಮತ್ತು ಪ್ರಾಣಿ ಸಣ್ಣ ಕೋಶಗಳಿಂದ ಮಾಡಲ್ಪಟ್ಟಿದೆ. ಕೋಶವು ಜೀವದ ಅತ್ಯಂತ ಚಿಕ್ಕ ಘಟಕ.",
+            "Every plant and animal is made of tiny cells. The cell is the smallest unit of life.")}),
+        ("Parts of a cell", "reading", {"body": opt(
+            "नाभिक कोशिका को नियंत्रित करता है।\nमाइटोकॉन्ड्रिया ऊर्जा बनाता है।\nपौधों की कोशिकाओं में एक मज़बूत कोशिका भित्ति होती है।",
+            "ನ್ಯೂಕ್ಲಿಯಸ್ ಕೋಶವನ್ನು ನಿಯಂತ್ರಿಸುತ್ತದೆ.\nಮೈಟೋಕಾಂಡ್ರಿಯಾ ಶಕ್ತಿ ತಯಾರಿಸುತ್ತದೆ.\nಸಸ್ಯ ಕೋಶಗಳಿಗೆ ಗಟ್ಟಿಯಾದ ಕೋಶ ಭಿತ್ತಿ ಇರುತ್ತದೆ.",
+            "The nucleus controls the cell.\nMitochondria make energy.\nPlant cells have a strong cell wall.")}),
+        ("Match the parts", "interactive", {}),
+    ]
+    for pos, (title, kind, content) in enumerate(lessons, start=1):
+        lesson = db.execute(text("insert into lessons(unit_id, position, title, kind, content) values "
+                                 "(:u,:p,:t,:k,cast(:c as jsonb)) returning id"),
+                            {"u": unit, "p": pos, "t": title, "k": kind,
+                             "c": json.dumps(content, ensure_ascii=False)}).scalar_one()
+        if kind == "interactive":
+            db.execute(text(
+                "insert into questions(lesson_id, kind, prompt, options, answer, concept, position) "
+                "values (:l,'match',cast(:p as jsonb),cast(:o as jsonb),cast(:a as jsonb),'cell',1)"),
+                {"l": lesson, "p": json.dumps(opt("हर भाग को उसके काम से मिलाओ",
+                                                  "ಪ್ರತಿ ಭಾಗವನ್ನು ಅದರ ಕೆಲಸದೊಂದಿಗೆ ಹೊಂದಿಸು",
+                                                  "Match each part to its job"), ensure_ascii=False),
+                 "o": json.dumps(PARTS + [JOBS[2], JOBS[0], JOBS[1]], ensure_ascii=False),
+                 "a": json.dumps({_k(PARTS[i]): _k(JOBS[i]) for i in range(3)}, ensure_ascii=False)})
+    db.execute(text("insert into terms(course_id, regional, english, definition) values "
+                    "(:c,'कोशिका','Cell',cast(:d1 as jsonb)), (:c,'नाभिक','Nucleus',cast(:d2 as jsonb)), "
+                    "(:c,'माइटोकॉन्ड्रिया','Mitochondria',cast(:d3 as jsonb))"),
+               {"c": course,
+                "d1": json.dumps(opt("जीवन की सबसे छोटी इकाई।", "ಜೀವದ ಅತ್ಯಂತ ಚಿಕ್ಕ ಘಟಕ.",
+                                     "The smallest unit of life."), ensure_ascii=False),
+                "d2": json.dumps(opt("कोशिका का नियंत्रण केंद्र।", "ಕೋಶದ ನಿಯಂತ್ರಣ ಕೇಂದ್ರ.",
+                                     "The control centre of the cell."), ensure_ascii=False),
+                "d3": json.dumps(opt("कोशिका का पावरहाउस, ऊर्जा बनाता है।", "ಕೋಶದ ಶಕ್ತಿ ಕೇಂದ್ರ.",
+                                     "The powerhouse of the cell; it makes energy."),
+                                 ensure_ascii=False)})
+    db.execute(text("insert into course_assignments values (:c,:k)"), {"c": course, "k": klass})
+
+
 def reset_demo(db: Connection) -> None:
     phones = [TEACHER_PHONE] + [p for _, p, _ in RIVALS]
     db.execute(text("delete from users where phone_e164 = any(:p)"), {"p": phones})
@@ -62,6 +121,7 @@ def seed_demo(db: Connection, student_phone: str, parent_phone: str | None) -> d
     klass = db.execute(text("insert into classrooms(teacher_id, name, class_key) values "
                             "(:t,'Class 7 Science','DEMO7SCI') on conflict (class_key) do update "
                             "set teacher_id=:t returning id"), {"t": teacher}).scalar_one()
+    db.execute(text("update classrooms set school_consent=true where id=:k"), {"k": klass})
     for title, subject, lesson_title, questions in COURSES:
         course = db.execute(text("insert into courses(teacher_id, title, subject, status) values "
                                  "(:t,:n,:s,'published') returning id"),
@@ -85,6 +145,7 @@ def seed_demo(db: Connection, student_phone: str, parent_phone: str | None) -> d
                  "c": "cell" if subject == "biology" else f"force{i}"})
         db.execute(text("insert into course_assignments values (:c,:k)"),
                    {"c": course, "k": klass})
+    seed_explore(db, teacher, klass)
     now = engine.utcnow()
     for name, phone, xp in RIVALS:
         uid = db.execute(text("insert into users(role, name, phone_e164) values "

@@ -18,7 +18,12 @@ class AttemptIn(BaseModel):
 
 @router.post("/lessons/{lesson_id}/start")
 def start_lesson(lesson_id: str, db: DbDep, user: Student) -> dict[str, Any]:
-    return {"questions": engine.start_lesson(db, user.id, lesson_id)}
+    """Starts (or restarts) a lesson. Video and reading lessons return their content; quiz and
+    interactive lessons return questions without answers (answers are checked by /attempts)."""
+    questions = engine.start_lesson(db, user.id, lesson_id)
+    meta = db.execute(text("select id, title, kind, content from lessons where id=:l"),
+                      {"l": lesson_id}).mappings().one()
+    return {"lesson": {**dict(meta), "id": str(meta["id"])}, "questions": questions}
 
 
 @router.post("/attempts")
@@ -42,7 +47,7 @@ def _paths(db: Any, user_id: str, lid: Any, course_id: str | None) -> list[dict[
     for c in courses:
         rows = db.execute(text(
             "select u.id as unit_id, u.title as unit_title, u.position as up, l.id as lesson_id, "
-            "l.title, l.position as lp, p.completed_at is not null as done "
+            "l.title, l.kind, l.position as lp, p.completed_at is not null as done "
             "from units u join lessons l on l.unit_id=u.id "
             "left join lesson_progress p on p.lesson_id=l.id and p.learner_id=:l "
             "where u.course_id=:c order by u.position, l.position"),
@@ -58,7 +63,8 @@ def _paths(db: Any, user_id: str, lid: Any, course_id: str | None) -> list[dict[
                 state, current_set = "current", True
             else:
                 state = "locked"
-            u["lessons"].append({"id": str(x["lesson_id"]), "title": x["title"], "state": state})
+            u["lessons"].append({"id": str(x["lesson_id"]), "title": x["title"],
+                                 "kind": x["kind"], "state": state})
         out.append({"id": str(c["id"]), "title": c["title"], "subject": c["subject"],
                     "units": list(units.values())})
     return out
