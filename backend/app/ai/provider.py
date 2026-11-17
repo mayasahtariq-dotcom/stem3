@@ -71,6 +71,8 @@ class FakeLLMProvider:
                                    "hi": "पौधों में कोशिकाएँ होती हैं।", "kn": "Plants have cells."},
                                    "options": [], "answer_index": 0, "answer_bool": True,
                                    "concept": "cell", "source_page": 1, "confidence": 0.9}]}
+        if "supported" in props:                               # chatbot fact check
+            return {"supported": "not supported" not in prompt}
         if "answer" in props:                                  # doubt chatbot
             found = "(none found)" not in prompt
             return {"answer": "A cell is the smallest unit of life. (from your notes)" if found

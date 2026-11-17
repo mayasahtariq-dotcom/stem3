@@ -83,7 +83,8 @@ def test_doubt_chatbot_answers_from_notes_with_page(conn: Connection, client: Te
     s = make_user(conn, "student")
     client.post("/v1/classrooms/join", headers=s["headers"], json={"class_key": cls["class_key"]})
     a = client.post("/v1/doubts", headers=s["headers"], json={"text": "What is the smallest unit of life?"}).json()
-    assert "cell" in a["answer"].lower() and a["citation"] == {"course": "The Cell", "page": 1}
+    assert "cell" in a["answer"].lower() and a["citation"]["course"] == "The Cell"
+    assert a["citation"]["page"] in (1, 2)          # both fake pages hold the same text
     nothing = client.post("/v1/doubts", headers=s["headers"], json={"text": "Who won the cricket match?"}).json()
     assert nothing["citation"] is None
     assert client.get("/v1/doubts", headers=t["headers"]).status_code == 403   # teachers never see doubts
@@ -163,3 +164,89 @@ def test_sarvam_decodes_audio(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr("app.speech.provider.httpx.post", fake_post)
     assert SarvamProvider("k").synthesize("नमस्ते", "kn", 8000) == b"RIFFwav"
     assert seen["language_code"] == "kn-IN" and seen["speech_sample_rate"] == 8000 and seen["key"] == "k"
+
+
+# ---------- the chatbot answers ONLY from the class notes ----------
+def _class_with_notes(conn: Connection, client: TestClient) -> dict[str, str]:
+    t = make_user(conn, "teacher")
+    course = client.get(f"/v1/uploads/{upload(client, t['headers'])['upload_id']}",
+                        headers=t["headers"]).json()["course_id"]
+    cls = client.post("/v1/classrooms", headers=t["headers"], json={"name": "7A"}).json()
+    client.post(f"/v1/courses/{course}/publish", headers=t["headers"])
+    client.post(f"/v1/courses/{course}/assign", headers=t["headers"], json={"classroom_id": cls["id"]})
+    s = make_user(conn, "student")
+    client.post("/v1/classrooms/join", headers=s["headers"], json={"class_key": cls["class_key"]})
+    headers: dict[str, str] = s["headers"]
+    return headers
+
+
+class Spy(FakeLLMProvider):
+    """Records every call; answers can be scripted per test."""
+    def __init__(self, answer: dict[str, Any] | None = None, supported: bool = True) -> None:
+        self.calls: list[str] = []
+        self.answer, self.supported = answer, supported
+
+    def generate_json(self, prompt: str, schema: dict[str, Any], parts: Any = None, system: str | None = None) -> dict[str, Any]:
+        props = schema.get("properties", {})
+        if "supported" in props:
+            self.calls.append("check")
+            return {"supported": self.supported}
+        if "answer" in props:
+            self.calls.append("answer")
+            return self.answer or {"answer": "A cell is the smallest unit of life.", "in_notes": True, "used_page": 1}
+        return super().generate_json(prompt, schema, parts, system)
+
+
+def _ask(client: TestClient, h: dict[str, str], spy: Spy, q: str) -> dict[str, Any]:
+    app.dependency_overrides[llm] = lambda: spy
+    try:
+        out: dict[str, Any] = client.post("/v1/doubts", headers=h, json={"text": q}).json()
+        return out
+    finally:
+        app.dependency_overrides.pop(llm, None)
+
+
+@needs_db
+def test_chatbot_refuses_without_asking_ai_when_notes_dont_cover_it(
+        conn: Connection, client: TestClient, inline_pipeline: Any) -> None:
+    h = _class_with_notes(conn, client)
+    spy = Spy()
+    a = _ask(client, h, spy, "Who won the cricket world cup?")
+    assert spy.calls == [] and a["citation"] is None and a["from_notes"] is False
+    assert "नोट्स में नहीं" in a["answer"]                      # fixed reply in the student's language
+
+
+@needs_db
+def test_chatbot_discards_general_knowledge_answers(conn: Connection, client: TestClient,
+                                                    inline_pipeline: Any) -> None:
+    h = _class_with_notes(conn, client)
+    spy = Spy(answer={"answer": "Cells were discovered by Robert Hooke in 1665.", "in_notes": False, "used_page": 0})
+    a = _ask(client, h, spy, "Who discovered the cell?")
+    assert "Hooke" not in a["answer"] and a["citation"] is None and spy.calls == ["answer"]
+
+
+@needs_db
+def test_chatbot_fact_check_blocks_unsupported_answers(conn: Connection, client: TestClient,
+                                                       inline_pipeline: Any) -> None:
+    h = _class_with_notes(conn, client)
+    spy = Spy(answer={"answer": "Mitochondria have their own DNA.", "in_notes": True, "used_page": 1}, supported=False)
+    a = _ask(client, h, spy, "Tell me about mitochondria energy")
+    assert "DNA" not in a["answer"] and a["citation"] is None and spy.calls == ["answer", "check"]
+
+
+@needs_db
+def test_chatbot_answers_and_cites_when_notes_cover_it(conn: Connection, client: TestClient,
+                                                       inline_pipeline: Any) -> None:
+    h = _class_with_notes(conn, client)
+    spy = Spy()
+    a = _ask(client, h, spy, "What is the smallest unit of life?")
+    assert a["from_notes"] is True and a["citation"]["course"] == "The Cell" and a["citation"]["page"] in (1, 2)
+    assert "smallest unit" in a["answer"] and spy.calls == ["answer", "check"]
+
+
+@needs_db
+def test_chatbot_needs_a_real_source(conn: Connection, client: TestClient, inline_pipeline: Any) -> None:
+    h = _class_with_notes(conn, client)
+    spy = Spy(answer={"answer": "Something.", "in_notes": True, "used_page": 7})   # page 7 doesn't exist
+    a = _ask(client, h, spy, "What is the smallest unit of life?")
+    assert a["citation"] is None and a["from_notes"] is False and spy.calls == ["answer"]
