@@ -1,0 +1,48 @@
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    services:
+      db:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: aaroh
+          POSTGRES_PASSWORD: aaroh
+          POSTGRES_DB: aaroh
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U aaroh" --health-interval 5s --health-retries 10
+    env:
+      DATABASE_URL: postgresql+psycopg://aaroh:aaroh@localhost:5432/aaroh
+      USE_FAKE_AI: "true"
+      USE_FAKE_SPEECH: "true"
+      USE_FAKE_TELEPHONY: "true"
+      USE_FAKE_SMS: "true"
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: backend/pyproject.toml
+      - run: pip install -e ".[dev]"
+      - name: Create Supabase-style roles
+        run: |
+          PGPASSWORD=aaroh psql -h localhost -U aaroh aaroh -c "create role anon nologin; create role authenticated nologin;"
+      - run: ruff check .
+      - run: ruff format --check . || true
+      - run: mypy app tests scripts
+      - run: alembic upgrade head
+      - run: pytest -q
+      - name: OpenAPI contract is up to date
+        run: |
+          PYTHONPATH=. python scripts/export_openapi.py
+          git diff --exit-code ../packages/api-client/openapi.json

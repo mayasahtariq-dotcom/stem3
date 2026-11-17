@@ -11,6 +11,9 @@ class Settings(BaseSettings):
     use_fake_ai: bool = True
     use_fake_speech: bool = True
     use_fake_telephony: bool = True
+    use_fake_sms: bool = True
+    supabase_url: str = ""
+    supabase_jwt_secret: str = "dev-only-secret-change-me-32-bytes!!"
 
 
 @lru_cache
