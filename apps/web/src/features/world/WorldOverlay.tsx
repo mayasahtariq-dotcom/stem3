@@ -254,6 +254,9 @@ export function WorldOverlay({ editor, field }: { editor: Editor; field: FieldId
   const picked = ui.picked ? editor.objects.find((o) => o.uid === ui.picked) : undefined;
   const d = ui.draft;
 
+  // A backend without the farm-world endpoints yet (404): keep the farm as it was, no store or editing.
+  if (world.error && asApiError(world.error).code === "NOT_FOUND") return null;
+
   return (
     <>
       {!d && (

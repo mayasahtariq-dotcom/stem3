@@ -1,9 +1,10 @@
 import json
+import logging
 import secrets
 from datetime import time
 from typing import Any, Literal
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, BackgroundTasks, HTTPException
 from pydantic import BaseModel, Field
 from sqlalchemy import Connection, text
 
@@ -13,11 +14,16 @@ from app.game import engine
 from app.people import create_learner
 
 router = APIRouter(tags=["teacher"])
-KEY_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"      # no look-alike characters
+KEY_CHARS = "ABCDEFGHJKMNPQRSTUVWXYZ23456789"       # no look-alikes (0 O 1 I L), matches the web app
 
 
 def new_key(n: int = 8) -> str:
     return "".join(secrets.choice(KEY_CHARS) for _ in range(n))
+
+
+def class_key(subject: str = "BI", grade: int = 7) -> str:
+    """Join keys look like BI07-K4X2 (subject, grade, 4 characters); stored without the dash."""
+    return f"{subject[:2].upper()}{max(1, min(grade, 12)):02d}{new_key(4)}"
 
 
 def own_classroom(db: Connection, teacher_id: str, classroom_id: str) -> None:
@@ -46,7 +52,7 @@ class ClassPatch(BaseModel):
 
 @router.post("/classrooms", status_code=201)
 def create_class(body: ClassIn, db: DbDep, user: Teacher) -> dict[str, Any]:
-    key = new_key()
+    key = class_key()
     row = db.execute(text("insert into classrooms(teacher_id, name, class_key) values "
                           "(:t,:n,:k) returning id, name, class_key"),
                      {"t": user.id, "n": body.name, "k": key}).mappings().one()
@@ -112,7 +118,15 @@ class QuestionIn(BaseModel):
 
 class LessonIn(BaseModel):
     title: str
+    kind: Literal["quiz", "video", "reading", "interactive"] = "quiz"
+    content: dict[str, Any] = {}       # video: {url, transcript}; reading: {body}; per language
     questions: list[QuestionIn] = []
+
+
+class TermIn(BaseModel):
+    regional: str
+    english: str
+    definition: dict[str, Any] | None = None
 
 
 class UnitIn(BaseModel):
@@ -122,6 +136,7 @@ class UnitIn(BaseModel):
 
 class ContentIn(BaseModel):
     units: list[UnitIn]
+    terms: list[TermIn] = []
 
 
 class AssignIn(BaseModel):
@@ -148,19 +163,25 @@ def add_content(course_id: str, body: ContentIn, db: DbDep, user: Teacher) -> di
                               "returning id"),
                          {"c": course_id, "p": base + ui, "t": unit.title}).scalar_one()
         for li, lesson in enumerate(unit.lessons, start=1):
-            lid = db.execute(text("insert into lessons(unit_id, position, title) values "
-                                  "(:u,:p,:t) returning id"),
-                             {"u": uid, "p": li, "t": lesson.title}).scalar_one()
-            for q in lesson.questions:
+            lid = db.execute(text("insert into lessons(unit_id, position, title, kind, content) "
+                                  "values (:u,:p,:t,:k,cast(:c as jsonb)) returning id"),
+                             {"u": uid, "p": li, "t": lesson.title, "k": lesson.kind,
+                              "c": json.dumps(lesson.content, ensure_ascii=False)}).scalar_one()
+            for qi, q in enumerate(lesson.questions, start=1):
                 db.execute(text(
                     "insert into questions(lesson_id, kind, prompt, options, answer, concept, "
-                    "call_safe, flagged, source_page_id) values (:l,:k,cast(:p as jsonb),"
-                    "cast(:o as jsonb),cast(:a as jsonb),:c,:cs,:f,:sp)"),
-                    {"l": lid, "k": q.kind, "p": json.dumps(q.prompt),
+                    "call_safe, flagged, source_page_id, position) values (:l,:k,"
+                    "cast(:p as jsonb),cast(:o as jsonb),cast(:a as jsonb),:c,:cs,:f,:sp,:pos)"),
+                    {"l": lid, "k": q.kind, "p": json.dumps(q.prompt), "pos": qi,
                      "o": json.dumps(q.options) if q.options is not None else None,
                      "a": json.dumps(q.answer), "c": q.concept, "cs": q.call_safe,
                      "f": q.flagged, "sp": q.source_page_id})
                 n_q += 1
+    for t in body.terms:
+        db.execute(text("insert into terms(course_id, regional, english, definition) values "
+                        "(:c,:r,:e,cast(:d as jsonb))"),
+                   {"c": course_id, "r": t.regional, "e": t.english,
+                    "d": json.dumps(t.definition, ensure_ascii=False) if t.definition else None})
     return {"units": len(body.units), "questions": n_q}
 
 
@@ -171,17 +192,19 @@ def get_course(course_id: str, db: DbDep, user: Teacher) -> dict[str, Any]:
     course = db.execute(text("select id, title, subject, status from courses where id=:c"),
                         {"c": course_id}).mappings().one()
     rows = db.execute(text(
-        "select u.id as uid, u.title as ut, l.id as lid, l.title as lt, q.id as qid, q.kind, "
+        "select u.id as uid, u.title as ut, l.id as lid, l.title as lt, l.kind as lk, "
+        "l.content as lc, q.id as qid, q.kind, "
         "q.prompt, q.options, q.answer, q.concept, q.call_safe, q.flagged "
         "from units u join lessons l on l.unit_id=u.id left join questions q on q.lesson_id=l.id "
-        "where u.course_id=:c order by u.position, l.position, q.flagged desc, q.id"),
+        "where u.course_id=:c order by u.position, l.position, q.flagged desc, q.position, q.id"),
         {"c": course_id}).mappings().all()
     units: dict[str, Any] = {}
     lessons: dict[str, Any] = {}
     for x in rows:
         u = units.setdefault(str(x["uid"]), {"id": str(x["uid"]), "title": x["ut"], "lessons": []})
         if str(x["lid"]) not in lessons:
-            lessons[str(x["lid"])] = {"id": str(x["lid"]), "title": x["lt"], "questions": []}
+            lessons[str(x["lid"])] = {"id": str(x["lid"]), "title": x["lt"], "kind": x["lk"],
+                                      "content": x["lc"], "questions": []}
             u["lessons"].append(lessons[str(x["lid"])])
         if x["qid"] is not None:
             lessons[str(x["lid"])]["questions"].append({
@@ -236,8 +259,18 @@ def delete_question(question_id: str, db: DbDep, user: Teacher) -> None:
     db.execute(text("delete from questions where id=:q"), {"q": question_id})
 
 
+def _prewarm_in_background(course_id: str) -> None:
+    from app.calls.prewarm import prewarm_course
+    from app.db.session import get_engine
+    try:
+        with get_engine().begin() as conn:
+            prewarm_course(conn, course_id)
+    except Exception:
+        logging.getLogger(__name__).exception("call audio prewarm failed")
+
+
 @router.post("/courses/{course_id}/publish")
-def publish(course_id: str, db: DbDep, user: Teacher) -> dict[str, str]:
+def publish(course_id: str, db: DbDep, user: Teacher, background: BackgroundTasks) -> dict[str, str]:
     own_course(db, user.id, course_id)
     n = db.execute(text("select count(*) from questions q join lessons l on l.id=q.lesson_id "
                         "join units u on u.id=l.unit_id where u.course_id=:c"),
@@ -245,6 +278,10 @@ def publish(course_id: str, db: DbDep, user: Teacher) -> dict[str, str]:
     if n == 0:
         raise HTTPException(409, "Add at least one question before publishing")
     db.execute(text("update courses set status='published' where id=:c"), {"c": course_id})
+    from app.calls.voice import enabled
+    if enabled():                     # pre-record phone audio for this course (PRD)
+        db.commit()
+        background.add_task(_prewarm_in_background, course_id)
     return {"status": "published"}
 
 
