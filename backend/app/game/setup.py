@@ -11,4 +11,7 @@ def register_all() -> None:
     quests.register()
     leagues.register()
     awards.register()
+    from app import notify
+
+    notify.register()        # last, so the badge count includes this lesson's badges
     _done = True
