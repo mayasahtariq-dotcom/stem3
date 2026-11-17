@@ -151,12 +151,12 @@ def add_content(course_id: str, body: ContentIn, db: DbDep, user: Teacher) -> di
             lid = db.execute(text("insert into lessons(unit_id, position, title) values "
                                   "(:u,:p,:t) returning id"),
                              {"u": uid, "p": li, "t": lesson.title}).scalar_one()
-            for q in lesson.questions:
+            for qi, q in enumerate(lesson.questions, start=1):
                 db.execute(text(
                     "insert into questions(lesson_id, kind, prompt, options, answer, concept, "
-                    "call_safe, flagged, source_page_id) values (:l,:k,cast(:p as jsonb),"
-                    "cast(:o as jsonb),cast(:a as jsonb),:c,:cs,:f,:sp)"),
-                    {"l": lid, "k": q.kind, "p": json.dumps(q.prompt),
+                    "call_safe, flagged, source_page_id, position) values (:l,:k,"
+                    "cast(:p as jsonb),cast(:o as jsonb),cast(:a as jsonb),:c,:cs,:f,:sp,:pos)"),
+                    {"l": lid, "k": q.kind, "p": json.dumps(q.prompt), "pos": qi,
                      "o": json.dumps(q.options) if q.options is not None else None,
                      "a": json.dumps(q.answer), "c": q.concept, "cs": q.call_safe,
                      "f": q.flagged, "sp": q.source_page_id})
@@ -174,7 +174,7 @@ def get_course(course_id: str, db: DbDep, user: Teacher) -> dict[str, Any]:
         "select u.id as uid, u.title as ut, l.id as lid, l.title as lt, q.id as qid, q.kind, "
         "q.prompt, q.options, q.answer, q.concept, q.call_safe, q.flagged "
         "from units u join lessons l on l.unit_id=u.id left join questions q on q.lesson_id=l.id "
-        "where u.course_id=:c order by u.position, l.position, q.flagged desc, q.id"),
+        "where u.course_id=:c order by u.position, l.position, q.flagged desc, q.position, q.id"),
         {"c": course_id}).mappings().all()
     units: dict[str, Any] = {}
     lessons: dict[str, Any] = {}
