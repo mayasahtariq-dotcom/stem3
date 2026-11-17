@@ -45,7 +45,7 @@ def _hash(phone: str, code: str) -> str:
     return hmac.new(key, f"{phone}:{code}".encode(), hashlib.sha256).hexdigest()
 
 
-def request_otp(db: Connection, sms: SmsProvider, raw_phone: str) -> None:
+def request_otp(db: Connection, sms: SmsProvider, raw_phone: str) -> str:
     phone = normalize_phone(raw_phone)
     sent = db.execute(text("select count(*) from otp_codes where phone_e164=:p "
                            "and created_at > now() - interval '1 hour'"), {"p": phone}).scalar_one()
@@ -56,6 +56,7 @@ def request_otp(db: Connection, sms: SmsProvider, raw_phone: str) -> None:
                     "values (:p, :h, now() + make_interval(mins => :m))"),
                {"p": phone, "h": _hash(phone, code), "m": OTP_TTL_MIN})
     sms.send(phone, f"Your Aaroh code is {code}")
+    return code
 
 
 def _session(user: dict[str, Any]) -> dict[str, Any]:
