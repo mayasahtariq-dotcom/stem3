@@ -16,3 +16,4 @@
 - Call now is enforced inside 9 am to 9 pm IST; `CALL_HOURS_ENFORCED=false` exists only for testing on your own verified number.
 - Key 0 ("simpler explanation") repeats the question for now; questions have no explanation field yet.
 - The 5-minute scheduler, retries, missed-call callback and weekly SMS are not built yet (M10/M11 remainder).
+- Parent SMS on course completion: sent once per course to linked parents (or a call student's parent phone), only with consent and outside 9 pm to 7 am IST; quiet-hour texts are marked queued_quiet until the M12 scheduler sends them. A failed SMS never undoes the lesson. Sent inline in the request (move after commit or to a job in M12).
