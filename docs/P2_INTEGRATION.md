@@ -3,11 +3,14 @@
 This is everything the student, teacher and parent app needs from the backend in `stem3/backend`.
 The backend serves **both kinds of students** with one system:
 
-| | Smartphone student (your app) | No-smartphone student (phone call) |
+| | Student on a computer (your app) | Student on a phone (any phone) |
 |---|---|---|
-| Learns by | Your screens | Keypad phone call (backend + Twilio) |
+| Learns by | Your screens (desktop/laptop/school PC) | Keypad phone call (backend + Twilio), or dialling Aaroh's number |
 | Courses | Same courses, made from the teacher's notes | Same |
 | Student Twin, XP, streak, hearts, league, badges | Same server-side numbers | Same (shown "by phone" in the league) |
+
+**Team decision (17 Nov 2026):** the app is **desktop-first**; no phone layout is required. Students on phones
+(smartphone or basic) learn through call mode, which already works end to end.
 
 Rules from the PRD that the screens must follow:
 - **The server owns every number** (XP, streak, hearts, league, mastery). Never compute them in the app; show what the API returns.
