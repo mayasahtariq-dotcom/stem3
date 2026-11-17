@@ -23,3 +23,13 @@ def test_real_providers_not_wired_yet() -> None:
     s = Settings(use_fake_ai=False, gemini_api_key="")
     with pytest.raises(NotImplementedError):
         get_llm(s)
+
+
+def test_cors_allows_the_web_app_origin() -> None:
+    r = TestClient(app).options("/v1/auth/otp", headers={
+        "Origin": "http://localhost:3000", "Access-Control-Request-Method": "POST",
+        "Access-Control-Request-Headers": "content-type"})
+    assert r.headers.get("access-control-allow-origin") == "http://localhost:3000"
+    bad = TestClient(app).options("/v1/auth/otp", headers={
+        "Origin": "https://evil.example", "Access-Control-Request-Method": "POST"})
+    assert "access-control-allow-origin" not in bad.headers

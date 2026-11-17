@@ -25,6 +25,9 @@ class Settings(BaseSettings):
     sarvam_speaker: str = "shubh"
     call_voice: str = "sarvam"        # sarvam | twilio
     upload_dir: str = "storage"
+    scheduler_enabled: bool = False
+    scheduler_interval: int = 300
+    web_origins: str = "http://localhost:3000,http://localhost:5173,http://127.0.0.1:3000"
     demo_phone: str = ""
     demo_parent_phone: str = ""
     supabase_url: str = ""
