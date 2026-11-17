@@ -4,4 +4,4 @@ COPY pyproject.toml .
 COPY app ./app
 COPY tests ./tests
 RUN pip install --no-cache-dir -e ".[dev]"
-CMD ["sleep", "infinity"]
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
