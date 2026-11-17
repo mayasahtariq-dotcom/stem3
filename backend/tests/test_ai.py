@@ -133,7 +133,7 @@ def test_gemini_retries_busy_then_falls_back(monkeypatch: pytest.MonkeyPatch) ->
     monkeypatch.setattr("app.ai.provider.time.sleep", lambda _s: None)
     g = GeminiProvider("key", "model-a")
     assert g.generate_json("hi", {"type": "OBJECT"}) == {"ok": 1}
-    assert calls[:3] == ["model-a", "model-a", "gemini-3.8-flash"]
+    assert calls[:3] == ["model-a", "model-a", "gemini-flash-lite-latest"]
 
 
 def test_gemini_respects_overall_deadline(monkeypatch: pytest.MonkeyPatch) -> None:

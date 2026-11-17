@@ -20,7 +20,7 @@
 - Demo console (/demo) and /v1/demo/* exist only with DEMO_MODE=true. /v1/demo/login gives the demo teacher's token without a password, so turn DEMO_MODE off after the hackathon (the tunnel URL is public).
 - Questions now have a position, so lessons and calls play them in the order they were written.
 - P3 AI: Gemini (Google AI Studio free tier) behind LLMProvider, model GEMINI_MODEL (default gemini-3.8-flash) with fallbacks; Google retired gemini-2.5-flash for new keys. Not open-source: swap for an open model after the hackathon. Free tier may use prompts for training, so only demo notes, never real student data.
-- Gemini calls retry busy (429/5xx) and retired (404) models, but stop after an 80-second overall deadline so the app never hangs.
+- Gemini calls retry busy (429/5xx) and retired (404) models, but stop after an 80-second overall deadline so the app never hangs. Lite models (gemini-flash-lite-latest) come first: on 17 Nov 2026 the full flash models were overloaded while lite answered in about 1 s; a real notes photo became a course in 22.8 s.
 - OCR is done by Gemini vision (photos and PDFs in one call) instead of Surya, for speed on a laptop.
 - Notes upload pipeline runs as a FastAPI background task (Procrastinate job later). Course stays a draft; questions under 0.7 confidence, or from pages read under 0.7, are flagged for review.
 - Doubt chatbot answers only from the class notes (OCR pages ranked by word overlap, plus terms) and cites the page; embeddings (BGE-M3) can replace the ranking later.
