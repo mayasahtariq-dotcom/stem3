@@ -28,3 +28,6 @@
 - Call voice: Sarvam clips (8 kHz WAV) played with Twilio <Play>. Fixed lines are pre-recorded when a course is published (or with scripts/prewarm_calls.py); live lines are made in parallel within 7 s, and any slow or failed line falls back to Twilio <Say>. CALL_VOICE=twilio turns it off. Needs PUBLIC_BASE_URL so Twilio can fetch the clips.
 - No canned demo courses: the demo seed creates only the class, the call student and classmates. Courses come from the teacher uploading real notes in the /demo console (upload, review flagged questions, publish to class).
 - UI is desktop-first (team decision, 17 Nov 2026): no phone layout. This differs from the PRD (360 px phones). Students on phones, smart or basic, learn through call mode (scheduled calls, Call now, or dialling in).
+- Scheduler (M10/M11): runs every SCHEDULER_INTERVAL seconds inside the API when SCHEDULER_ENABLED=true (one instance; Procrastinate job when scaling). Uses each session's scheduled time for "today". Weekly SMS goes to call-only students on Sunday after 6 pm IST; league reset runs on Mondays (idempotent).
+- CORS: origins from WEB_ORIGINS for the teammate's desktop app; bearer tokens, no cookies.
+- scripts/start_demo.py starts the API and tunnel, writes PUBLIC_BASE_URL, restarts the API and points the Twilio number in one command.

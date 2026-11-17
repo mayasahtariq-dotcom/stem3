@@ -31,7 +31,7 @@ The full machine-readable contract is `packages/api-client/openapi.json` (genera
 | Auth | `Authorization: Bearer <access_token>` from login. Token lasts 1 hour (`expires_in`). |
 | Errors | JSON `{"detail": "<message>"}`. 401 = log in again. 403 = wrong role or **no consent**. 404 = not found or not yours. 409 = not allowed right now (see message). 422 = bad input. 429 = too many tries. 503 = AI or speech busy, try again. |
 | Roles | `student`, `teacher`, `parent` (`admin` exists, not self-assignable) |
-| CORS | Not enabled. Call the API through a same-origin proxy (e.g. Next.js rewrite `/v1/*` → API) or ask P1 to add your origin. |
+| CORS | Allowed origins come from `WEB_ORIGINS` in `backend/.env` (comma-separated; default `http://localhost:3000`, `http://localhost:5173`, `http://127.0.0.1:3000`). Ask P1 to add your deployed address. |
 
 ### Language of content
 Content fields come as objects like `{"hi": "...", "kn": "...", "en": "...", "regional": "...", "english": "..."}` or as plain strings. Pick in this order: the user's language key (`hi`/`kn`/`en`) → `regional` (or `english` for en) → `english` → plain string. Show the English line underneath.

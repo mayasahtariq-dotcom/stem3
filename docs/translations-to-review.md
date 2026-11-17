@@ -9,3 +9,6 @@ The Hindi and Kannada messages in MESSAGES are drafts.
 
 ## Demo course content (backend/app/demo.py), drafts
 The Hindi and Kannada question and option text in COURSES ("1. Cells", "2. Force") are drafts.
+
+## Review sheet
+Run `python scripts/export_translations.py` (from backend/) to regenerate `docs/translation-review-sheet.md`, the side-by-side table for the native-speaker review.

@@ -11,4 +11,4 @@
 - [x] M7 Parent link codes, weekly summary, consent/revoke, deletion, call-student records
 - [x] M8 Leagues (pods of 10, 5 tiers, weekly reset logic), quests (daily/weekly/revision), 43 badges
 - [x] M9 Golu Pot, mascot growth, outfits/freeze/hearts spending, guardrails, WSS /realtime
-- [ ] Scheduler for the weekly league reset (Procrastinate job) lands in M12
+- [x] M10/M11 scheduler: window calls, retries, consent tries, not reachable, held SMS, weekly SMS, Monday league reset

@@ -1,6 +1,13 @@
-from fastapi import FastAPI
+import asyncio
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
 
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
+from app.config import get_settings
 from app.game.setup import register_all
+from app.jobs.runner import loop as scheduler_loop
 from app.logging_setup import setup_logging
 from app.routers import (
     admin,
@@ -18,7 +25,26 @@ from app.routers import (
 
 setup_logging()
 register_all()
-app = FastAPI(title="Aaroh API", version="0.1.0")
+
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
+    task = None
+    if get_settings().scheduler_enabled:       # the PRD's 5-minute job
+        task = asyncio.create_task(scheduler_loop(get_settings().scheduler_interval))
+    yield
+    if task:
+        task.cancel()
+
+
+app = FastAPI(title="Aaroh API", version="0.1.0", lifespan=lifespan)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[o.strip() for o in get_settings().web_origins.split(",") if o.strip()],
+    allow_methods=["GET", "POST", "PATCH", "DELETE"],
+    allow_headers=["Authorization", "Content-Type"],
+    allow_credentials=False,          # bearer tokens, no cookies
+)
 app.include_router(auth.router, prefix="/v1")
 app.include_router(student.router, prefix="/v1")
 app.include_router(learning.router, prefix="/v1")
