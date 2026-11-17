@@ -101,7 +101,8 @@ def new_session(db: Connection, cs_id: Any, learner_id: Any, kind: str, now: dat
 
 
 # ---------- incoming calls: caller ID -> student -> twin picks the course ----------
-def incoming(db: Connection, from_number: str, call_sid: str, now: datetime) -> str:
+def incoming(db: Connection, from_number: str, call_sid: str, now: datetime,
+             enforce_hours: bool = True) -> str:
     """A student calls our number. Match the caller to call-only students by phone.
 
     Unknown numbers get no learner data. Siblings sharing a phone pick with a key press.
@@ -113,7 +114,7 @@ def incoming(db: Connection, from_number: str, call_sid: str, now: datetime) -> 
     if not rows:
         return tw.response(tw.say(UNKNOWN_CALLER, "en"), tw.HANGUP)
     lang = rows[0]["language"]
-    if get_settings().call_hours_enforced and not within_call_hours(now):
+    if enforce_hours and get_settings().call_hours_enforced and not within_call_hours(now):
         return tw.response(tw.say(line(lang, "closed"), lang), tw.HANGUP)
     if len(rows) == 1:
         return begin_incoming(db, dict(rows[0]), call_sid, now)

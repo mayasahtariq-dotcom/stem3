@@ -1,13 +1,19 @@
 """Hackathon demo console API. Only exists when DEMO_MODE=true. Turn it off after the event:
 /demo/login hands out the demo teacher's token without a password."""
+import re
+import uuid
+import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import HTMLResponse
+from pydantic import BaseModel
 from sqlalchemy import text
 
 from app.auth.tokens import issue_token
+from app.calls import flow
+from app.calls.voice import with_voice
 from app.config import get_settings
 from app.demo import TEACHER_PHONE, seed_demo
 from app.deps import DbDep, Teacher
@@ -122,3 +128,65 @@ def demo_state(db: DbDep, _: Teacher) -> dict[str, Any]:
             " on u.id=l.unit_id where u.course_id=c.id and q.flagged) as flagged "
             "from courses c where c.teacher_id=:t order by c.created_at desc"),
             {"t": ids["teacher"]}).mappings().all()]}
+
+
+# ---------- phone simulator: "call Aaroh" from the demo console, no phone number needed ----------
+SIM_STEPS = {"lang", "consent", "pick", "answer", "confirm", "voice"}
+
+
+class SimIn(BaseModel):
+    step: str                      # incoming | lang | consent | pick | answer | confirm | voice
+    session: str | None = None
+    digits: str | None = None
+
+
+def twiml_to_steps(xml: str, transcript: dict[str, str] | None = None) -> dict[str, Any]:
+    """Turn the call engine's TwiML into a script the browser phone can play."""
+    def item(el: ET.Element) -> dict[str, Any] | None:
+        if el.tag == "Say":
+            return {"type": "say", "text": el.text or "", "lang": (el.get("language") or "hi-IN")}
+        if el.tag == "Play":
+            url = (el.text or "").strip()
+            return {"type": "play", "url": url, "text": (transcript or {}).get(url, "")}
+        return None
+
+    def target(url: str) -> dict[str, str]:
+        m = re.search(r"/webhooks/twilio/(\w+)\?s=([\w-]+)", url or "")
+        return {"step": m.group(1), "session": m.group(2)} if m else {}
+
+    out: dict[str, Any] = {"before": [], "gather": None, "after": [], "redirect": None, "hangup": False}
+    seen_gather = False
+    for el in ET.fromstring(xml):
+        if el.tag == "Gather":
+            seen_gather = True
+            out["gather"] = {"items": [i for c in el if (i := item(c))], **target(el.get("action", ""))}
+        elif el.tag == "Redirect":
+            out["redirect"] = target(el.text or "")
+        elif el.tag == "Hangup":
+            out["hangup"] = True
+        elif (i := item(el)) is not None:
+            out["after" if seen_gather else "before"].append(i)
+    return out
+
+
+@router.post("/sim")
+def simulate(body: SimIn, db: DbDep, _: Teacher) -> dict[str, Any]:
+    """Runs one step of a call exactly like a Twilio webhook would, with Sarvam voices if on.
+
+    'incoming' dials in from the demo student's phone, so caller ID finds her and her course.
+    The 9 am to 9 pm rule is lifted here: nothing real is being called."""
+    said: dict[str, str] = {}
+    if body.step == "incoming":
+        phone = db.execute(text("select phone_e164 from call_students where id=:i"),
+                           {"i": _ids(db)["cs"]}).scalar_one()
+        xml = with_voice(lambda d: flow.incoming(d, phone, f"SIM-{uuid.uuid4().hex[:12]}",
+                                                 engine.utcnow(), enforce_hours=False), db,
+                         transcript=said)
+    elif body.step in SIM_STEPS and body.session:
+        fn = {"lang": flow.choose_language, "consent": flow.consent, "pick": flow.pick,
+              "answer": flow.answer, "confirm": flow.confirm}.get(body.step)
+        xml = (with_voice(flow.voice, db, body.session, transcript=said) if fn is None
+               else with_voice(fn, db, body.session, body.digits or "", transcript=said))
+    else:
+        raise HTTPException(422, "Unknown step")
+    return twiml_to_steps(xml, said)

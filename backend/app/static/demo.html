@@ -85,6 +85,18 @@
   .q .txt { flex: 1; } .q small { color: var(--muted); display: block; }
   .tiny { padding: 6px 10px; font-size: 13px; border-radius: 10px; background: #fff; border: 2px solid var(--line); color: var(--coral); }
   select, input[type=number] { font: inherit; padding: 8px; border-radius: 10px; border: 2px solid var(--line); }
+  .phone { max-width: 300px; margin: 0 auto; background: #222; border-radius: 34px; padding: 14px; box-shadow: 0 10px 24px rgba(0,0,0,.18); }
+  .screen { background: #0f2b0f; color: #d8ffd0; border-radius: 22px; min-height: 170px; padding: 12px; font-size: 14px; display: flex; flex-direction: column; gap: 6px; }
+  .screen .st { font-size: 12px; opacity: .8; text-transform: uppercase; letter-spacing: .6px; }
+  .screen .line { background: rgba(255,255,255,.08); border-radius: 10px; padding: 6px 8px; }
+  .screen .line.me { align-self: flex-end; background: #2f7a00; color: #fff; }
+  .keys { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 12px; }
+  .key { background: #3a3a3a; color: #fff; border-radius: 50%; aspect-ratio: 1; font-size: 22px; padding: 0; }
+  .key:disabled { opacity: .35; cursor: default; }
+  .key.live { background: #4a4a4a; box-shadow: 0 0 0 2px var(--grass); }
+  .callrow { display: flex; gap: 10px; margin-top: 12px; }
+  .callrow button { flex: 1; border-radius: 999px; }
+  .dial { background: var(--grass); color: #fff; } .hang { background: var(--coral); color: #fff; }
   .banner { grid-column: span 12; background: #FFF6D6; border: 2px solid #FFE38A; border-radius: 12px; padding: 12px 16px; display: none; }
 </style>
 </head>
@@ -152,27 +164,38 @@
     <div class="msg" id="msg"></div>
   </section>
 
-  <section class="card span5">
+  <section class="card span4">
+    <h2>Ananya's phone (simulator)</h2>
+    <div class="phone">
+      <div class="screen" id="pscreen"><div class="st" id="pstatus">Ready. Press the green button to call Aaroh.</div></div>
+      <div class="keys" id="keys"></div>
+      <div class="callrow"><button class="dial" id="dialBtn">Call Aaroh</button><button class="hang" id="hangBtn" disabled>Hang up</button></div>
+    </div>
+    <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Calls in from Ananya's number, so caller ID finds her and the Student Twin picks her course. Same call engine as a real phone; Golu speaks with Sarvam's voice. No phone number needed.</p>
+  </section>
+
+  <section class="card span4">
+    <h2>Student Twin</h2>
+    <div id="twin"><div class="empty">Mastery appears after the first answer.</div></div>
+  </section>
+
+  <section class="card span8">
     <h2>Live call <span class="pill" id="cstatus" style="margin-left:6px">no call yet</span></h2>
     <ul class="timeline" id="timeline"><li class="empty">Press "Call Ananya now", or call the number above from Ananya's phone.</li></ul>
   </section>
 
-  <section class="card span3">
-    <h2>Student Twin</h2>
-    <div id="twin"><div class="empty">Mastery appears after the first answer.</div></div>
-  </section>
 
   <section class="card span4">
     <h2>Class league (this week)</h2>
     <table id="league"></table>
   </section>
 
-  <section class="card span4">
+  <section class="card span6">
     <h2>Badges earned</h2>
     <div class="chips" id="badges"><span class="empty">None yet</span></div>
   </section>
 
-  <section class="card span4">
+  <section class="card span6">
     <h2>Parent SMS</h2>
     <div id="sms"><div class="empty">A text goes to the parent when Ananya finishes a whole course.</div></div>
   </section>
@@ -331,6 +354,73 @@ async function showReview(courseId) {
     catch (e) { umsg(e.message, true); }
   };
 }
+
+// ---------- phone simulator ----------
+const KEYS = ["1","2","3","4","5","6","7","8","9","*","0","#"];
+let simRun = 0, simWait = null, simAudio = null, simOn = false, keyResolve = null;
+$("keys").innerHTML = KEYS.map((k) => `<button class="key" data-k="${k}" disabled>${k}</button>`).join("");
+function pline(text, me) {
+  if (!text) return;
+  const d = document.createElement("div"); d.className = "line" + (me ? " me" : ""); d.textContent = text;
+  $("pscreen").appendChild(d);
+  while ($("pscreen").children.length > 6) $("pscreen").children[1].remove();
+}
+function pstatus(t) { $("pstatus").textContent = t; }
+function setKeys(live) { document.querySelectorAll(".key").forEach((b) => { b.disabled = !simOn; b.classList.toggle("live", !!live); }); }
+function stopAudio() { try { simAudio && simAudio.pause(); } catch {} simAudio = null; try { speechSynthesis.cancel(); } catch {} }
+function playItem(it, run) {
+  return new Promise((resolve) => {
+    if (run !== simRun) return resolve();
+    pline(it.text);
+    if (it.type === "play") {
+      simAudio = new Audio(it.url); simAudio.onended = resolve; simAudio.onerror = resolve;
+      simAudio.play().catch(resolve);
+    } else {
+      try { const u = new SpeechSynthesisUtterance(it.text); u.lang = it.lang; u.onend = resolve; u.onerror = resolve;
+            speechSynthesis.speak(u); setTimeout(resolve, 15000); } catch { resolve(); }
+    }
+  });
+}
+async function playAll(items, run) { for (const it of items || []) { if (run !== simRun) return; await playItem(it, run); } }
+function waitKey(ms, run) { return new Promise((resolve) => { keyResolve = resolve; setTimeout(() => { if (run === simRun) resolve(null); }, ms); }); }
+async function simStep(step, session, digits) {
+  const run = ++simRun; stopAudio(); simWait = null; setKeys(false);
+  let r;
+  try { r = await api("/demo/sim", { method: "POST", body: JSON.stringify({ step, session, digits }) }); }
+  catch (e) { pstatus("Call failed: " + e.message); return endCall(); }
+  if (run !== simRun) return;
+  await playAll(r.before, run);
+  if (r.gather) {
+    simWait = r.gather; setKeys(true); pstatus("Speaking… press a key any time");
+    await playAll(r.gather.items, run);
+    if (run !== simRun) return;
+    pstatus("Waiting for your key…");
+    const key = await waitKey(8000, run);
+    if (run !== simRun || key) return;
+    simWait = null; setKeys(false);
+    await playAll(r.after, run);
+    if (run === simRun && r.redirect && r.redirect.step) return simStep(r.redirect.step, r.redirect.session);
+  } else if (r.hangup) { await new Promise((ok) => setTimeout(ok, 300)); if (run === simRun) { pstatus("Call ended."); endCall(true); } }
+  else if (r.redirect && r.redirect.step) return simStep(r.redirect.step, r.redirect.session);
+}
+function pressKey(k) {
+  if (!simOn) return;
+  pline("Pressed " + k, true);
+  if (simWait) { const g = simWait; simWait = null; if (keyResolve) keyResolve(k); simStep(g.step, g.session, k); }
+}
+document.querySelectorAll(".key").forEach((b) => b.onclick = () => pressKey(b.dataset.k));
+document.addEventListener("keydown", (e) => { if (simOn && /^[0-9*#]$/.test(e.key) && document.activeElement.tagName !== "INPUT") pressKey(e.key); });
+function endCall(keep) {
+  simRun++; stopAudio(); simWait = null; simOn = false; setKeys(false);
+  $("dialBtn").disabled = false; $("hangBtn").disabled = true; if (!keep) pstatus("Call ended.");
+  refresh();
+}
+$("dialBtn").onclick = () => {
+  [...$("pscreen").querySelectorAll(".line")].forEach((n) => n.remove());
+  simOn = true; $("dialBtn").disabled = true; $("hangBtn").disabled = false; pstatus("Calling Aaroh…"); setKeys(false);
+  simStep("incoming");
+};
+$("hangBtn").onclick = () => endCall();
 
 $("callBtn").onclick = async () => {
   if (busy) return; busy = true; $("callBtn").disabled = true; show("Placing the call…");

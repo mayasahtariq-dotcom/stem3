@@ -1,4 +1,6 @@
 """Demo console API: hidden unless DEMO_MODE, seed works, live state shows the call."""
+from typing import Any
+
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import Connection
@@ -65,3 +67,43 @@ def test_demo_seed_login_state_and_live_call(conn: Connection, client: TestClien
         assert live["student"]["xp"] >= 10 and live["twin"][0]["concept"] == "cell"
     finally:
         app.dependency_overrides.pop(telephony, None)
+
+
+def test_phone_simulator_runs_a_whole_call(conn: Connection, client: TestClient,
+                                          monkeypatch: pytest.MonkeyPatch) -> None:
+    on = Settings(demo_mode=True, demo_phone="9876512345", call_hours_enforced=True,
+                  twilio_auth_token="", use_fake_telephony=True, public_base_url="")
+    for target in ("app.routers.demo.get_settings", "app.routers.calls.get_settings",
+                   "app.calls.flow.get_settings"):
+        monkeypatch.setattr(target, lambda: on)
+    seed_demo(conn, "9876512345", None)
+    login = client.post("/v1/demo/login").json()
+    h = {"Authorization": f"Bearer {login['token']}"}
+    course = client.post("/v1/courses", headers=h, json={"title": "Cells", "subject": "biology"}).json()["id"]
+    client.post(f"/v1/courses/{course}/content", headers=h, json={"units": [{"title": "U", "lessons": [
+        {"title": "The Cell", "questions": [{"kind": "true_false", "call_safe": True,
+         "prompt": {"en": "Plants have cells.", "hi": "पौधों में कोशिकाएँ होती हैं।"}, "answer": True}]}]}]})
+    client.post(f"/v1/courses/{course}/publish", headers=h)
+    client.post(f"/v1/courses/{course}/assign", headers=h, json={"classroom_id": login["classroom_id"]})
+
+    def sim(step: str, session: str | None = None, digits: str | None = None) -> dict[str, Any]:
+        r = client.post("/v1/demo/sim", headers=h, json={"step": step, "session": session, "digits": digits})
+        assert r.status_code == 200, r.text
+        out: dict[str, Any] = r.json()
+        return out
+
+    first = sim("incoming")                    # works at any hour: nothing real is called
+    assert first["gather"]["step"] == "lang" and len(first["gather"]["items"]) == 3
+    sid = first["gather"]["session"]
+    consent = sim("lang", sid, "3")            # English
+    assert consent["gather"]["step"] == "consent" and "agree" in consent["gather"]["items"][0]["text"]
+    lesson = sim("consent", sid, "1")
+    assert lesson["gather"]["step"] == "answer"
+    assert any("Plants have cells" in i["text"] for i in lesson["gather"]["items"])
+    confirm = sim("answer", sid, "1")          # True
+    assert confirm["gather"]["step"] == "confirm"
+    done = sim("confirm", sid, "1")
+    assert done["hangup"] is True and any("Goodbye" in i["text"] for i in done["after"] + done["before"])
+    state = client.get("/v1/demo/state", headers=h).json()
+    assert state["student"]["status"] == "active" and state["student"]["xp"] >= 10
+    assert client.post("/v1/demo/sim", headers=h, json={"step": "nope"}).status_code == 422
