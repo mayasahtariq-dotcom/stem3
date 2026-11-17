@@ -14,7 +14,7 @@ from app.game import engine
 from app.main import app
 from app.routers.calls import telephony
 from tests.conftest import needs_db
-from tests.helpers import make_user, make_world
+from tests.helpers import make_call_safe, make_user, make_world
 
 pytestmark = needs_db
 DAY = datetime(2026, 3, 4, 10, 0, tzinfo=UTC)       # 15:30 IST
@@ -80,7 +80,7 @@ def test_call_student_parent_gets_hindi_text(conn: Connection, client: TestClien
     app.dependency_overrides[telephony] = lambda: FakeTelephonyProvider()
     try:
         w = make_world(conn, n_lessons=1)
-        conn.execute(text("update questions set call_safe=true"))
+        make_call_safe(conn, w["course"])
         cs = client.post(f"/v1/classrooms/{w['classroom']}/call-students",
                          headers=w["teacher"]["headers"],
                          json={"name": "Ananya", "phone": "9876500001", "language": "hi",

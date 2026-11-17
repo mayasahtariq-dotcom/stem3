@@ -23,6 +23,7 @@ class Settings(BaseSettings):
     sarvam_api_key: str = ""
     sarvam_model: str = "bulbul:v3"
     sarvam_speaker: str = "shubh"
+    call_voice: str = "sarvam"        # sarvam | twilio
     upload_dir: str = "storage"
     demo_phone: str = ""
     demo_parent_phone: str = ""

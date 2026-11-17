@@ -15,7 +15,7 @@ from app.config import Settings
 from app.main import app
 from app.routers.calls import telephony
 from tests.conftest import needs_db
-from tests.helpers import make_world
+from tests.helpers import make_call_safe, make_world
 
 pytestmark = needs_db
 
@@ -34,7 +34,7 @@ def phone(monkeypatch: pytest.MonkeyPatch) -> Iterator[FakeTelephonyProvider]:
 
 def setup_call_student(conn: Connection, client: TestClient) -> dict[str, Any]:
     w = make_world(conn)
-    conn.execute(text("update questions set call_safe=true"))
+    make_call_safe(conn, w["course"])
     r = client.post(f"/v1/classrooms/{w['classroom']}/call-students", headers=w["teacher"]["headers"],
                     json={"name": "Ananya K", "phone": "9876500001", "language": "hi",
                           "parent_phone": "9876500002"})

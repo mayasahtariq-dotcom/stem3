@@ -1,9 +1,10 @@
 import json
+import logging
 import secrets
 from datetime import time
 from typing import Any, Literal
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, BackgroundTasks, HTTPException
 from pydantic import BaseModel, Field
 from sqlalchemy import Connection, text
 
@@ -253,8 +254,18 @@ def delete_question(question_id: str, db: DbDep, user: Teacher) -> None:
     db.execute(text("delete from questions where id=:q"), {"q": question_id})
 
 
+def _prewarm_in_background(course_id: str) -> None:
+    from app.calls.prewarm import prewarm_course
+    from app.db.session import get_engine
+    try:
+        with get_engine().begin() as conn:
+            prewarm_course(conn, course_id)
+    except Exception:
+        logging.getLogger(__name__).exception("call audio prewarm failed")
+
+
 @router.post("/courses/{course_id}/publish")
-def publish(course_id: str, db: DbDep, user: Teacher) -> dict[str, str]:
+def publish(course_id: str, db: DbDep, user: Teacher, background: BackgroundTasks) -> dict[str, str]:
     own_course(db, user.id, course_id)
     n = db.execute(text("select count(*) from questions q join lessons l on l.id=q.lesson_id "
                         "join units u on u.id=l.unit_id where u.course_id=:c"),
@@ -262,6 +273,10 @@ def publish(course_id: str, db: DbDep, user: Teacher) -> dict[str, str]:
     if n == 0:
         raise HTTPException(409, "Add at least one question before publishing")
     db.execute(text("update courses set status='published' where id=:c"), {"c": course_id})
+    from app.calls.voice import enabled
+    if enabled():                     # pre-record phone audio for this course (PRD)
+        db.commit()
+        background.add_task(_prewarm_in_background, course_id)
     return {"status": "published"}
 
 
