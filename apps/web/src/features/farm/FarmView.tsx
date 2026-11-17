@@ -18,6 +18,10 @@ import { pickQuality, readDeviceHints } from "@/three/engine/quality";
 import { FARM_PLACES } from "@/three/world/scene-model";
 import { LessonPanel, PlacePanel, type FarmPanelActions, type FarmPanelData } from "./FarmPanels";
 import { useFarmData } from "./use-farm";
+import { useWorld } from "@/features/world/api";
+import { useFieldEditor } from "@/features/world/use-field-editor";
+import { WorldOverlay } from "@/features/world/WorldOverlay";
+import { useWorldUi } from "@/features/world/world-store";
 
 // three.js (~600 KB) loads only here, after sign-in, never on the login screens.
 const FarmCanvas = dynamic(() => import("./FarmCanvas"), { ssr: false, loading: () => <LoadingState className="h-full" /> });
@@ -44,6 +48,15 @@ export function FarmView({ sceneExtras, renderPanel }: { sceneExtras?: ReactNode
   const buyItem = useBuyItem();
   const resume = useLessonSessions((s) => s.latest());
   const openPot = useOpenPot();
+  // Farm worlds: the field the student stands in (only an unlocked one), and its editor.
+  const world = useWorld();
+  const chosenField = useWorldUi((s) => s.field);
+  const field = world.data && !world.data.fields.some((f) => f.id === chosenField && f.unlocked) ? "starter-meadow" : chosenField;
+  const editor = useFieldEditor(field);
+  const draft = useWorldUi((s) => s.draft);
+  const sheet = useWorldUi((s) => s.sheet);
+  const moveDraft = useWorldUi((s) => s.moveDraft);
+  const pickPlaced = useWorldUi((s) => s.pick);
 
   const select = (id: string) => {
     setSelected(id);
@@ -104,6 +117,10 @@ export function FarmView({ sceneExtras, renderPanel }: { sceneExtras?: ReactNode
         onSelect={select}
         reducedMotion={reduced}
         extras={sceneExtras}
+        field={field}
+        placed={editor.objects}
+        onPickPlaced={pickPlaced}
+        placement={draft ? { draft, valid: !editor.problem, onMove: moveDraft } : undefined}
         onError={(e) => reporter.capture(e, { where: "farm3d" })}
         overlays={{
           loading: (pct) => <LoadingState message={pct > 0 && pct < 100 ? t("loadingProgress", { percent: Math.round(pct) }) : t("loading")} />,
@@ -123,7 +140,9 @@ export function FarmView({ sceneExtras, renderPanel }: { sceneExtras?: ReactNode
         }}
       />
 
-      {resume && !selected && (
+      <WorldOverlay editor={editor} field={field} />
+
+      {resume && !selected && !draft && (
         <Link
           href={`/farm/lesson/${encodeURIComponent(resume.session.lessonId)}`}
           data-testid="resume-lesson"
@@ -137,7 +156,7 @@ export function FarmView({ sceneExtras, renderPanel }: { sceneExtras?: ReactNode
         </Link>
       )}
 
-      {!greeted && !resume && profile.data?.name && (
+      {!greeted && !resume && !draft && !sheet && field === "starter-meadow" && profile.data?.name && (
         <div className="pointer-events-none absolute left-3 top-20 z-10 flex max-w-xs items-end gap-2 tablet:left-4">
           <GoluMascot pose="wave" size={72} />
           <SpeechBubble tail="left" className="mb-4">

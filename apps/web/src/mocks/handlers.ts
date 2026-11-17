@@ -6,6 +6,7 @@ import { makeLearningHandlers } from "./learning/handlers";
 import { makeGameHandlers } from "./game/handlers";
 import { makeTeacherHandlers } from "./teacher/handlers";
 import { makeNotesHandlers } from "./notes/handlers";
+import { makeWorldHandlers } from "./world/handlers";
 import { rosterOf } from "./teacher/state";
 import { makeParentHandlers } from "./parent/handlers";
 import { makeCallHandlers } from "./calls/handlers";
@@ -56,6 +57,7 @@ export function makeHandlers(base = FAKE_API_BASE_URL) {
     ...makeLearningHandlers(base),
     ...makeTeacherHandlers(base),
     ...makeNotesHandlers(base),
+    ...makeWorldHandlers(base),
     ...makeParentHandlers(base),
     ...makeCallHandlers(base),
     // MOCK ONLY: endpoints the backend hasn't built yet.

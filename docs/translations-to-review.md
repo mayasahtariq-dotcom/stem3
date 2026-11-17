@@ -1273,3 +1273,73 @@ File: `apps/web/messages/{hi,kn}.json` (keys are `namespace.key`).
 | notes.fileTooBig | That file is too large. Keep it under 1.5 MB. | यह फ़ाइल बहुत बड़ी है। 1.5 MB से छोटी रखें। | ಈ ಫೈಲ್ ತುಂಬಾ ದೊಡ್ಡದು. 1.5 MB ಒಳಗೆ ಇಡಿ. | [ ] |
 | notes.open | Open | खोलें | ತೆರೆಯಿರಿ | [ ] |
 | notes.download | Download | डाउनलोड | ಡೌನ್‌ಲೋಡ್ | [ ] |
+
+## Farm worlds: fields, Farm Store, placement
+
+| Key | English | Hindi | Kannada | Reviewed |
+|---|---|---|---|---|
+| world.fields | Fields | खेत | ಹೊಲಗಳು | [ ] |
+| world.store | Farm Store | फ़ार्म स्टोर | ಫಾರ್ಮ್ ಅಂಗಡಿ | [ ] |
+| world.inventory | My items | मेरी चीज़ें | ನನ್ನ ವಸ್ತುಗಳು | [ ] |
+| world.levelsTitle | Meadow levels | घास के मैदान के स्तर | ಹುಲ್ಲುಗಾವಲು ಹಂತಗಳು | [ ] |
+| world.levelsHint | Earn XP in lessons to unlock new fields. | नए खेत खोलने के लिए पाठों में XP कमाएँ। | ಹೊಸ ಹೊಲ ತೆರೆಯಲು ಪಾಠಗಳಲ್ಲಿ XP ಗಳಿಸಿ. | [ ] |
+| world.field_starter-meadow | Starter Meadow | शुरुआती मैदान | ಆರಂಭದ ಹುಲ್ಲುಗಾವಲು | [ ] |
+| world.field_blossom-meadow | Blossom Meadow | फूलों का मैदान | ಹೂವಿನ ಹುಲ್ಲುಗಾವಲು | [ ] |
+| world.field_golden-valley | Golden Valley | सुनहरी घाटी | ಚಿನ್ನದ ಕಣಿವೆ | [ ] |
+| world.field_woodland-farm | Woodland Farm | वन फ़ार्म | ಕಾಡಿನ ತೋಟ | [ ] |
+| world.field_mountain-paradise | Mountain Paradise | पहाड़ी स्वर्ग | ಬೆಟ್ಟದ ಸ್ವರ್ಗ | [ ] |
+| world.unlockAt | Unlocks at {xp} XP | {xp} XP पर खुलेगा | {xp} XP ಗೆ ತೆರೆಯುತ್ತದೆ | [ ] |
+| world.xpToGo | {xp} XP to go | अभी {xp} XP बाकी | ಇನ್ನೂ {xp} XP ಬೇಕು | [ ] |
+| world.unlocked | Unlocked | खुला है | ತೆರೆದಿದೆ | [ ] |
+| world.here | You are here | आप यहाँ हैं | ನೀವು ಇಲ್ಲಿದ್ದೀರಿ | [ ] |
+| world.enter | Visit | जाएँ | ಭೇಟಿ ನೀಡಿ | [ ] |
+| world.placedCount | {n} items placed | {n} चीज़ें रखी गईं | {n} ವಸ್ತುಗಳನ್ನು ಇಟ್ಟಿದ್ದೀರಿ | [ ] |
+| world.newField | New field unlocked! | नया खेत खुल गया! | ಹೊಸ ಹೊಲ ತೆರೆಯಿತು! | [ ] |
+| world.newFieldBody | {name} is ready to explore and decorate. | {name} घूमने और सजाने के लिए तैयार है। | {name} ಸುತ್ತಾಡಲು ಮತ್ತು ಅಲಂಕರಿಸಲು ಸಿದ್ಧವಾಗಿದೆ. | [ ] |
+| world.goThere | Go there | वहाँ चलें | ಅಲ್ಲಿಗೆ ಹೋಗಿ | [ ] |
+| world.later | Later | बाद में | ನಂತರ | [ ] |
+| world.gems | {n} gems | {n} रत्न | {n} ರತ್ನಗಳು | [ ] |
+| world.cat_decorations | Decorations | सजावट | ಅಲಂಕಾರ | [ ] |
+| world.cat_buildings | Buildings | इमारतें | ಕಟ್ಟಡಗಳು | [ ] |
+| world.cat_nature | Nature | प्रकृति | ಪ್ರಕೃತಿ | [ ] |
+| world.cat_animals | Animals | जानवर | ಪ್ರಾಣಿಗಳು | [ ] |
+| world.cat_customisation | Customise | अपने हिसाब से | ನಿಮ್ಮಂತೆ ಮಾಡಿ | [ ] |
+| world.owned | Owned: {n} | आपके पास: {n} | ನಿಮ್ಮಲ್ಲಿ: {n} | [ ] |
+| world.buy | Buy for {price} | {price} में खरीदें | {price} ಗೆ ಖರೀದಿಸಿ | [ ] |
+| world.needGems | Need {n} more gems | {n} और रत्न चाहिए | ಇನ್ನೂ {n} ರತ್ನ ಬೇಕು | [ ] |
+| world.bought | Bought! Find it in My items. | खरीद लिया! मेरी चीज़ें में देखें। | ಖರೀದಿಸಿದಿರಿ! ನನ್ನ ವಸ್ತುಗಳಲ್ಲಿ ನೋಡಿ. | [ ] |
+| world.placeNow | Place it now | अभी रखें | ಈಗ ಇಡಿ | [ ] |
+| world.storeEmpty | Nothing in this shelf yet. | इस शेल्फ़ में अभी कुछ नहीं। | ಈ ಕಪಾಟಿನಲ್ಲಿ ಇನ್ನೂ ಏನೂ ಇಲ್ಲ. | [ ] |
+| world.inventoryEmpty | No items yet. Buy something in the Farm Store. | अभी कोई चीज़ नहीं। फ़ार्म स्टोर से कुछ खरीदें। | ಇನ್ನೂ ವಸ್ತುಗಳಿಲ್ಲ. ಫಾರ್ಮ್ ಅಂಗಡಿಯಲ್ಲಿ ಖರೀದಿಸಿ. | [ ] |
+| world.available | {n} to place | {n} रखने को | {n} ಇಡಲು ಇದೆ | [ ] |
+| world.allPlaced | All placed | सब रख दिए | ಎಲ್ಲಾ ಇಟ್ಟಾಯಿತು | [ ] |
+| world.place | Place | रखें | ಇಡಿ | [ ] |
+| world.openStore | Open the store | स्टोर खोलें | ಅಂಗಡಿ ತೆರೆಯಿರಿ | [ ] |
+| world.dragHint | Drag it or tap the ground to move it. | इसे खींचें या ज़मीन पर टैप करके हटाएँ। | ಎಳೆಯಿರಿ ಅಥವಾ ನೆಲದ ಮೇಲೆ ಒತ್ತಿ ಸರಿಸಿ. | [ ] |
+| world.rotate | Rotate | घुमाएँ | ತಿರುಗಿಸಿ | [ ] |
+| world.cancel | Cancel | रद्द करें | ರದ್ದು ಮಾಡಿ | [ ] |
+| world.confirm | Place here | यहाँ रखें | ಇಲ್ಲಿ ಇಡಿ | [ ] |
+| world.placed | Placed! Your field is saved. | रख दिया! आपका खेत सहेजा गया। | ಇಟ್ಟಾಯಿತು! ನಿಮ್ಮ ಹೊಲ ಉಳಿಸಲಾಗಿದೆ. | [ ] |
+| world.move | Move | हटाएँ | ಸರಿಸಿ | [ ] |
+| world.putAway | Back to My items | मेरी चीज़ों में वापस | ನನ್ನ ವಸ್ತುಗಳಿಗೆ ವಾಪಸ್ | [ ] |
+| world.putAwayDone | Put away in My items. | मेरी चीज़ों में रख दिया। | ನನ್ನ ವಸ್ತುಗಳಲ್ಲಿ ಇಟ್ಟಾಯಿತು. | [ ] |
+| world.close | Close | बंद करें | ಮುಚ್ಚಿ | [ ] |
+| world.noSpot | Not quite: there is no free spot left for this here. | अभी नहीं: यहाँ इसके लिए खाली जगह नहीं बची। | ಇನ್ನೂ ಇಲ್ಲ: ಇಲ್ಲಿ ಇದಕ್ಕೆ ಖಾಲಿ ಜಾಗ ಉಳಿದಿಲ್ಲ. | [ ] |
+| world.problem_outside | Not quite: keep it inside the field. | अभी नहीं: इसे खेत के अंदर रखें। | ಇನ್ನೂ ಇಲ್ಲ: ಹೊಲದ ಒಳಗೆ ಇಡಿ. | [ ] |
+| world.problem_water | Not quite: it can't go in water. | अभी नहीं: यह पानी में नहीं जा सकता। | ಇನ್ನೂ ಇಲ್ಲ: ಇದು ನೀರಿನಲ್ಲಿ ಹೋಗದು. | [ ] |
+| world.problem_path | Not quite: keep the path clear. | अभी नहीं: रास्ता खाली रखें। | ಇನ್ನೂ ಇಲ್ಲ: ದಾರಿ ಖಾಲಿ ಇಡಿ. | [ ] |
+| world.problem_steep | Not quite: the ground is too steep here. | अभी नहीं: यहाँ ज़मीन बहुत ढलान वाली है। | ಇನ್ನೂ ಇಲ್ಲ: ಇಲ್ಲಿ ನೆಲ ತುಂಬಾ ಇಳಿಜಾರು. | [ ] |
+| world.problem_structure | Not quite: too close to a building. | अभी नहीं: इमारत के बहुत पास है। | ಇನ್ನೂ ಇಲ್ಲ: ಕಟ್ಟಡಕ್ಕೆ ತುಂಬಾ ಹತ್ತಿರ. | [ ] |
+| world.problem_overlap | Not quite: something is already there. | अभी नहीं: वहाँ पहले से कुछ है। | ಇನ್ನೂ ಇಲ್ಲ: ಅಲ್ಲಿ ಈಗಾಗಲೇ ಏನೋ ಇದೆ. | [ ] |
+| world.problem_unknown | Not quite: this item can't be placed. | अभी नहीं: यह चीज़ नहीं रखी जा सकती। | ಇನ್ನೂ ಇಲ್ಲ: ಇದನ್ನು ಇಡಲಾಗದು. | [ ] |
+| world.fits | Looks good here! | यहाँ अच्छा लगेगा! | ಇಲ್ಲಿ ಚೆನ್ನಾಗಿದೆ! | [ ] |
+| world.conflict | Your field changed on another device. We reloaded it, try again. | आपका खेत दूसरे डिवाइस पर बदला। हमने इसे दोबारा लोड किया, फिर कोशिश करें। | ನಿಮ್ಮ ಹೊಲ ಇನ್ನೊಂದು ಸಾಧನದಲ್ಲಿ ಬದಲಾಗಿದೆ. ಮತ್ತೆ ಲೋಡ್ ಮಾಡಿದ್ದೇವೆ, ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ. | [ ] |
+| world.saveFailed | Couldn't save your field. Check your connection and try again. | खेत सहेजा नहीं जा सका। कनेक्शन देखें और फिर कोशिश करें। | ಹೊಲ ಉಳಿಸಲಾಗಲಿಲ್ಲ. ಸಂಪರ್ಕ ನೋಡಿ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ. | [ ] |
+| world.progressTitle | Farm fields | फ़ार्म के खेत | ತೋಟದ ಹೊಲಗಳು | [ ] |
+| world.progressLine | {n} of 5 fields unlocked | 5 में से {n} खेत खुले | 5 ರಲ್ಲಿ {n} ಹೊಲಗಳು ತೆರೆದಿವೆ | [ ] |
+| errors.LAYOUT_CONFLICT | Your field changed on another device. We reloaded it, try again. | आपका खेत दूसरे डिवाइस पर बदला। हमने इसे दोबारा लोड किया, फिर कोशिश करें। | ನಿಮ್ಮ ಹೊಲ ಇನ್ನೊಂದು ಸಾಧನದಲ್ಲಿ ಬದಲಾಗಿದೆ. ಮತ್ತೆ ಲೋಡ್ ಮಾಡಿದ್ದೇವೆ, ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ. | [ ] |
+| errors.FIELD_LOCKED | This field is still locked. Earn more XP to open it. | यह खेत अभी बंद है। इसे खोलने के लिए और XP कमाएँ। | ಈ ಹೊಲ ಇನ್ನೂ ಮುಚ್ಚಿದೆ. ತೆರೆಯಲು ಇನ್ನಷ್ಟು XP ಗಳಿಸಿ. | [ ] |
+| errors.NOT_OWNED | Not quite: you don't have enough of that item. Buy one in the Farm Store. | अभी नहीं: आपके पास यह चीज़ काफ़ी नहीं है। फ़ार्म स्टोर से खरीदें। | ಇನ್ನೂ ಇಲ್ಲ: ಈ ವಸ್ತು ಸಾಕಷ್ಟಿಲ್ಲ. ಫಾರ್ಮ್ ಅಂಗಡಿಯಲ್ಲಿ ಖರೀದಿಸಿ. | [ ] |
+| errors.INVALID_PLACEMENT | Not quite: something can't stand where it is. Move it and try again. | अभी नहीं: कोई चीज़ अपनी जगह पर नहीं रह सकती। हटाकर फिर कोशिश करें। | ಇನ್ನೂ ಇಲ್ಲ: ಏನೋ ಅದರ ಜಾಗದಲ್ಲಿ ನಿಲ್ಲದು. ಸರಿಸಿ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ. | [ ] |
+| errors.DUPLICATE_OBJECT | That item was saved twice. Reload and try again. | यह चीज़ दो बार सहेजी गई। दोबारा लोड करके कोशिश करें। | ಈ ವಸ್ತು ಎರಡು ಬಾರಿ ಉಳಿಯಿತು. ಮತ್ತೆ ಲೋಡ್ ಮಾಡಿ ಪ್ರಯತ್ನಿಸಿ. | [ ] |
+| errors.UNKNOWN_ITEM | That item isn't in the Farm Store any more. | यह चीज़ अब फ़ार्म स्टोर में नहीं है। | ಈ ವಸ್ತು ಈಗ ಫಾರ್ಮ್ ಅಂಗಡಿಯಲ್ಲಿಲ್ಲ. | [ ] |

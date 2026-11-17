@@ -155,3 +155,13 @@ The contracts are in `packages/api-client/src/pending-teacher.ts`, and the fakes
 - `POST /classrooms/{id}/notes` (teacher who owns the class) with `{title, body?, file?: {name, type, data_url}}` → 201 `ClassNote`. Needs a title and either text or a file; 422 `VALIDATION`, 413 `FILE_TOO_LARGE`.
 - `GET /teacher/notes` → the teacher's notes, newest first. `GET /me/notes` → notes from the classes the caller is a member of.
 - Types are in `packages/api-client/src/pending-notes.ts`. Store files in object storage and return a signed `url`.
+
+## Farm worlds and Farm Store (pending): please build
+All student-only (others: 403 `NOT_A_STUDENT`). Fake: apps/web/src/mocks/world. Types: packages/api-client/src/pending-world.ts. Catalog and placement rules: apps/web/src/lib/world/{catalog,fields,placement}.ts.
+- `GET /world` → `{xp_total, gems, fields: [{id, order, unlock_xp, unlocked, celebrated, placed_count}]}`
+- `POST /world/fields/{id}/celebrate` → marks the unlock celebration seen; returns the world.
+- `GET /world/store` → items `{id, category, name{en,hi,kn}, description, price, model, radius, owned}`
+- `GET /world/inventory` → `[{item_id, owned, placed: {field_id: n}}]`
+- `POST /world/store/purchase {item_id}` with `Idempotency-Key` → 201 `{item_id, owned, gems}`; 409 `NOT_ENOUGH_GEMS`. Gems come from the game ledger.
+- `GET /world/fields/{id}/layout` → `{field_id, version, objects: [{uid, item_id, x, z, rotation}]}`
+- `PUT /world/fields/{id}/layout {version, objects}` → the saved layout with version+1. Errors: 409 `LAYOUT_CONFLICT`, 403 `FIELD_LOCKED`, 422 `NOT_OWNED` / `INVALID_PLACEMENT` / `DUPLICATE_OBJECT` / `UNKNOWN_ITEM`.
