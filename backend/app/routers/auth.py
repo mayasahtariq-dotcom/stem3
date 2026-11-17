@@ -7,6 +7,7 @@ from sqlalchemy import Connection, text
 from app.auth import service
 from app.auth.sms import SmsProvider, get_sms
 from app.auth.tokens import decode_token
+from app.config import get_settings
 from app.db.session import get_db
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -45,10 +46,17 @@ class SessionOut(BaseModel):
     user: UserOut
 
 
-@router.post("/otp", status_code=204)
-def send_otp(body: OtpRequest, request: Request, db: DbDep, sms: SmsDep) -> None:
+class OtpSent(BaseModel):
+    sent: bool
+    dev_code: str | None = None     # only with DEMO_MODE and fake SMS, for local testing
+
+
+@router.post("/otp", response_model=OtpSent)
+def send_otp(body: OtpRequest, request: Request, db: DbDep, sms: SmsDep) -> dict[str, Any]:
     service.rate_limit(f"otp-ip:{request.client.host if request.client else '?'}", 20, 3600)
-    service.request_otp(db, sms, body.phone)
+    code = service.request_otp(db, sms, body.phone)
+    s = get_settings()
+    return {"sent": True, "dev_code": code if (s.demo_mode and s.use_fake_sms) else None}
 
 
 @router.post("/verify", response_model=SessionOut)

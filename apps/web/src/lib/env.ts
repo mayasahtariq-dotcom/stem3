@@ -15,7 +15,8 @@ const schema = z
   })
   .superRefine((env, ctx) => {
     if (env.useFakes) return;
-    for (const key of ["apiBaseUrl", "supabaseUrl", "supabaseAnonKey"] as const) {
+    // Supabase is optional: without it, login uses the Aaroh backend's own OTP (/web/auth/*).
+    for (const key of ["apiBaseUrl"] as const) {
       if (!env[key]) {
         ctx.addIssue({ code: "custom", path: [key], message: `${key} is required when NEXT_PUBLIC_USE_FAKES is not "true"` });
       }

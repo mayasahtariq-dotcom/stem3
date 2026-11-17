@@ -1,5 +1,6 @@
 import hashlib
 import hmac
+import logging
 import re
 import secrets
 import time
@@ -15,6 +16,8 @@ from app.config import get_settings
 from app.people import create_learner
 
 OTP_TTL_MIN = 5
+DEMO_FALLBACK_CODE = "123456"
+log = logging.getLogger(__name__)
 MAX_ATTEMPTS = 5
 MAX_SENDS_PER_HOUR = 5
 E164 = re.compile(r"^\+[1-9]\d{7,14}$")
@@ -45,17 +48,25 @@ def _hash(phone: str, code: str) -> str:
     return hmac.new(key, f"{phone}:{code}".encode(), hashlib.sha256).hexdigest()
 
 
-def request_otp(db: Connection, sms: SmsProvider, raw_phone: str) -> None:
+def request_otp(db: Connection, sms: SmsProvider, raw_phone: str) -> str:
     phone = normalize_phone(raw_phone)
     sent = db.execute(text("select count(*) from otp_codes where phone_e164=:p "
                            "and created_at > now() - interval '1 hour'"), {"p": phone}).scalar_one()
     if sent >= MAX_SENDS_PER_HOUR:
         raise HTTPException(429, "Too many codes requested. Try again later.")
     code = f"{secrets.randbelow(10**6):06d}"
+    try:
+        sms.send(phone, f"Your Aaroh code is {code}")
+    except Exception as exc:
+        log.warning("OTP SMS failed: %s", exc)
+        if not get_settings().demo_mode:
+            raise HTTPException(503, {"code": "SMS_UNAVAILABLE",
+                                      "message": "We could not send the code. Try again later."}) from exc
+        code = DEMO_FALLBACK_CODE          # demo only: a failed text falls back to a known code
     db.execute(text("insert into otp_codes(phone_e164, code_hash, expires_at) "
                     "values (:p, :h, now() + make_interval(mins => :m))"),
                {"p": phone, "h": _hash(phone, code), "m": OTP_TTL_MIN})
-    sms.send(phone, f"Your Aaroh code is {code}")
+    return code
 
 
 def _session(user: dict[str, Any]) -> dict[str, Any]:

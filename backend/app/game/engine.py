@@ -126,7 +126,7 @@ def lesson_questions(db: Connection, lid: Any, lesson_id: str) -> list[dict[str,
         "select q.id, q.kind, q.prompt, q.options, q.concept, q.call_safe from questions q "
         "left join twin_concepts t on t.learner_id=:l and t.concept = coalesce(q.concept, "
         "q.lesson_id::text) where q.lesson_id=:le "
-        "order by coalesce(t.mastery, 0) asc, q.id limit :n"),
+        "order by coalesce(t.mastery, 0) asc, q.position, q.id limit :n"),
         {"l": lid, "le": lesson_id, "n": LESSON_SIZE}).mappings().all()
     return [{**dict(x), "id": str(x["id"])} for x in rows]
 

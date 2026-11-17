@@ -11,6 +11,9 @@ __pycache__/
 .env
 .env.local
 *.sqlite3
+backend/storage/
+storage/
+
 
 # web app
 storybook-static/

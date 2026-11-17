@@ -92,3 +92,18 @@ describe("Farm worlds UI", () => {
     expect(useWorldUi.getState().draft).toBeNull();
   });
 });
+
+describe("Farm worlds on a backend without the world endpoints", () => {
+  it("hides the store and editing tools and keeps the farm", async () => {
+    const { http, HttpResponse } = await import("msw");
+    const { server } = await import("@/mocks/node");
+    server.use(http.get(/\/world$/, () => HttpResponse.json({ detail: "Not Found" }, { status: 404 })));
+    const { FarmView } = await import("@/features/farm/FarmView");
+    const services = makeTestServices();
+    await signInAs(services, DEMO.studentPhone);
+    renderWithProviders(<FarmView />, { services });
+    await screen.findByTestId("farm-canvas");
+    await waitFor(() => expect(screen.queryByTestId("world-tools")).not.toBeInTheDocument());
+    await screen.findByRole("button", { name: /Learning barn/ });
+  });
+});
