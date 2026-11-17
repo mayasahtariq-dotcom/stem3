@@ -12,6 +12,7 @@ from sqlalchemy import Connection, text
 from app.auth.sms import SmsProvider
 from app.auth.tokens import TTL, issue_token
 from app.config import get_settings
+from app.people import create_learner
 
 OTP_TTL_MIN = 5
 MAX_ATTEMPTS = 5
@@ -70,8 +71,7 @@ def _create_user(db: Connection, role: str, name: str, language: str,
                           "values (:r,:n,:l,:p) returning id, role, name, language"),
                      {"r": role, "n": name, "l": language, "p": phone}).mappings().one()
     if role == "student":
-        db.execute(text("insert into learners(kind, user_id) values ('app', :u)"),
-                   {"u": row["id"]})
+        create_learner(db, user_id=row["id"])
     return dict(row)
 
 
