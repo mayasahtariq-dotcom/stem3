@@ -153,11 +153,24 @@ class DoubtIn(BaseModel):
 ANSWER_SCHEMA = {"type": "OBJECT", "properties": {
     "answer": {"type": "STRING"}, "in_notes": {"type": "BOOLEAN"}, "used_page": {"type": "INTEGER"}},
     "required": ["answer", "in_notes", "used_page"]}
-TUTOR = ("You are Golu, a kind cow who helps Indian school children (Classes 6 to 10) with science "
-         "doubts. Answer in {lang}, then one short English line. Use ONLY the class notes given. If "
-         "the notes do not cover it, say so kindly and suggest asking the teacher; set in_notes "
-         "false and used_page 0. At most 80 words, simple words. Never ask for or repeat personal "
-         "details. If the question is unsafe or not about studies, gently steer back to science.")
+CHECK_SCHEMA = {"type": "OBJECT", "properties": {"supported": {"type": "BOOLEAN"}}, "required": ["supported"]}
+TUTOR = ("You are Golu, a kind cow who helps Indian school children (Classes 6 to 10) with doubts about "
+         "their CLASS NOTES. Strict rules: (1) Use ONLY the class notes given below. Never use your own "
+         "knowledge, the internet, or guesses, even if you know the answer. (2) If the notes do not clearly "
+         "answer the doubt, set in_notes to false and used_page to 0. (3) Questions that are not about the "
+         "notes (games, films, cricket, personal questions, homework from other subjects, anything unsafe) "
+         "always get in_notes false. (4) Never ask for or repeat personal details. When the notes answer it: "
+         "reply in {lang}, then one short English line, at most 80 words, simple words; used_page is the "
+         "[PAGE n] you used (0 if you used only a [TERM]).")
+CHECKER = ("You check a tutor's answer. Reply supported=true only if EVERY fact in the answer is stated in "
+           "the notes. Greetings and encouragement are fine. Anything not in the notes means false.")
+NOT_IN_NOTES = {
+    "hi": "यह बात तुम्हारे नोट्स में नहीं है। मैं सिर्फ़ तुम्हारे क्लास नोट्स से जवाब देता हूँ। अपने शिक्षक से पूछो! "
+          "(This is not in your notes. Please ask your teacher.)",
+    "kn": "ಇದು ನಿನ್ನ ನೋಟ್ಸ್‌ನಲ್ಲಿ ಇಲ್ಲ. ನಾನು ನಿನ್ನ ತರಗತಿಯ ನೋಟ್ಸ್‌ನಿಂದ ಮಾತ್ರ ಉತ್ತರಿಸುತ್ತೇನೆ. ನಿನ್ನ ಶಿಕ್ಷಕರನ್ನು ಕೇಳು! "
+          "(This is not in your notes. Please ask your teacher.)",
+    "en": "This is not in your class notes. I only answer from your notes, so please ask your teacher!",
+}
 LANG = {"hi": "Hindi", "kn": "Kannada", "en": "English"}
 ACCESSIBLE = ("c.status='published' and exists (select 1 from course_assignments a "
               "join memberships m on m.classroom_id=a.classroom_id where a.course_id=c.id and m.user_id=:u)")
@@ -182,10 +195,16 @@ def _words(s: str) -> set[str]:
 
 @router.post("/doubts")
 def ask_doubt(body: DoubtIn, db: DbDep, user: Student, model: LLMDep) -> dict[str, Any]:
-    """Answers from the class notes (OCR pages and terms) and cites the page. Doubt text stays private."""
+    """Answers ONLY from the teacher's class notes (OCR pages and terms of the student's courses).
+
+    1. No related notes found: a fixed reply, the AI is not asked at all.
+    2. The AI says the notes don't answer it: its text is discarded, fixed reply instead.
+    3. Every answer is fact-checked against the notes; unsupported answers get the fixed reply.
+    4. An answer must cite a page or term from the notes. Doubt text stays private."""
     rate_limit(f"doubt:{user.id}", 30, 3600)
     lid = learner_id_for(db, user.id)
     q = body.text
+    refusal = NOT_IN_NOTES.get(user.language, NOT_IN_NOTES["hi"])
     pages = db.execute(text(
         f"select p.id, p.page_no, p.ocr_text, c.title from upload_pages p join uploads up on up.id=p.upload_id "
         f"join courses c on c.id=up.course_id where {ACCESSIBLE} and p.ocr_text is not null"),
@@ -195,33 +214,39 @@ def ask_doubt(body: DoubtIn, db: DbDep, user: Student, model: LLMDep) -> dict[st
     qw = _words(q)
     ranked = sorted(pages, key=lambda p: len(qw & _words(p["ocr_text"])), reverse=True)[:3]
     ranked = [p for p in ranked if qw & _words(p["ocr_text"])]
-    hits = [t for t in terms if t["english"].lower() in q.lower() or t["regional"] in q]
-    citation: dict[str, Any] | None = None
-    if ranked or hits or not get_settings().use_fake_ai:
+    hits = [t for t in terms if (t["english"] and t["english"].lower() in q.lower())
+            or (t["regional"] and t["regional"] in q)]
+    answer, citation, grounded = refusal, None, False
+    if ranked or hits:                                   # (1) nothing related: never ask the AI
         notes = "\n\n".join(f"[PAGE {i + 1}] ({p['title']}, page {p['page_no']})\n{p['ocr_text'][:3000]}"
-                            for i, p in enumerate(ranked))
-        notes += "".join(f"\n[TERM] {t['english']} ({t['regional']}): {_def_text(t['definition'], 'en')}" for t in hits)
+                             for i, p in enumerate(ranked))
+        notes += "".join(f"\n[TERM] {t['english']} ({t['regional']}): {_def_text(t['definition'], 'en')}"
+                         for t in hits)
         try:
-            out = model.generate_json(f"Class notes:\n{notes or '(none found)'}\n\nStudent's doubt: {q}",
-                                      ANSWER_SCHEMA, system=TUTOR.format(lang=LANG.get(user.language, "Hindi")))
+            out = model.generate_json(f"Class notes:\n{notes}\n\nStudent's doubt: {q}",
+                                      ANSWER_SCHEMA, system=TUTOR.replace("{lang}", LANG.get(user.language, "Hindi")))
+            draft = str(out.get("answer") or "").strip()
+            used = int(out.get("used_page") or 0)
+            if out.get("in_notes") and draft:            # (2) the AI itself says it's in the notes
+                if 1 <= used <= len(ranked):             # (4) it must point at a real page or term
+                    citation = {"course": ranked[used - 1]["title"], "page": ranked[used - 1]["page_no"]}
+                elif hits:
+                    citation = {"course": hits[0]["title"], "term": hits[0]["english"]}
+                if citation:                             # (3) fact check against the same notes
+                    check = model.generate_json(f"Notes:\n{notes}\n\nAnswer to check:\n{draft}",
+                                                CHECK_SCHEMA, system=CHECKER)
+                    grounded = bool(check.get("supported"))
+            if grounded:
+                answer = draft
+            else:
+                citation = None
         except AIUnavailable as exc:
             raise HTTPException(503, "Golu is busy right now. Please ask again in a minute.") from exc
-        answer = str(out.get("answer") or "").strip()
-        used = int(out.get("used_page") or 0)
-        if out.get("in_notes") and 1 <= used <= len(ranked):
-            p = ranked[used - 1]
-            citation = {"course": p["title"], "page": p["page_no"]}
-        elif out.get("in_notes") and hits:
-            citation = {"course": hits[0]["title"], "term": hits[0]["english"]}
-    else:
-        answer = "I could not find this in your class notes yet. Ask your teacher, or try other words."
-    if not answer:
-        answer = "I could not find this in your class notes yet. Ask your teacher, or try other words."
     did = db.execute(text("insert into doubts(learner_id, text, lesson_id, answer, citation) "
                           "values (:l,:t,:le,:a,cast(:c as jsonb)) returning id"),
                      {"l": lid, "t": q, "le": body.lesson_id, "a": answer,
                       "c": json.dumps(citation) if citation else None}).scalar_one()
-    return {"id": str(did), "answer": answer, "citation": citation}
+    return {"id": str(did), "answer": answer, "citation": citation, "from_notes": grounded}
 
 
 @router.get("/doubts")
