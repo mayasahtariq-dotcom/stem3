@@ -1,5 +1,8 @@
 # Aaroh: Frontend Integration Guide (for P2)
 
+> **Building `apps/web`?** Use `docs/FRONTEND_PROMPT.md` and the `/web` compatibility layer. This guide
+> describes the backend's own `/v1` API (used by the demo console, phone calls and other clients).
+
 This is everything the student, teacher and parent app needs from the backend in `stem3/backend`.
 The backend serves **both kinds of students** with one system:
 
@@ -44,7 +47,7 @@ Content fields come as objects like `{"hi": "...", "kn": "...", "en": "...", "re
 |---|---|---|
 | Send OTP | `POST /v1/auth/otp` | `{"phone": "9876543210"}` → `{"sent": true, "dev_code": null}`. `dev_code` holds the code only in local demo mode with fake SMS. Rate limited (5 per phone per hour). |
 | Verify | `POST /v1/auth/verify` | `{"phone", "code": "123456", "role"?, "name"?, "language"?: "hi"\|"kn"\|"en"}` → `{"access_token", "token_type": "bearer", "expires_in": 3600, "user": {"id", "role", "language", "name"}}`. New phone numbers **must** send `role` and `name`. |
-| School computer login | `POST /v1/auth/class-key` | `{"class_key": "DEMO7SCI", "name": "Ravi"}` → same session shape. Same name in the same class = same student (fast switching). |
+| School computer login | `POST /v1/auth/class-key` | `{"class_key": "BI07AARH", "name": "Ravi"}` → same session shape. Same name in the same class = same student (fast switching). |
 | Who am I | `GET /v1/auth/me` | → `{"id", "role", "language", "name"}` |
 | Join a class (student) | `POST /v1/classrooms/join` | `{"class_key": "ABCD2345"}` → `{"classroom_id", "name"}`. Use this for key, QR code and link joins (put the key in the QR/link). |
 

@@ -14,11 +14,16 @@ from app.game import engine
 from app.people import create_learner
 
 router = APIRouter(tags=["teacher"])
-KEY_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"      # no look-alike characters
+KEY_CHARS = "ABCDEFGHJKMNPQRSTUVWXYZ23456789"       # no look-alikes (0 O 1 I L), matches the web app
 
 
 def new_key(n: int = 8) -> str:
     return "".join(secrets.choice(KEY_CHARS) for _ in range(n))
+
+
+def class_key(subject: str = "BI", grade: int = 7) -> str:
+    """Join keys look like BI07-K4X2 (subject, grade, 4 characters); stored without the dash."""
+    return f"{subject[:2].upper()}{max(1, min(grade, 12)):02d}{new_key(4)}"
 
 
 def own_classroom(db: Connection, teacher_id: str, classroom_id: str) -> None:
@@ -47,7 +52,7 @@ class ClassPatch(BaseModel):
 
 @router.post("/classrooms", status_code=201)
 def create_class(body: ClassIn, db: DbDep, user: Teacher) -> dict[str, Any]:
-    key = new_key()
+    key = class_key()
     row = db.execute(text("insert into classrooms(teacher_id, name, class_key) values "
                           "(:t,:n,:k) returning id, name, class_key"),
                      {"t": user.id, "n": body.name, "k": key}).mappings().one()
