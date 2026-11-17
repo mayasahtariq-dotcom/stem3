@@ -2,7 +2,7 @@
 
 Run: `npx pnpm@10.28.0 --filter @mooshala/web dev`, then open http://localhost:3000 (fake backend, no keys needed).
 
-1. **Desktop layout.** On a laptop, sign in as the student (Hindi, Student, 9876543210, code 123456). The top bar shows Mooshala, the links Farm / Learn / Quests / League / Profile and the stats. There's no bottom dock. Narrow the window below 1024 px and the game dock comes back.
+1. **Desktop layout.** On a laptop, sign in as the student (Hindi, Student, 9876543210, code 123456). The top bar shows Aaroh, the links Farm / Learn / Quests / League / Profile and the stats. There's no bottom dock. Narrow the window below 1024 px and the game dock comes back.
 2. **Offline answers.** Open the Learning barn and start "Parts of a cell". In Chrome DevTools, go to Network and set it to Offline.
    - A banner says you're offline.
    - Answer a question and you'll see "Saved on this phone", with no grade.

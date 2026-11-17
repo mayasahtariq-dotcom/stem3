@@ -1,8 +1,8 @@
-# Mooshala Web: Phase 1 architecture
+# Aaroh Web: Phase 1 architecture
 
 Nov 17, 2026
 
-How the web app is put together, so Phases 2 to 6 can build on it. The product spec is the Mooshala Web PRD (uploaded to the project); the phase plan is `docs/web/p2-frontend-plan.md`.
+How the web app is put together, so Phases 2 to 6 can build on it. The product spec is the Aaroh Web PRD (uploaded to the project); the phase plan is `docs/web/p2-frontend-plan.md`.
 
 ## Repository layout
 
@@ -76,7 +76,7 @@ Messages exist in `en`, `hi` and `kn` (a test enforces identical keys). `useBili
 
 Tokens live in `packages/tokens/src/index.ts`: the web PRD brand colours (grass, sky, sun, flame, berry, coral, ink, cloud), the farm extensions (leaf, meadow, wood, soil, cream, parchment, stone), accessible "strong" shades for text on colour, radii (12 px buttons, 16 px cards, 20 px panels), the type scale, spacing, elevation (chunky lip, float shadows) and motion timings. `pnpm --filter @mooshala/tokens generate` writes `tokens.css` as a Tailwind `@theme` block, so `bg-grass-strong`, `rounded-card` and `text-lg` exist; tests check the CSS is in sync and that text pairs pass WCAG AA. The 3D world imports the same values.
 
-Components (`src/components/ui`, all with stories): `ChunkyButton` (primary, white, ghost, sky, wood; loading; `asChild`), `BilingualText`, `TextField`, `AnswerOption`, `SpeechBubble`, `ProgressBar`, `TopStatsBar`, `StreakFlame`, `XPRing`, `HeartMeter`, `GemCounter`, `LeagueRow`, `QuestCard`, `BadgeTile`, `SourceChip`, `StickerIcon` (55 sticker icons extracted from the Mooshala prototype), `GoluMascot` (7 static poses from the prototype), `MeadowScene`, `Card`, `WoodPanel`, `Dialog` (Radix), `Toaster`/`toast` (Radix), `LoadingState`, `EmptyState`, `ErrorState`, `Spinner`. Motion presets (pop, shake, float, flicker, confetti, each with a reduced-motion fade) are in `lib/motion/presets.ts`; the sound manager (`lib/sound`) never plays before a user gesture and has a one-tap mute.
+Components (`src/components/ui`, all with stories): `ChunkyButton` (primary, white, ghost, sky, wood; loading; `asChild`), `BilingualText`, `TextField`, `AnswerOption`, `SpeechBubble`, `ProgressBar`, `TopStatsBar`, `StreakFlame`, `XPRing`, `HeartMeter`, `GemCounter`, `LeagueRow`, `QuestCard`, `BadgeTile`, `SourceChip`, `StickerIcon` (55 sticker icons extracted from the Aaroh prototype), `GoluMascot` (7 static poses from the prototype), `MeadowScene`, `Card`, `WoodPanel`, `Dialog` (Radix), `Toaster`/`toast` (Radix), `LoadingState`, `EmptyState`, `ErrorState`, `Spinner`. Motion presets (pop, shake, float, flicker, confetti, each with a reduced-motion fade) are in `lib/motion/presets.ts`; the sound manager (`lib/sound`) never plays before a user gesture and has a one-tap mute.
 
 ## 3D rendering
 

@@ -116,10 +116,11 @@ session in sessionStorage as now). Onboarding: `GET /me` → `registered:false` 
 | `GET /classrooms/{id}`, `/dashboard`, `/students/{id}`, `/insights`, `/teacher/overview` | Real numbers from attempts and the Student Twin. `completion` and `trend` are 0/empty for now; `recent` activity is empty |
 | Uploads | `POST /uploads {pages:[{kind}]}` → `pages[].upload_url` (null for text pages, whose `text` is stored at once) → **PUT the raw file** to each `upload_url` with `Content-Type` `image/jpeg|png|webp` or `application/pdf` (≤10 MB) and the bearer token → `POST /uploads/{id}/start` → poll `GET /uploads/{id}` every 1.5 s. Statuses: `created` → `queued` → `reading` → `outlining` → `ready` (or `failed` with `error`). Typical time 15–25 s (real Gemini) |
 | `GET /courses/{id}`, `GET /lessons/{id}` (teacher view), `PUT /questions/{id} {question}`, `DELETE`, `/regenerate` | Flagged (low-confidence) questions first, `flag_reason:"low_confidence"`. Editing clears the flag. `PUT /courses/{id} {title}` stores one title (hi preferred) |
-| `POST /lessons/{id}/publish {classroom_id?}` | **Publishing is per course in this backend**: the lesson's whole course goes live (and phone audio is pre-recorded). Show it as "Publish course" |
-| `POST /courses/{id}/assign {classroom_ids}` | `due_at` is accepted but not stored yet |
+| `POST /lessons/{id}/publish {classroom_id?}` | **Publishing is per course in this backend**: the lesson's whole course goes live (and phone audio is pre-recorded). Show it as "Publish course". The course is also assigned to the class picked at upload (`POST /uploads {classroom_id}`), even if `classroom_id` is null here |
+| `POST /courses/{id}/assign {classroom_ids}` | `due_at` is accepted but not stored yet. Assigning a published course shares its notes with that class |
 | `/teacher/materials` | Built from uploads; files are named `page-N` |
-| Class notes (`/teacher/notes`, `/me/notes`, `POST /classrooms/{id}/notes`) | **Not built in the backend**: GETs return `[]`, POST returns `501`. Show "coming soon" |
+| Class notes (`/teacher/notes`, `/me/notes`, `POST /classrooms/{id}/notes`, `DELETE /notes/{id}`) | Built (contract: `pending-notes.ts`). `file.url` is a signed link (6 h) that opens without a token. When a course is published or assigned to a class, every uploaded page it was made from is added to that class's notes automatically (once), so students can re-read the source notes |
+| `POST /attempts {question_id, answer}` | `answer` is the bare shape (`{index}` / `{value}` / `{pairs, mistakes}`); `type` is optional, the server takes it from the question |
 
 ### Call console (`pending-calls.ts`)
 | Endpoint | Notes |

@@ -131,6 +131,7 @@ describe("playing a lesson offline", () => {
   });
 
   it("finishes a lesson offline and gets its rewards after sync", async () => {
+    localStorage.setItem("aaroh.plainQuestions", "1"); // the walk-through answers the plain questions
     const services = makeTestServices();
     await signInAs(services, DEMO.studentPhone);
     renderWithProviders(

@@ -1,4 +1,4 @@
-import { fireEvent, screen, waitFor, within } from "@testing-library/react";
+import { act, fireEvent, screen, waitFor, within } from "@testing-library/react";
 import { http, HttpResponse } from "msw";
 import { DEMO } from "@/mocks/fake-db";
 import { learner } from "@/mocks/learning/state";
@@ -7,11 +7,14 @@ import { FAKE_API_BASE_URL } from "@/lib/env";
 import { makeTestServices, renderWithProviders, resetAuthStore, signInAs } from "@/test/render";
 import { LessonRoute } from "./LessonRoute";
 import { useLessonSessions } from "./session-store";
+import { seededOrder } from "./content";
+import { QuestionStage } from "./minigames";
 import { FillFormulaQuestion, MatchPairsQuestion, MultipleChoiceQuestion, TrueFalseQuestion } from "./questions";
 
 beforeEach(() => {
   resetAuthStore();
   useLessonSessions.setState({ sessions: {} });
+  localStorage.removeItem("aaroh.plainQuestions");
 });
 
 async function startLesson2() {
@@ -86,6 +89,7 @@ describe("lesson player", () => {
   });
 
   it("finishes a lesson: basket, XP, accuracy and streak from POST /complete", async () => {
+    localStorage.setItem("aaroh.plainQuestions", "1"); // the walk-through below answers the plain questions
     await startLesson2();
     const answers: Record<string, RegExp> = {
       "Which part controls the cell?": /Nucleus/,
@@ -174,5 +178,63 @@ describe("question types", () => {
     fireEvent.click(lefts[1]!);
     fireEvent.click(screen.getByTestId("match-right-1"));
     expect(onAnswer).toHaveBeenCalledWith({ type: "match_pairs", pairs: [[0, 0], [1, 1]], mistakes: 1 });
+  });
+});
+
+describe("mini-games", () => {
+  const terms = { nucleus: { forms: { en: "Nucleus", hi: "केंद्रक", kn: "ಕೋಶಕೇಂದ್ರ" } } };
+  const tri = (en: string) => ({ en, hi: en, kn: en });
+  const base = { prompt: tri("p"), explanation: tri("e") };
+  const props = { terms, result: null, busy: false };
+
+  it("Feed Golu: multiple choice is played as a game and sends the same {index}", () => {
+    const onAnswer = vi.fn();
+    renderWithProviders(<QuestionStage id="q" {...props} onAnswer={onAnswer} content={{ type: "multiple_choice", ...base, options: [{ term_key: "nucleus" }, { text: tri("Sand") }] }} />);
+    expect(screen.getByTestId("game-feed")).toBeInTheDocument();
+    expect(screen.getByTestId("check-answer")).toBeDisabled();
+    pick(/Sand/);
+    check();
+    expect(onAnswer).toHaveBeenCalledWith({ type: "multiple_choice", index: 1 });
+  });
+
+  it("Barn sort: true/false with arrow keys sends {value}", () => {
+    const onAnswer = vi.fn();
+    renderWithProviders(<QuestionStage id="q" {...props} onAnswer={onAnswer} content={{ type: "true_false", ...base, statement: tri("Cells are alive") }} />);
+    expect(screen.getByTestId("game-sort")).toBeInTheDocument();
+    fireEvent.keyDown(window, { key: "ArrowRight" });
+    check();
+    expect(onAnswer).toHaveBeenCalledWith({ type: "true_false", value: false });
+  });
+
+  it("Memory patch: flipping a part and its match pairs them; a miss flips back and is counted", () => {
+    vi.useFakeTimers();
+    try {
+      const onAnswer = vi.fn();
+      const pairs = [{ left: { text: tri("Nucleus") }, right: { text: tri("Controls") } }, { left: { text: tri("Ribosome") }, right: { text: tri("Proteins") } }];
+      renderWithProviders(<QuestionStage id="q-m" {...props} onAnswer={onAnswer} content={{ type: "match_pairs", ...base, pairs }} />);
+      // the board is shuffled with the same seeded order the game uses: card i holds order[i]
+      const order = seededOrder(4, "q-m");
+      const at = (pair: number, side: "left" | "right") => screen.getByTestId(`memory-card-${order.indexOf(side === "left" ? pair : pair + 2)}`);
+      expect(screen.getAllByText(/^\d$/)).toHaveLength(4); // all face down
+      fireEvent.click(at(0, "left"));
+      fireEvent.click(at(1, "right")); // a miss: costs no heart, flips back
+      expect(screen.getByText(/don't cost a heart/)).toBeInTheDocument();
+      act(() => void vi.advanceTimersByTime(1000));
+      expect(screen.getAllByText(/^\d$/)).toHaveLength(4);
+      fireEvent.click(at(0, "left"));
+      fireEvent.click(at(0, "right"));
+      fireEvent.click(at(1, "right"));
+      fireEvent.click(at(1, "left"));
+      expect(onAnswer).toHaveBeenCalledWith({ type: "match_pairs", pairs: [[0, 0], [1, 1]], mistakes: 1 });
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("Plain view switch shows the ordinary question and is remembered", () => {
+    renderWithProviders(<QuestionStage id="q" {...props} onAnswer={vi.fn()} content={{ type: "true_false", ...base, statement: tri("Cells are alive") }} />);
+    fireEvent.click(screen.getByTestId("game-toggle"));
+    expect(screen.queryByTestId("game-sort")).not.toBeInTheDocument();
+    expect(localStorage.getItem("aaroh.plainQuestions")).toBe("1");
   });
 });

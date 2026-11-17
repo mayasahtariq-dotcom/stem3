@@ -40,7 +40,7 @@ Files: `app/core/designsystem/src/main/res/values-{hi,kn}/strings.xml`, `app/app
 | gallery_section_icons | Sticker icons | स्टिकर आइकन | ಸ್ಟಿಕರ್ ಐಕಾನ್‌ಗಳು | [ ] |
 | gallery_backend_error | Can't reach the server. | सर्वर से नहीं जुड़ पा रहे। | ಸರ್ವರ್ ತಲುಪಲು ಆಗುತ್ತಿಲ್ಲ. | [ ] |
 
-Fixed labels in code (not resources): the language toggle shows "हिंदी" / "Hindi + English" and "ಕನ್ನಡ" / "Kannada + English". The app name "Mooshala" is written मूशाला / ಮೂಶಾಲೆ (spellings taken from the design prototype).
+Fixed labels in code (not resources): the language toggle shows "हिंदी" / "Hindi + English" and "ಕನ್ನಡ" / "Kannada + English". The app name "Aaroh" is written आरोह / ಆರೋಹ (spellings taken from the design prototype).
 
 ## M1
 
@@ -86,7 +86,7 @@ Fixed texts in code (the language screen shows all three languages before a lang
 
 | Key | English | Hindi (draft) | Kannada (draft) | Reviewed |
 |---|---|---|---|---|
-| ob_app_name | Mooshala | मूशाला | ಮೂಶಾಲೆ | [ ] |
+| ob_app_name | Aaroh | आरोह | ಆರೋಹ | [ ] |
 | ob_tagline | Your notes, turned into lessons in your language | तुम्हारे नोट्स, तुम्हारी भाषा में पाठ | ನಿಮ್ಮ ನೋಟ್ಸ್, ನಿಮ್ಮ ಭಾಷೆಯಲ್ಲಿ ಪಾಠ | [ ] |
 | ob_start | Let's start | चलो शुरू करें | ಶುರು ಮಾಡೋಣ | [ ] |
 | ob_terms | By continuing, you agree to our Terms and Privacy Policy | आगे बढ़कर तुम हमारी शर्तें और गोपनीयता नीति मानते हो | ಮುಂದುವರಿದರೆ ನೀವು ನಮ್ಮ ನಿಯಮ ಮತ್ತು ಗೌಪ್ಯತಾ ನೀತಿಗೆ ಒಪ್ಪುತ್ತೀರಿ | [ ] |
@@ -135,7 +135,7 @@ Fixed texts in code (the language screen shows all three languages before a lang
 | st_languages_n | Languages: %1$s | भाषाएँ: %1$s | ಭಾಷೆಗಳು: %1$s | [ ] |
 | st_join | Join | जुड़ो | ಸೇರಿ | [ ] |
 | st_joined | You joined %1$s! | तुम %1$s में जुड़ गए! | ನೀವು %1$s ಗೆ ಸೇರಿದಿರಿ! | [ ] |
-| st_camera_why | Mooshala needs the camera to scan the class QR code. | क्लास का QR कोड स्कैन करने के लिए मूशाला को कैमरा चाहिए। | ತರಗತಿಯ QR ಕೋಡ್ ಸ್ಕ್ಯಾನ್ ಮಾಡಲು ಮೂಶಾಲೆಗೆ ಕ್ಯಾಮೆರಾ ಬೇಕು. | [ ] |
+| st_camera_why | Aaroh needs the camera to scan the class QR code. | क्लास का QR कोड स्कैन करने के लिए आरोह को कैमरा चाहिए। | ತರಗತಿಯ QR ಕೋಡ್ ಸ್ಕ್ಯಾನ್ ಮಾಡಲು ಆರೋಹಕ್ಕೆ ಕ್ಯಾಮೆರಾ ಬೇಕು. | [ ] |
 | st_camera_allow | Allow camera | कैमरा चालू करो | ಕ್ಯಾಮೆರಾ ಅನುಮತಿಸಿ | [ ] |
 | st_scan_hint | Point the camera at the QR code on the board. | कैमरा बोर्ड पर लगे QR कोड की तरफ़ करो। | ಕ್ಯಾಮೆರಾವನ್ನು ಬೋರ್ಡ್‌ನ QR ಕೋಡ್ ಕಡೆ ತೋರಿಸಿ. | [ ] |
 
@@ -161,7 +161,7 @@ Fixed texts in code (the language screen shows all three languages before a lang
 | te_copy | Copy | कॉपी करें | ನಕಲಿಸಿ | [ ] |
 | te_copied | Key copied | की कॉपी हो गई | ಕೀ ನಕಲಾಯಿತು | [ ] |
 | te_share | Share | शेयर करें | ಹಂಚಿಕೊಳ್ಳಿ | [ ] |
-| te_share_message | Join my class "%1$s" on Mooshala. Class key: %2$s | मूशाला पर मेरी क्लास "%1$s" में जुड़ो। क्लास की: %2$s | ಮೂಶಾಲೆಯಲ್ಲಿ ನನ್ನ ತರಗತಿ "%1$s" ಗೆ ಸೇರಿ. ತರಗತಿ ಕೀ: %2$s | [ ] |
+| te_share_message | Join my class "%1$s" on Aaroh. Class key: %2$s | आरोह पर मेरी क्लास "%1$s" में जुड़ो। क्लास की: %2$s | ಆರೋಹದಲ್ಲಿ ನನ್ನ ತರಗತಿ "%1$s" ಗೆ ಸೇರಿ. ತರಗತಿ ಕೀ: %2$s | [ ] |
 | te_share_chooser | Share class key | क्लास की शेयर करें | ತರಗತಿ ಕೀ ಹಂಚಿಕೊಳ್ಳಿ | [ ] |
 | te_members | Students (%1$d) | छात्र (%1$d) | ವಿದ್ಯಾರ್ಥಿಗಳು (%1$d) | [ ] |
 | te_no_members | No students yet. Share the class key! | अभी कोई छात्र नहीं। क्लास की शेयर करें! | ಇನ್ನೂ ವಿದ್ಯಾರ್ಥಿಗಳಿಲ್ಲ. ತರಗತಿ ಕೀ ಹಂಚಿಕೊಳ್ಳಿ! | [ ] |
@@ -226,7 +226,7 @@ Also to review: the sample course content in `backend/app/ai/fake_content.py` an
 | nt_crop_hint | Drag the corners to crop. | काटने के लिए कोने खींचो। | ಕತ್ತರಿಸಲು ಮೂಲೆಗಳನ್ನು ಎಳೆಯಿರಿ. | [ ] |
 | nt_take_photo | Take photo | फ़ोटो लो | ಫೋಟೋ ತೆಗೆಯಿರಿ | [ ] |
 | nt_photos_taken | %1$d taken | %1$d ली गईं | %1$d ತೆಗೆಯಲಾಗಿದೆ | [ ] |
-| nt_camera_why | Mooshala needs the camera to photograph your notes. | नोट्स की फ़ोटो लेने के लिए मूशाला को कैमरा चाहिए। | ನೋಟ್ಸ್ ಫೋಟೋ ತೆಗೆಯಲು ಮೂಶಾಲೆಗೆ ಕ್ಯಾಮೆರಾ ಬೇಕು. | [ ] |
+| nt_camera_why | Aaroh needs the camera to photograph your notes. | नोट्स की फ़ोटो लेने के लिए आरोह को कैमरा चाहिए। | ನೋಟ್ಸ್ ಫೋಟೋ ತೆಗೆಯಲು ಆರೋಹಕ್ಕೆ ಕ್ಯಾಮೆರಾ ಬೇಕು. | [ ] |
 | nt_allow_camera | Allow camera | कैमरा चालू करो | ಕ್ಯಾಮೆರಾ ಅನುಮತಿಸಿ | [ ] |
 | nt_gen_title | Making your course… | तुम्हारा कोर्स बन रहा है… | ನಿಮ್ಮ ಕೋರ್ಸ್ ತಯಾರಾಗುತ್ತಿದೆ… | [ ] |
 | nt_step_queued | Notes received | नोट्स मिल गए | ನೋಟ್ಸ್ ಸಿಕ್ಕಿವೆ | [ ] |
@@ -425,7 +425,7 @@ Files: `values-{hi,kn}/strings.xml` in `app/feature/teacher`, `app/feature/paren
 | db_mixes_up | Often mixes up %1$s and %2$s | अक्सर %1$s और %2$s में उलझता है | ಆಗಾಗ %1$s ಮತ್ತು %2$s ನಡುವೆ ಗೊಂದಲ | [ ] |
 | db_lessons | Lessons | पाठ | ಪಾಠಗಳು | [ ] |
 | fam_link_parent | Link a parent | माता-पिता को जोड़ो | ಪೋಷಕರನ್ನು ಜೋಡಿಸಿ | [ ] |
-| fam_link_explain | Ask your parent to open Mooshala, tap Add child, and enter this code or scan it. | अपने माता-पिता से कहो कि मूशाला खोलें, "बच्चा जोड़ें" दबाएँ और यह कोड डालें या स्कैन करें। | ನಿಮ್ಮ ಪೋಷಕರಿಗೆ ಮೂಶಾಲಾ ತೆರೆದು, "ಮಗುವನ್ನು ಸೇರಿಸಿ" ಒತ್ತಿ, ಈ ಕೋಡ್ ನಮೂದಿಸಲು ಅಥವಾ ಸ್ಕ್ಯಾನ್ ಮಾಡಲು ಹೇಳಿ. | [ ] |
+| fam_link_explain | Ask your parent to open Aaroh, tap Add child, and enter this code or scan it. | अपने माता-पिता से कहो कि आरोह खोलें, "बच्चा जोड़ें" दबाएँ और यह कोड डालें या स्कैन करें। | ನಿಮ್ಮ ಪೋಷಕರಿಗೆ ಆರೋಹ ತೆರೆದು, "ಮಗುವನ್ನು ಸೇರಿಸಿ" ಒತ್ತಿ, ಈ ಕೋಡ್ ನಮೂದಿಸಲು ಅಥವಾ ಸ್ಕ್ಯಾನ್ ಮಾಡಲು ಹೇಳಿ. | [ ] |
 | fam_qr_desc | QR code to link a parent | माता-पिता को जोड़ने का QR कोड | ಪೋಷಕರನ್ನು ಜೋಡಿಸುವ QR ಕೋಡ್ | [ ] |
 | fam_code_24h | This code works once and lasts 24 hours. | यह कोड एक बार चलता है और 24 घंटे तक रहता है। | ಈ ಕೋಡ್ ಒಮ್ಮೆ ಮಾತ್ರ ಕೆಲಸ ಮಾಡುತ್ತದೆ ಮತ್ತು 24 ಗಂಟೆ ಇರುತ್ತದೆ. | [ ] |
 | fam_linked_parents | Linked parents | जुड़े माता-पिता | ಜೋಡಣೆಯಾದ ಪೋಷಕರು | [ ] |
@@ -465,9 +465,9 @@ Files: `values-{hi,kn}/strings.xml` in `app/feature/teacher`, `app/feature/paren
 | pa_scan | Scan QR code | QR कोड स्कैन करें | QR ಕೋಡ್ ಸ್ಕ್ಯಾನ್ ಮಾಡಿ | [ ] |
 | pa_link | Link | जोड़ें | ಜೋಡಿಸಿ | [ ] |
 | pa_consent_title | Approve %1$s's account | %1$s के खाते को मंज़ूरी दें | %1$s ಅವರ ಖಾತೆಯನ್ನು ಅನುಮೋದಿಸಿ | [ ] |
-| pa_we_collect | What Mooshala keeps | मूशाला क्या रखता है | ಮೂಶಾಲಾ ಏನನ್ನು ಇಟ್ಟುಕೊಳ್ಳುತ್ತದೆ | [ ] |
+| pa_we_collect | What Aaroh keeps | आरोह क्या रखता है | ಆರೋಹ ಏನನ್ನು ಇಟ್ಟುಕೊಳ್ಳುತ್ತದೆ | [ ] |
 | pa_we_collect_list | Your child's name, class and learning activity: lessons, answers and progress. | आपके बच्चे का नाम, क्लास और पढ़ाई की गतिविधि: पाठ, जवाब और प्रगति। | ನಿಮ್ಮ ಮಗುವಿನ ಹೆಸರು, ತರಗತಿ ಮತ್ತು ಕಲಿಕೆಯ ಚಟುವಟಿಕೆ: ಪಾಠಗಳು, ಉತ್ತರಗಳು ಮತ್ತು ಪ್ರಗತಿ. | [ ] |
-| pa_we_dont | What Mooshala never collects | मूशाला क्या कभी नहीं लेता | ಮೂಶಾಲಾ ಎಂದಿಗೂ ಸಂಗ್ರಹಿಸದ್ದು | [ ] |
+| pa_we_dont | What Aaroh never collects | आरोह क्या कभी नहीं लेता | ಆರೋಹ ಎಂದಿಗೂ ಸಂಗ್ರಹಿಸದ್ದು | [ ] |
 | pa_we_dont_list | No location, no contacts, no public profile, no ads. | कोई लोकेशन नहीं, कोई कॉन्टैक्ट नहीं, कोई सार्वजनिक प्रोफ़ाइल नहीं, कोई विज्ञापन नहीं। | ಸ್ಥಳವಿಲ್ಲ, ಸಂಪರ್ಕಗಳಿಲ್ಲ, ಸಾರ್ವಜನಿಕ ಪ್ರೊಫೈಲ್ ಇಲ್ಲ, ಜಾಹೀರಾತುಗಳಿಲ್ಲ. | [ ] |
 | pa_consent_rights | You can withdraw consent or ask us to delete your child's data at any time in Child settings. | आप कभी भी बच्चे की सेटिंग में सहमति वापस ले सकते हैं या बच्चे का डेटा मिटाने को कह सकते हैं। | ಮಗುವಿನ ಸೆಟ್ಟಿಂಗ್‌ಗಳಲ್ಲಿ ಯಾವಾಗ ಬೇಕಾದರೂ ಒಪ್ಪಿಗೆ ಹಿಂಪಡೆಯಬಹುದು ಅಥವಾ ಮಗುವಿನ ಡೇಟಾ ಅಳಿಸಲು ಕೇಳಬಹುದು. | [ ] |
 | pa_i_approve | I approve | मैं मंज़ूरी देता/देती हूँ | ನಾನು ಅನುಮೋದಿಸುತ್ತೇನೆ | [ ] |
@@ -485,13 +485,13 @@ Files: `values-{hi,kn}/strings.xml` in `app/feature/teacher`, `app/feature/paren
 | pa_no | No | नहीं | ಇಲ್ಲ | [ ] |
 
 
-## Web Phase 1 (Mooshala Web)
+## Web Phase 1 (Aaroh Web)
 
 File: `apps/web/messages/{hi,kn}.json` (keys are `namespace.key`).
 
 | Key | English | Hindi (draft) | Kannada (draft) | Reviewed |
 |---|---|---|---|---|
-| common.appName | Mooshala | मूशाला | ಮೂಶಾಲಾ | [ ] |
+| common.appName | Aaroh | आरोह | ಆರೋಹ | [ ] |
 | common.loading | Getting things ready… | तैयारी हो रही है… | ಸಿದ್ಧವಾಗುತ್ತಿದೆ… | [ ] |
 | common.retry | Try again | फिर से कोशिश करें | ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ | [ ] |
 | common.continue | Continue | आगे बढ़ें | ಮುಂದುವರಿಯಿರಿ | [ ] |
@@ -586,7 +586,7 @@ File: `apps/web/messages/{hi,kn}.json` (keys are `namespace.key`).
 | farm.loading | Building your farm… | तुम्हारा खेत बन रहा है… | ನಿನ್ನ ಹೊಲ ತಯಾರಾಗುತ್ತಿದೆ… | [ ] |
 | farm.loadingProgress | Building your farm… {percent}% | तुम्हारा खेत बन रहा है… {percent}% | ನಿನ್ನ ಹೊಲ ತಯಾರಾಗುತ್ತಿದೆ… {percent}% | [ ] |
 | farm.error | The farm couldn't load. Let's try again. | खेत लोड नहीं हुआ। चलो फिर से कोशिश करें। | ಹೊಲ ಲೋಡ್ ಆಗಲಿಲ್ಲ. ಮತ್ತೆ ಪ್ರಯತ್ನಿಸೋಣ. | [ ] |
-| farm.unsupported | This computer can't show the 3D farm. You can still learn with Mooshala. | यह कंप्यूटर 3D खेत नहीं दिखा सकता। तुम फिर भी मूशाला से सीख सकते हो। | ಈ ಕಂಪ್ಯೂಟರ್ 3D ಹೊಲವನ್ನು ತೋರಿಸಲಾರದು. ಆದರೂ ನೀನು ಮೂಶಾಲಾದೊಂದಿಗೆ ಕಲಿಯಬಹುದು. | [ ] |
+| farm.unsupported | This computer can't show the 3D farm. You can still learn with Aaroh. | यह कंप्यूटर 3D खेत नहीं दिखा सकता। तुम फिर भी आरोह से सीख सकते हो। | ಈ ಕಂಪ್ಯೂಟರ್ 3D ಹೊಲವನ್ನು ತೋರಿಸಲಾರದು. ಆದರೂ ನೀನು ಆರೋಹದೊಂದಿಗೆ ಕಲಿಯಬಹುದು. | [ ] |
 | farm.places | Places on the farm | खेत की जगहें | ಹೊಲದ ಸ್ಥಳಗಳು | [ ] |
 | farm.selected | {place} selected | {place} चुना गया | {place} ಆಯ್ಕೆಯಾಗಿದೆ | [ ] |
 | farm.close | Close | बंद करें | ಮುಚ್ಚಿ | [ ] |
@@ -848,7 +848,7 @@ File: `apps/web/messages/{hi,kn}.json` (keys are `namespace.key`).
 | teacher.confusedWith | Picked {chosenEn} instead of {expectedEn} ({n} times) | {expected} की जगह {chosen} चुना ({n} बार) | {expected} ಬದಲು {chosen} ಆರಿಸಿದರು ({n} ಬಾರಿ) | [ ] |
 | teacher.coursesTitle | Courses | कोर्स | ಕೋರ್ಸ್‌ಗಳು | [ ] |
 | teacher.newCourse | New course from notes | नोट्स से नया कोर्स | ಟಿಪ್ಪಣಿಯಿಂದ ಹೊಸ ಕೋರ್ಸ್ | [ ] |
-| teacher.noCourses | No courses yet. Upload your notes and Mooshala makes the lessons. | अभी कोई कोर्स नहीं। अपने नोट्स अपलोड करें, मूशाला पाठ बनाएगा। | ಇನ್ನೂ ಕೋರ್ಸ್ ಇಲ್ಲ. ನಿಮ್ಮ ಟಿಪ್ಪಣಿ ಅಪ್‌ಲೋಡ್ ಮಾಡಿ, ಮೂಶಾಲಾ ಪಾಠ ಮಾಡುತ್ತದೆ. | [ ] |
+| teacher.noCourses | No courses yet. Upload your notes and Aaroh makes the lessons. | अभी कोई कोर्स नहीं। अपने नोट्स अपलोड करें, आरोह पाठ बनाएगा। | ಇನ್ನೂ ಕೋರ್ಸ್ ಇಲ್ಲ. ನಿಮ್ಮ ಟಿಪ್ಪಣಿ ಅಪ್‌ಲೋಡ್ ಮಾಡಿ, ಆರೋಹ ಪಾಠ ಮಾಡುತ್ತದೆ. | [ ] |
 | teacher.statusPublished | Published | प्रकाशित | ಪ್ರಕಟಿತ | [ ] |
 | teacher.statusDraft | Draft | ड्राफ़्ट | ಕರಡು | [ ] |
 | teacher.gradeN | Class {n} | कक्षा {n} | ತರಗತಿ {n} | [ ] |
@@ -941,7 +941,7 @@ File: `apps/web/messages/{hi,kn}.json` (keys are `namespace.key`).
 | teacher.retryPage | Try this page again | यह पेज फिर भेजें | ಈ ಪುಟ ಮತ್ತೆ ಕಳುಹಿಸಿ | [ ] |
 | teacher.pageFailedHint | A page didn't reach the server. Nothing is lost; try it again. | एक पेज सर्वर तक नहीं पहुँचा। कुछ नहीं खोया, फिर भेजें। | ಒಂದು ಪುಟ ಸರ್ವರ್ ತಲುಪಲಿಲ್ಲ. ಏನೂ ಕಳೆದಿಲ್ಲ, ಮತ್ತೆ ಕಳುಹಿಸಿ. | [ ] |
 | teacher.retryStart | Start again | फिर शुरू करें | ಮತ್ತೆ ಪ್ರಾರಂಭಿಸಿ | [ ] |
-| teacher.aiWorking | Mooshala is reading your notes… | मूशाला आपके नोट्स पढ़ रहा है… | ಮೂಶಾಲಾ ನಿಮ್ಮ ಟಿಪ್ಪಣಿ ಓದುತ್ತಿದೆ… | [ ] |
+| teacher.aiWorking | Aaroh is reading your notes… | आरोह आपके नोट्स पढ़ रहा है… | ಆರೋಹ ನಿಮ್ಮ ಟಿಪ್ಪಣಿ ಓದುತ್ತಿದೆ… | [ ] |
 | teacher.courseReady | Your first lesson is ready to review. | आपका पहला पाठ जाँचने के लिए तैयार है। | ನಿಮ್ಮ ಮೊದಲ ಪಾಠ ಪರಿಶೀಲನೆಗೆ ಸಿದ್ಧ. | [ ] |
 | teacher.courseFailed | We couldn't make lessons from these notes. | इन नोट्स से पाठ नहीं बन सके। | ಈ ಟಿಪ್ಪಣಿಯಿಂದ ಪಾಠ ಮಾಡಲಾಗಲಿಲ್ಲ. | [ ] |
 | teacher.tryAgainUpload | Try different pages | दूसरे पेज आज़माएँ | ಬೇರೆ ಪುಟ ಪ್ರಯತ್ನಿಸಿ | [ ] |
@@ -959,7 +959,7 @@ File: `apps/web/messages/{hi,kn}.json` (keys are `namespace.key`).
 | parent.consent_approved | Approved | मंज़ूर | ಒಪ್ಪಲಾಗಿದೆ | [ ] |
 | parent.consent_revoked | Paused | रुका हुआ | ತಡೆಹಿಡಿಯಲಾಗಿದೆ | [ ] |
 | parent.linkTitle | Link a child | बच्चे को जोड़ें | ಮಗುವನ್ನು ಜೋಡಿಸಿ | [ ] |
-| parent.linkHint | Type the six-letter code from your child's Mooshala profile. Codes work once and last 24 hours. | बच्चे की मूशाला प्रोफ़ाइल का छह अक्षर का कोड लिखें। कोड एक बार चलता है और 24 घंटे रहता है। | ಮಗುವಿನ ಮೂಶಾಲಾ ಪ್ರೊಫೈಲ್‌ನ ಆರು ಅಕ್ಷರದ ಕೋಡ್ ಬರೆಯಿರಿ. ಕೋಡ್ ಒಮ್ಮೆ ಮಾತ್ರ, 24 ಗಂಟೆ ಇರುತ್ತದೆ. | [ ] |
+| parent.linkHint | Type the six-letter code from your child's Aaroh profile. Codes work once and last 24 hours. | बच्चे की आरोह प्रोफ़ाइल का छह अक्षर का कोड लिखें। कोड एक बार चलता है और 24 घंटे रहता है। | ಮಗುವಿನ ಆರೋಹ ಪ್ರೊಫೈಲ್‌ನ ಆರು ಅಕ್ಷರದ ಕೋಡ್ ಬರೆಯಿರಿ. ಕೋಡ್ ಒಮ್ಮೆ ಮಾತ್ರ, 24 ಗಂಟೆ ಇರುತ್ತದೆ. | [ ] |
 | parent.codeLabel | Link code | जोड़ने का कोड | ಜೋಡಣೆ ಕೋಡ್ | [ ] |
 | parent.checkingCode | Checking the code… | कोड जाँच रहे हैं… | ಕೋಡ್ ಪರಿಶೀಲಿಸುತ್ತಿದೆ… | [ ] |
 | parent.isThisYourChild | Is this your child, {name}? | क्या यह आपका बच्चा {name} है? | ಇದು ನಿಮ್ಮ ಮಗು {name} ಆ? | [ ] |
@@ -967,7 +967,7 @@ File: `apps/web/messages/{hi,kn}.json` (keys are `namespace.key`).
 | parent.linked | {name} is linked. | {name} जुड़ गए। | {name} ಜೋಡಣೆಯಾಯಿತು. | [ ] |
 | parent.backToChildren | Back to your children | बच्चों पर वापस | ಮಕ್ಕಳಿಗೆ ಹಿಂತಿರುಗಿ | [ ] |
 | parent.consentTitle | Your permission | आपकी अनुमति | ನಿಮ್ಮ ಅನುಮತಿ | [ ] |
-| parent.consentBody_pending | Mooshala needs your OK to save {name}'s answers and progress so lessons can adapt. You can change this any time. | पाठों को ढालने के लिए मूशाला को {name} के जवाब और प्रगति सहेजने की आपकी अनुमति चाहिए। आप इसे कभी भी बदल सकते हैं। | ಪಾಠಗಳನ್ನು ಹೊಂದಿಸಲು {name} ಅವರ ಉತ್ತರ ಮತ್ತು ಪ್ರಗತಿ ಉಳಿಸಲು ಮೂಶಾಲಾಗೆ ನಿಮ್ಮ ಅನುಮತಿ ಬೇಕು. ನೀವು ಯಾವಾಗ ಬೇಕಾದರೂ ಬದಲಿಸಬಹುದು. | [ ] |
+| parent.consentBody_pending | Aaroh needs your OK to save {name}'s answers and progress so lessons can adapt. You can change this any time. | पाठों को ढालने के लिए आरोह को {name} के जवाब और प्रगति सहेजने की आपकी अनुमति चाहिए। आप इसे कभी भी बदल सकते हैं। | ಪಾಠಗಳನ್ನು ಹೊಂದಿಸಲು {name} ಅವರ ಉತ್ತರ ಮತ್ತು ಪ್ರಗತಿ ಉಳಿಸಲು ಆರೋಹಕ್ಕೆ ನಿಮ್ಮ ಅನುಮತಿ ಬೇಕು. ನೀವು ಯಾವಾಗ ಬೇಕಾದರೂ ಬದಲಿಸಬಹುದು. | [ ] |
 | parent.consentBody_approved | You approved. {name} can keep learning. Pausing stops new lessons until you approve again. | आपने मंज़ूरी दी है। {name} सीखते रह सकते हैं। रोकने पर नए पाठ तब तक रुकेंगे जब तक आप फिर मंज़ूरी न दें। | ನೀವು ಒಪ್ಪಿದ್ದೀರಿ. {name} ಕಲಿಯುತ್ತಿರಬಹುದು. ತಡೆದರೆ ಮತ್ತೆ ಒಪ್ಪುವವರೆಗೆ ಹೊಸ ಪಾಠ ನಿಲ್ಲುತ್ತದೆ. | [ ] |
 | parent.consentBody_revoked | Learning is paused for {name}. Approve to let them continue. | {name} के लिए सीखना रुका है। जारी रखने के लिए मंज़ूरी दें। | {name} ಅವರಿಗೆ ಕಲಿಕೆ ತಡೆಹಿಡಿಯಲಾಗಿದೆ. ಮುಂದುವರಿಸಲು ಒಪ್ಪಿಗೆ ನೀಡಿ. | [ ] |
 | parent.iApprove | I approve | मैं मंज़ूरी देता/देती हूँ | ನಾನು ಒಪ್ಪುತ್ತೇನೆ | [ ] |
@@ -1020,7 +1020,7 @@ File: `apps/web/messages/{hi,kn}.json` (keys are `namespace.key`).
 | parent.confirm_delete_hint | Learning stops now and everything is erased within 7 days. This can't be undone. | सीखना अभी रुकेगा और 7 दिन में सब मिट जाएगा। यह वापस नहीं होगा। | ಕಲಿಕೆ ಈಗಲೇ ನಿಲ್ಲುತ್ತದೆ, 7 ದಿನದಲ್ಲಿ ಎಲ್ಲವೂ ಅಳಿಯುತ್ತದೆ. ಹಿಂಪಡೆಯಲಾಗದು. | [ ] |
 | parent.yesContinue | Yes, continue | हाँ, आगे बढ़ें | ಹೌದು, ಮುಂದುವರಿಸಿ | [ ] |
 | parent.studentPanelTitle | Link a parent | माता-पिता को जोड़ें | ಪೋಷಕರನ್ನು ಜೋಡಿಸಿ | [ ] |
-| parent.studentPanelHint | Make a code and give it to your parent. They type it in the Mooshala parent app. | कोड बनाओ और माता-पिता को दो। वे इसे मूशाला में लिखेंगे। | ಕೋಡ್ ಮಾಡಿ ಪೋಷಕರಿಗೆ ಕೊಡಿ. ಅವರು ಮೂಶಾಲಾದಲ್ಲಿ ಬರೆಯುತ್ತಾರೆ. | [ ] |
+| parent.studentPanelHint | Make a code and give it to your parent. They type it in the Aaroh parent app. | कोड बनाओ और माता-पिता को दो। वे इसे आरोह में लिखेंगे। | ಕೋಡ್ ಮಾಡಿ ಪೋಷಕರಿಗೆ ಕೊಡಿ. ಅವರು ಆರೋಹದಲ್ಲಿ ಬರೆಯುತ್ತಾರೆ. | [ ] |
 | parent.makeCode | Make a code | कोड बनाओ | ಕೋಡ್ ಮಾಡಿ | [ ] |
 | parent.codeExpires | Works once, until {time} | एक बार चलेगा, {time} तक | ಒಮ್ಮೆ ಮಾತ್ರ, {time} ವರೆಗೆ | [ ] |
 | parent.parentApproved | Approved | मंज़ूर | ಒಪ್ಪಿದ್ದಾರೆ | [ ] |
@@ -1084,7 +1084,7 @@ File: `apps/web/messages/{hi,kn}.json` (keys are `namespace.key`).
 | calls.title | Phone lessons | फ़ोन पाठ | ಫೋನ್ ಪಾಠಗಳು | [ ] |
 | calls.addStudent | Add student without app | बिना ऐप वाला छात्र जोड़ें | ಆ್ಯಪ್ ಇಲ್ಲದ ವಿದ್ಯಾರ್ಥಿ ಸೇರಿಸಿ | [ ] |
 | calls.noClass | Make a class first to add phone students. | फ़ोन वाले छात्र जोड़ने के लिए पहले कक्षा बनाएँ। | ಫೋನ್ ವಿದ್ಯಾರ್ಥಿಗಳನ್ನು ಸೇರಿಸಲು ಮೊದಲು ತರಗತಿ ಮಾಡಿ. | [ ] |
-| calls.rulesHint | Mooshala calls between 9 am and 9 pm, Monday to Saturday, up to 15 minutes a week. A missed call is tried again after 20 minutes, twice. | मूशाला सुबह 9 से रात 9 बजे तक, सोमवार से शनिवार, हफ़्ते में 15 मिनट तक कॉल करता है। छूटी कॉल 20 मिनट बाद दो बार फिर की जाती है। | ಮೂಶಾಲಾ ಬೆಳಿಗ್ಗೆ 9 ರಿಂದ ರಾತ್ರಿ 9 ರವರೆಗೆ, ಸೋಮವಾರದಿಂದ ಶನಿವಾರ, ವಾರಕ್ಕೆ 15 ನಿಮಿಷದವರೆಗೆ ಕರೆ ಮಾಡುತ್ತದೆ. ತಪ್ಪಿದ ಕರೆಯನ್ನು 20 ನಿಮಿಷದ ನಂತರ ಎರಡು ಬಾರಿ ಮತ್ತೆ ಮಾಡಲಾಗುತ್ತದೆ. | [ ] |
+| calls.rulesHint | Aaroh calls between 9 am and 9 pm, Monday to Saturday, up to 15 minutes a week. A missed call is tried again after 20 minutes, twice. | आरोह सुबह 9 से रात 9 बजे तक, सोमवार से शनिवार, हफ़्ते में 15 मिनट तक कॉल करता है। छूटी कॉल 20 मिनट बाद दो बार फिर की जाती है। | ಆರೋಹ ಬೆಳಿಗ್ಗೆ 9 ರಿಂದ ರಾತ್ರಿ 9 ರವರೆಗೆ, ಸೋಮವಾರದಿಂದ ಶನಿವಾರ, ವಾರಕ್ಕೆ 15 ನಿಮಿಷದವರೆಗೆ ಕರೆ ಮಾಡುತ್ತದೆ. ತಪ್ಪಿದ ಕರೆಯನ್ನು 20 ನಿಮಿಷದ ನಂತರ ಎರಡು ಬಾರಿ ಮತ್ತೆ ಮಾಡಲಾಗುತ್ತದೆ. | [ ] |
 | calls.demoClock | Demo clock: {now} | डेमो घड़ी: {now} | ಡೆಮೊ ಗಡಿಯಾರ: {now} | [ ] |
 | calls.demoEvening | Pretend it's 6 pm | मान लो शाम 6 बजे हैं | ಸಂಜೆ 6 ಎಂದು ಭಾವಿಸಿ | [ ] |
 | calls.demoReal | Real time | असली समय | ನಿಜವಾದ ಸಮಯ | [ ] |
@@ -1288,3 +1288,19 @@ The Hindi and Kannada question and option text in COURSES ("1. Cells", "2. Force
 
 ## Review sheet
 Run `python scripts/export_translations.py` (from backend/) to regenerate `docs/translation-review-sheet.md`, the side-by-side table for the native-speaker review.
+
+## Mini-games (lesson player)
+| Key | English | Hindi | Kannada | Reviewed |
+|---|---|---|---|---|
+| lesson.gameFeed | Feed Golu | गोलू को खिलाओ | ಗೋಲುಗೆ ತಿನ್ನಿಸು | [ ] |
+| lesson.gameFeedHint | Pick the right basket for Golu. | गोलू के लिए सही टोकरी चुनो। | ಗೋಲುಗೆ ಸರಿಯಾದ ಬುಟ್ಟಿ ಆರಿಸು. | [ ] |
+| lesson.gameFeedGo | Toss it | फेंको | ಎಸೆ | [ ] |
+| lesson.gameSort | Barn sort | खलिहान में रखो | ಕೊಟ್ಟಿಗೆಗೆ ಸೇರಿಸು | [ ] |
+| lesson.gameSortHint | Is it true? Send the crate to the right barn. | क्या यह सही है? टोकरा सही खलिहान में भेजो। | ಇದು ಸರಿಯೇ? ಪೆಟ್ಟಿಗೆಯನ್ನು ಸರಿಯಾದ ಕೊಟ್ಟಿಗೆಗೆ ಕಳುಹಿಸು. | [ ] |
+| lesson.gameSortGo | Send it | भेजो | ಕಳುಹಿಸು | [ ] |
+| lesson.gameMemory | Memory patch | याद का खेत | ನೆನಪಿನ ಹೊಲ | [ ] |
+| lesson.gameMemoryHint | Flip two patches. Find each pair. | दो क्यारियाँ पलटो। हर जोड़ी ढूँढो। | ಎರಡು ಮಡಿ ತಿರುಗಿಸು. ಪ್ರತಿ ಜೋಡಿ ಹುಡುಕು. | [ ] |
+| lesson.gameFlip | Flip patch {n} | क्यारी {n} पलटो | ಮಡಿ {n} ತಿರುಗಿಸು | [ ] |
+| lesson.gameView | Game view | खेल वाला रूप | ಆಟದ ನೋಟ | [ ] |
+| lesson.plainView | Plain view | सादा रूप | ಸರಳ ನೋಟ | [ ] |
+| path.level | Level {n} | लेवल {n} | ಹಂತ {n} | [ ] |

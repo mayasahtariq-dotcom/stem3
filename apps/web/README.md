@@ -1,4 +1,4 @@
-# Mooshala Web
+# Aaroh Web
 
 Next.js app for students (3D farm), teachers and parents. Architecture and conventions: `docs/web/architecture.md`. Backend contract notes: `docs/web/backend-handoff.md`.
 

@@ -29,6 +29,8 @@ export function PathScreen({ home, path, onRetry }: { home: { data?: Schemas["Ho
       />
     );
   const p = path.data;
+  // every lesson is a level, numbered across chapters
+  const levelOf = new Map(p.units.flatMap((u) => u.lessons).map((l, i) => [l.id, i + 1]));
   return (
     <div className="mx-auto flex max-w-xl flex-col gap-5 px-4 pb-32 pt-20 laptop:max-w-4xl laptop:px-8 laptop:pb-12 laptop:pt-8">
       <header className="flex flex-col gap-2">
@@ -49,6 +51,9 @@ export function PathScreen({ home, path, onRetry }: { home: { data?: Schemas["Ho
                 <>
                   <StickerIcon name={l.state === "done" ? "star" : l.state === "locked" ? "lock" : "sprout"} size={32} className={l.state === "locked" ? "opacity-60 grayscale" : undefined} />
                   <span className="flex flex-1 flex-col">
+                    <span className="self-start rounded-full bg-sun-soft px-2 text-xs font-extrabold" data-testid="level-badge">
+                      {t("level", { n: levelOf.get(l.id) ?? 0 }).regional} · {t("level", { n: levelOf.get(l.id) ?? 0 }).english}
+                    </span>
                     <BilingualText as="span" text={tri(l.title as never)} />
                     <span className="text-xs text-stone">
                       {f(`state_${l.state}`).regional} · {f(`state_${l.state}`).english}
