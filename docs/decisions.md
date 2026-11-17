@@ -1,0 +1,13 @@
+# Decisions
+- M2: schema and RLS written as SQL files run by Alembic (not SQLAlchemy models); models are added per feature from M4. RLS tests run on the Supabase project in a rolled-back transaction.
+- M3: backend issues its own HS256 tokens signed with SUPABASE_JWT_SECRET (sub = users.id). Direct Supabase-client RLS access only works if that secret matches the project's JWT signing key; revisit at deploy. Real SMS provider deferred to Phase 6 (fake SMS used).
+- Prices the PRD leaves open: hearts refill 50 gems, outfit 30 gems (backend/app/game/rules.py).
+- Mascot: calf to cow at 500 XP, cow to champion at 2,000 XP; 8,000 XP unlocks the "golden_meadow" scene.
+- Quiet hours: a daily goal met after 9 pm IST still gives XP but does not extend the streak.
+- Soft limit: after 45 minutes of play in a day, XP still counts for the student but not for the league.
+- Anti-cheat: an answer less than 1 second after the previous one, or a 3rd+ repeat of a question in a lesson, earns no XP.
+- Replaying a finished lesson counts as practice: XP and +1 heart, but no extra gems or pot.
+- Consent gate: lessons need a granted consent (parent app, or school-wide flag on the class). The latest record wins, so a parent can revoke a school consent.
+- Badge titles are English only for now; Hindi/Kannada titles come from P3's copy pass (log in translations-to-review.md).
+- Realtime hub is in-process (one API instance); move to Redis or Postgres NOTIFY when scaling out.
+- Badge checks run on lesson completion and on combos or comebacks, not on every answer, to keep requests fast.
