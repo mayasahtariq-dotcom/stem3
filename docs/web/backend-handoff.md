@@ -1,4 +1,4 @@
-# Backend handoff for Mooshala Web
+# Backend handoff for Aaroh Web
 
 Nov 17, 2026
 

@@ -398,8 +398,12 @@ class AttemptIn(BaseModel):
     time_ms: int | None = None
 
 
+KIND_TO_TYPE = {"mcq": "multiple_choice", "true_false": "true_false", "match": "match_pairs", "fill_in": "fill_formula"}
+
+
 def _to_our_answer(q: Any, a: dict[str, Any]) -> Any:
-    t = a.get("type")
+    # the web app sends the bare answer ({index} / {value} / {pairs, mistakes} / {chip}); "type" is optional
+    t = a.get("type") or KIND_TO_TYPE.get(q["kind"])
     if t == "multiple_choice":
         opts = q["options"] or []
         i = int(a.get("index", -1))

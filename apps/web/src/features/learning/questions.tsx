@@ -24,7 +24,7 @@ export interface QuestionProps<C extends QuestionContent> {
 }
 
 /** Number keys 1-9 pick an option (keyboard play). */
-function useNumberKeys(count: number, onPick: (i: number) => void, enabled: boolean) {
+export function useNumberKeys(count: number, onPick: (i: number) => void, enabled: boolean) {
   useEffect(() => {
     if (!enabled) return;
     const h = (e: KeyboardEvent) => {

@@ -63,6 +63,30 @@ def test_class_key_student_plays_a_lesson_in_web_shapes(conn: Connection, client
     assert done["xp_earned"] >= 20 and done["stats"]["xp_total"] > 0
 
 
+def test_three_language_options_grade_by_index(conn: Connection, client: TestClient) -> None:
+    """AI-made courses store options as {en, hi, kn}: picking the right one by index must be marked right."""
+    import json
+    w = make_world(conn, n_lessons=1)
+    opts = [{"en": "Systematic study of nature", "hi": "प्रकृति का अध्ययन", "kn": "ಪ್ರಕೃತಿ"},
+            {"en": "Art of painting", "hi": "चित्रकला", "kn": "ಚಿತ್ರಕಲೆ"}]
+    qid = conn.execute(text("select id from questions where lesson_id=:l and kind='mcq' order by position limit 1"),
+                       {"l": w["lessons"][0]}).scalar_one()
+    conn.execute(text("update questions set options=cast(:o as jsonb), answer=cast(:a as jsonb) where id=:q"),
+                 {"o": json.dumps(opts, ensure_ascii=False), "a": json.dumps(opts[0], ensure_ascii=False), "q": qid})
+    h = w["student"]["headers"]
+    client.post(f"/web/lessons/{w['lessons'][0]}/start", headers=h)
+    # the web app sends the bare answer, without "type" (that's what the real browser posts)
+    r = client.post("/web/attempts", headers=h, json={"question_id": str(qid), "answer": {"index": 0}})
+    assert r.status_code == 200, r.text
+    assert r.json()["correct"] is True and r.json()["correct_answer"] == {"index": 0}
+    tf = conn.execute(text("select id from questions where lesson_id=:l and kind='true_false' limit 1"),
+                      {"l": w["lessons"][0]}).scalar()
+    if tf:
+        ans = conn.execute(text("select answer from questions where id=:q"), {"q": tf}).scalar_one()
+        r = client.post("/web/attempts", headers=h, json={"question_id": str(tf), "answer": {"value": ans in (True, "true")}})
+        assert r.json()["correct"] is True
+
+
 def test_teacher_screens_and_join_key_format(conn: Connection, client: TestClient) -> None:
     w = make_world(conn)
     h = w["teacher"]["headers"]
@@ -125,6 +149,58 @@ def test_upload_pages_then_start_makes_a_course(conn: Connection, client: TestCl
         client.post(f"/web/uploads/{up['id']}/start", headers=h)
         st: dict[str, Any] = client.get(f"/web/uploads/{up['id']}", headers=h).json()
         assert st["status"] == "ready" and st["course_id"] and st["first_lesson_id"] and st["page_count"] == 2
+    finally:
+        app.dependency_overrides.pop(pipeline_runner, None)
+
+
+def test_class_notes_teacher_shares_students_read(conn: Connection, client: TestClient) -> None:
+    import base64
+    w = make_world(conn)
+    th, sh = w["teacher"]["headers"], w["student"]["headers"]
+    url = f"/web/classrooms/{w['classroom']}/notes"
+    assert client.post(url, headers=th, json={"title": "Empty"}).status_code == 422          # needs text or a file
+    assert client.post(url, headers=sh, json={"title": "x", "body": "y"}).status_code == 403  # students can't post
+    data_url = "data:application/pdf;base64," + base64.b64encode(b"%PDF-1.4 cells").decode()
+    n = client.post(url, headers=th, json={"title": "Cells", "body": "Cells are tiny.",
+                                           "file": {"name": "cells.pdf", "type": "application/pdf", "data_url": data_url}})
+    assert n.status_code == 201, n.text
+    note = n.json()
+    assert note["file"]["size"] == len(b"%PDF-1.4 cells") and note["classroom_id"] == w["classroom"]
+    mine = client.get("/web/me/notes", headers=sh).json()
+    assert [x["title"] for x in mine] == ["Cells"] and mine[0]["body"] == "Cells are tiny."
+    f = client.get(mine[0]["file"]["url"].split("testserver")[-1])                         # signed: no token needed
+    assert f.status_code == 200 and f.content == b"%PDF-1.4 cells" and f.headers["content-type"] == "application/pdf"
+    assert client.get(f"/web/notes/{note['id']}/file?exp=9999999999&sig=bad").status_code == 403
+    outsider = make_user(conn, "student")
+    assert client.get("/web/me/notes", headers=outsider["headers"]).json() == []
+    assert len(client.get("/web/teacher/notes", headers=th).json()) == 1
+    assert client.delete(f"/web/notes/{note['id']}", headers=th).status_code == 204
+    assert client.get("/web/me/notes", headers=sh).json() == []
+
+
+def test_upload_to_a_class_then_publish_assigns_it_and_shares_the_notes(conn: Connection, client: TestClient) -> None:
+    app.dependency_overrides[pipeline_runner] = lambda: (
+        lambda uid: run_pipeline(NoCommit(conn), FakeLLMProvider(), uid))  # type: ignore[arg-type]
+    try:
+        w = make_world(conn)
+        th, sh = w["teacher"]["headers"], w["student"]["headers"]
+        up = client.post("/web/uploads", headers=th, json={"classroom_id": w["classroom"], "pages": [
+            {"kind": "photo"}, {"kind": "text", "text": "Plants make food from sunlight."}]}).json()
+        path = up["pages"][0]["upload_url"].split("testserver")[-1]
+        assert client.put(path, headers={"Content-Type": "image/png"}, content=b"fake-png").status_code == 204
+        client.post(f"/web/uploads/{up['id']}/start", headers=th)
+        st = client.get(f"/web/uploads/{up['id']}", headers=th).json()
+        assert st["status"] == "ready"
+        # publish without naming a class: the class picked at upload gets it
+        r = client.post(f"/web/lessons/{st['first_lesson_id']}/publish", headers=th, json={"classroom_id": None})
+        assert r.status_code == 200, r.text
+        course = client.get(f"/web/courses/{st['course_id']}", headers=th).json()
+        assert w["classroom"] in course["assigned_classroom_ids"]
+        notes = client.get("/web/me/notes", headers=sh).json()
+        assert len(notes) == 2                                         # one per uploaded page
+        assert {n["file"]["type"] if n["file"] else n["body"] for n in notes} == {"image/png", "Plants make food from sunlight."}
+        client.post(f"/web/lessons/{st['first_lesson_id']}/publish", headers=th, json={"classroom_id": None})
+        assert len(client.get("/web/me/notes", headers=sh).json()) == 2   # re-publish doesn't duplicate
     finally:
         app.dependency_overrides.pop(pipeline_runner, None)
 

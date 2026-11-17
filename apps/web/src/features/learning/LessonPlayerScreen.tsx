@@ -23,7 +23,7 @@ import {
   SproutBloom,
   XpPop,
 } from "./feedback/FarmFeedback";
-import { QuestionBody } from "./questions";
+import { QuestionStage } from "./minigames";
 import { progress } from "./session";
 import type { LessonPlayerModel } from "./use-lesson-player";
 
@@ -242,7 +242,7 @@ export function LessonPlayerScreen({
                 </ChunkyButton>
               )}
             </div>
-            <QuestionBody
+            <QuestionStage
               key={`${question.id}:${session.index}`}
               id={question.id}
               content={question.content}

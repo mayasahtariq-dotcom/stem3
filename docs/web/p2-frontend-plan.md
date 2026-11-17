@@ -1,8 +1,8 @@
-# P2 frontend phase plan (Mooshala Web)
+# P2 frontend phase plan (Aaroh Web)
 
 Nov 17, 2026
 
-This plan splits P2's share of Mooshala Web (every student, teacher and parent screen, the call console, the design system, animation, accessibility, offline support and the end-to-end tests) into the six phases of the web spec's delivery roadmap (section 11). The spec says to build the phases strictly in order, so P2's phases line up week for week with the backend's, and each phase ends only when all its tests pass.
+This plan splits P2's share of Aaroh Web (every student, teacher and parent screen, the call console, the design system, animation, accessibility, offline support and the end-to-end tests) into the six phases of the web spec's delivery roadmap (section 11). The spec says to build the phases strictly in order, so P2's phases line up week for week with the backend's, and each phase ends only when all its tests pass.
 
 ## How P2's work fits the roadmap
 

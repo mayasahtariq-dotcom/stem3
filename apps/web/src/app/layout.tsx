@@ -11,7 +11,7 @@ const devanagari = Noto_Sans_Devanagari({ subsets: ["devanagari"], weight: ["500
 const kannada = Noto_Sans_Kannada({ subsets: ["kannada"], weight: ["500", "700"], variable: "--font-kannada", display: "swap" });
 
 export const metadata: Metadata = {
-  title: "Mooshala",
+  title: "Aaroh",
   description: "Learn science on your own farm, in Hindi or Kannada with English.",
 };
 

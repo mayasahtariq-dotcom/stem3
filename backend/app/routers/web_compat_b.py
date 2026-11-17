@@ -819,10 +819,16 @@ def t_publish(lesson_id: str, body: PublishIn, background: BackgroundTasks, db: 
         raise HTTPException(404, {"code": "NOT_FOUND"})
     c = _own_course(db, user, str(course))
     publish_course(str(c["id"]), db, user, background)
+    # the class picked when the notes were uploaded, plus the one picked now
+    targets = {str(k) for k in db.execute(text("select classroom_id from uploads where course_id=:c and classroom_id is not null"),
+                                          {"c": c["id"]}).scalars()}
     if body.classroom_id:
         _own_class(db, user, body.classroom_id)
-        db.execute(text("insert into course_assignments values (:c,:k) on conflict do nothing"),
-                   {"c": c["id"], "k": body.classroom_id})
+        targets.add(body.classroom_id)
+    for k in targets:
+        db.execute(text("insert into course_assignments values (:c,:k) on conflict do nothing"), {"c": c["id"], "k": k})
+    for k in db.execute(text("select classroom_id from course_assignments where course_id=:c"), {"c": c["id"]}).scalars():
+        share_course_notes(db, c["id"], k)
     units = _lesson_summaries(db, _own_course(db, user, str(course)))
     return next(le for u in units for le in u["lessons"] if le["id"] == lesson_id)
 
@@ -834,10 +840,12 @@ class AssignIn(BaseModel):
 
 @router.post("/courses/{course_id}/assign")
 def t_assign(course_id: str, body: AssignIn, db: DbDep, user: UserDep) -> dict[str, Any]:
-    _own_course(db, user, course_id)
+    c = _own_course(db, user, course_id)
     for k in body.classroom_ids:
         _own_class(db, user, k)
         db.execute(text("insert into course_assignments values (:c,:k) on conflict do nothing"), {"c": course_id, "k": k})
+        if c["status"] == "published":
+            share_course_notes(db, course_id, k)
     return course_out(db, _own_course(db, user, course_id))
 
 
@@ -900,20 +908,151 @@ def t_materials(db: DbDep, user: UserDep) -> list[dict[str, Any]]:
     return out
 
 
+# ---------- class notes (packages/api-client/src/pending-notes.ts) ----------
+NOTE_TITLE_MAX, NOTE_BODY_MAX, NOTE_FILE_MAX = 120, 20_000, 1_500_000
+SHARED_PAGE_MAX = 10_000_000          # course-generation pages shared as notes can be bigger
+NOTE_LINK_SECONDS = 6 * 3600
+NOTE_COLS = ("n.id, n.classroom_id, k.name as classroom, t.name as teacher_name, n.title, n.body, n.file_name, "
+             "n.file_type, octet_length(n.file_data) as file_size, n.created_at")
+
+
+def _note_sig(note_id: str, exp: int) -> str:
+    import hashlib
+    import hmac
+
+    from app.config import get_settings
+    return hmac.new(get_settings().supabase_jwt_secret.encode(), f"note:{note_id}:{exp}".encode(),
+                    hashlib.sha256).hexdigest()[:32]
+
+
+def note_out(n: Any, base: str) -> dict[str, Any]:
+    file = None
+    if n["file_name"]:
+        exp = int(engine.utcnow().timestamp()) + NOTE_LINK_SECONDS
+        file = {"name": n["file_name"], "type": n["file_type"] or "application/octet-stream", "size": n["file_size"] or 0,
+                "url": f"{base}/web/notes/{n['id']}/file?exp={exp}&sig={_note_sig(str(n['id']), exp)}"}
+    return {"id": str(n["id"]), "classroom_id": str(n["classroom_id"]), "classroom": n["classroom"],
+            "teacher_name": n["teacher_name"] or "", "title": n["title"], "body": n["body"], "file": file,
+            "created_at": iso(n["created_at"])}
+
+
+def _notes(db: Connection, where: str, params: dict[str, Any], request: Request) -> list[dict[str, Any]]:
+    rows = db.execute(text(f"select {NOTE_COLS} from class_notes n join classrooms k on k.id=n.classroom_id "
+                           f"join users t on t.id=n.teacher_id where {where} order by n.created_at desc"),
+                      params).mappings().all()
+    base = str(request.base_url).rstrip("/")
+    return [note_out(n, base) for n in rows]
+
+
+def share_course_notes(db: Connection, course_id: Any, classroom_id: Any) -> int:
+    """Put the notes a course was generated from into the class's Notes, so students can read them later.
+    Each uploaded page becomes one note (once per class). Returns how many were added."""
+    course = db.execute(text("select teacher_id, title from courses where id=:c"), {"c": course_id}).mappings().first()
+    if course is None:
+        return 0
+    pages = db.execute(text("select p.id, p.page_no, p.storage_path, p.mime, p.ocr_text, "
+                            "count(*) over (partition by p.upload_id) as n from upload_pages p join uploads u "
+                            "on u.id=p.upload_id where u.course_id=:c order by u.created_at, p.page_no"),
+                       {"c": course_id}).mappings().all()
+    added = 0
+    for p in pages:
+        title = course["title"] if p["n"] == 1 else f"{course['title']} · {p['page_no']}"
+        body, name, mime, data = "", None, None, None
+        try:
+            raw = storage.read(p["storage_path"])
+        except (OSError, ValueError):
+            raw = None                 # file gone (host disk wiped): fall back to the read text
+        if p["mime"] == "text/plain":
+            body = raw.decode("utf-8", "replace") if raw is not None else (p["ocr_text"] or "")
+        elif raw is not None and len(raw) <= SHARED_PAGE_MAX:
+            ext = ai_routes.ALLOWED.get(p["mime"] or "", "")
+            name, mime, data = f"{course['title'][:80]}-{p['page_no']}{ext}", p["mime"], raw
+        else:
+            body = p["ocr_text"] or ""
+        if not (body or data):
+            continue
+        added += db.execute(text(
+            "insert into class_notes(classroom_id, teacher_id, title, body, file_name, file_type, file_data, upload_page_id) "
+            "values (:k,:t,:ti,:b,:fn,:ft,:fd,:p) on conflict (classroom_id, upload_page_id) do nothing"),
+            {"k": classroom_id, "t": course["teacher_id"], "ti": title[:NOTE_TITLE_MAX], "b": body[:NOTE_BODY_MAX],
+             "fn": name, "ft": mime, "fd": data, "p": p["id"]}).rowcount
+    return added
+
+
 @router.get("/teacher/notes")
-def t_notes(user: UserDep) -> list[dict[str, Any]]:
+def t_notes(request: Request, db: DbDep, user: UserDep) -> list[dict[str, Any]]:
     _teacher(user)
-    return []       # class notes sharing is not built in the backend yet (see docs/FRONTEND_PROMPT.md)
+    return _notes(db, "k.teacher_id=:u", {"u": user.id}, request)
 
 
 @router.get("/me/notes")
-def s_notes(user: UserDep) -> list[dict[str, Any]]:
-    return []
+def s_notes(request: Request, db: DbDep, user: UserDep) -> list[dict[str, Any]]:
+    return _notes(db, "n.classroom_id in (select classroom_id from memberships where user_id=:u)", {"u": user.id}, request)
 
 
-@router.post("/classrooms/{classroom_id}/notes")
-def t_add_note(classroom_id: str, user: UserDep) -> dict[str, Any]:
-    raise HTTPException(501, {"code": "NOT_IMPLEMENTED", "message": "Class notes sharing is coming soon."})
+class NoteFileIn(BaseModel):
+    name: str
+    type: str = ""
+    data_url: str
+
+
+class NoteIn(BaseModel):
+    title: str
+    body: str | None = None
+    file: NoteFileIn | None = None
+
+
+@router.post("/classrooms/{classroom_id}/notes", status_code=201)
+def t_add_note(classroom_id: str, body: NoteIn, request: Request, db: DbDep, user: UserDep) -> dict[str, Any]:
+    import base64
+    import binascii
+    import re
+    _own_class(db, user, classroom_id)
+    title, txt = body.title.strip(), (body.body or "").strip()
+    if not title or len(title) > NOTE_TITLE_MAX or len(txt) > NOTE_BODY_MAX or not (txt or body.file):
+        raise HTTPException(422, {"code": "VALIDATION"})
+    name = mime = data = None
+    if body.file:
+        m = re.match(r"^data:([\w/+.-]+);base64,", body.file.data_url)
+        if not m:
+            raise HTTPException(422, {"code": "VALIDATION"})
+        try:
+            data = base64.b64decode(body.file.data_url[m.end():], validate=True)
+        except (binascii.Error, ValueError):
+            raise HTTPException(422, {"code": "VALIDATION"}) from None
+        if len(data) > NOTE_FILE_MAX:
+            raise HTTPException(413, {"code": "FILE_TOO_LARGE"})
+        name, mime = body.file.name.strip()[:200] or "file", body.file.type or m.group(1)
+    nid = db.execute(text("insert into class_notes(classroom_id, teacher_id, title, body, file_name, file_type, file_data) "
+                          "values (:k,:t,:ti,:b,:fn,:ft,:fd) returning id"),
+                     {"k": classroom_id, "t": user.id, "ti": title, "b": txt, "fn": name, "ft": mime, "fd": data}).scalar_one()
+    return _notes(db, "n.id=:n", {"n": nid}, request)[0]
+
+
+@router.delete("/notes/{note_id}", status_code=204)
+def t_delete_note(note_id: str, db: DbDep, user: UserDep) -> None:
+    _teacher(user)
+    if not db.execute(text("delete from class_notes n using classrooms k where n.id=:n and k.id=n.classroom_id "
+                           "and k.teacher_id=:t"), {"n": note_id, "t": user.id}).rowcount:
+        raise HTTPException(404, {"code": "NOT_FOUND"})
+
+
+@router.get("/notes/{note_id}/file")
+def note_file(note_id: str, db: DbDep, exp: int = 0, sig: str = "") -> Any:
+    """The note's file, at the signed link note_out hands out (opens in a new tab: no bearer token)."""
+    import hmac
+    from urllib.parse import quote
+
+    from fastapi.responses import Response
+    if exp < engine.utcnow().timestamp() or not hmac.compare_digest(sig, _note_sig(note_id, exp)):
+        raise HTTPException(403, {"code": "LINK_EXPIRED_OR_INVALID"})
+    n = db.execute(text("select file_name, file_type, file_data from class_notes where id=:n and file_data is not null"),
+                   {"n": note_id}).mappings().first()
+    if n is None:
+        raise HTTPException(404, {"code": "NOT_FOUND"})
+    return Response(bytes(n["file_data"]), media_type=n["file_type"] or "application/octet-stream",
+                    headers={"Content-Disposition": f"inline; filename*=UTF-8''{quote(n['file_name'])}",
+                             "Cache-Control": "private, max-age=3600"})
 
 
 # =====================================================================================
