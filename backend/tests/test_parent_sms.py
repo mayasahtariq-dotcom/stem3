@@ -88,9 +88,11 @@ def test_call_student_parent_gets_hindi_text(conn: Connection, client: TestClien
         sid = client.post(f"/v1/call-students/{cs['id']}/call-now",
                           headers=w["teacher"]["headers"]).json()["session_id"]
         client.post(f"/v1/webhooks/twilio/voice?s={sid}", data={"CallSid": "CA1"})
+        client.post(f"/v1/webhooks/twilio/lang?s={sid}", data={"Digits": "1"})       # Hindi
         client.post(f"/v1/webhooks/twilio/consent?s={sid}", data={"Digits": "1"})
         for _ in range(3):
             client.post(f"/v1/webhooks/twilio/answer?s={sid}", data={"Digits": "1"})
+            client.post(f"/v1/webhooks/twilio/confirm?s={sid}", data={"Digits": "1"})
     finally:
         app.dependency_overrides.pop(telephony, None)
     assert len(sms.outbox) == 1
