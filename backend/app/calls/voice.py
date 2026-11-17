@@ -30,6 +30,7 @@ class Voice:
     def __init__(self, db: Connection) -> None:
         self.db = db
         self.lines: list[tuple[str, str, str]] = []      # (text, lang, fallback <Say>)
+        self.transcript: dict[str, str] = {}             # clip url -> spoken text (simulator)
 
     def add(self, body: str, lang: str, fallback_xml: str) -> str:
         self.lines.append((body, lang, fallback_xml))
@@ -67,21 +68,31 @@ class Voice:
 
         def swap(m: re.Match[str]) -> str:
             i = int(m.group(1))
-            return f"<Play>{base}/v1/audio/{ids[i]}</Play>" if i in ids else self.lines[i][2]
+            if i not in ids:
+                return self.lines[i][2]
+            url = f"{base}/v1/audio/{ids[i]}"
+            self.transcript[url] = self.lines[i][0]
+            return f"<Play>{url}</Play>"
         return PLACEHOLDER.sub(swap, xml)
 
 
 CURRENT: ContextVar[Voice | None] = ContextVar("aaroh_call_voice", default=None)
 
 
-def with_voice(fn: Any, db: Connection, *args: Any) -> str:
-    """Run a call step; when Sarvam voices are on, swap its <Say> lines for <Play> clips."""
+def with_voice(fn: Any, db: Connection, *args: Any, transcript: dict[str, str] | None = None) -> str:
+    """Run a call step; when Sarvam voices are on, swap its <Say> lines for <Play> clips.
+    `transcript` (simulator) receives clip url -> spoken text."""
     if not enabled():
         return str(fn(db, *args))
     token = CURRENT.set(Voice(db))
     try:
         xml = str(fn(db, *args))
         v = CURRENT.get()
-        return v.finish(xml) if v is not None else xml
+        if v is None:
+            return xml
+        out = v.finish(xml)
+        if transcript is not None:
+            transcript.update(v.transcript)
+        return out
     finally:
         CURRENT.reset(token)

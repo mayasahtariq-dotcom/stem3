@@ -31,3 +31,4 @@
 - Scheduler (M10/M11): runs every SCHEDULER_INTERVAL seconds inside the API when SCHEDULER_ENABLED=true (one instance; Procrastinate job when scaling). Uses each session's scheduled time for "today". Weekly SMS goes to call-only students on Sunday after 6 pm IST; league reset runs on Mondays (idempotent).
 - CORS: origins from WEB_ORIGINS for the teammate's desktop app; bearer tokens, no cookies.
 - scripts/start_demo.py starts the API and tunnel, writes PUBLIC_BASE_URL, restarts the API and points the Twilio number in one command.
+- Calling in without a Twilio number: the /demo console has a phone simulator. It runs the same call engine (POST /v1/demo/sim turns each step's TwiML into a script the browser plays), dials in from the demo student's number so caller ID works, and plays Sarvam clips. It lifts the 9 am to 9 pm rule because nothing real is called. Real dial-in still needs an owned number (Exotel/Twilio).
