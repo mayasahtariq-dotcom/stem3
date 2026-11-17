@@ -162,7 +162,8 @@ def web_otp(body: OtpIn, request: Request, db: DbDep,
     auth_service.rate_limit(f"otp-ip:{request.client.host if request.client else '?'}", 20, 3600)
     code = auth_service.request_otp(db, sms, phone)
     s = get_settings()
-    return {"sent": True, "dev_code": code if (s.demo_mode and s.use_fake_sms) else None}
+    fallback = s.demo_mode and code == auth_service.DEMO_FALLBACK_CODE
+    return {"sent": True, "dev_code": code if (s.demo_mode and (s.use_fake_sms or fallback)) else None}
 
 
 @router.post("/auth/verify")

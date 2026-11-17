@@ -37,7 +37,8 @@ class TwilioSmsProvider:
             f"https://api.twilio.com/2010-04-01/Accounts/{s.twilio_account_sid}/Messages.json",
             auth=(s.twilio_account_sid, s.twilio_auth_token), timeout=15,
             data={"To": to_e164, "From": s.twilio_number, "Body": text})
-        r.raise_for_status()
+        if r.status_code >= 400:          # keep Twilio's reason (e.g. 21659: not your Twilio number)
+            raise RuntimeError(f"Twilio SMS {r.status_code}: {r.text[:200]}")
 
 
 def get_sms() -> SmsProvider:

@@ -123,3 +123,23 @@ def test_me_requires_token(client: tuple[TestClient, FakeSmsProvider]) -> None:
     c, _ = client
     assert c.get("/v1/auth/me").status_code == 401
     assert c.get("/v1/auth/me", headers={"Authorization": "Bearer junk"}).status_code == 401
+
+
+def test_failed_sms_never_crashes(client: tuple[TestClient, FakeSmsProvider], monkeypatch: pytest.MonkeyPatch) -> None:
+    from app.auth.sms import get_sms
+    from app.config import Settings
+    from app.main import app as main_app
+
+    class Broken(FakeSmsProvider):
+        def send(self, to_e164: str, text: str) -> None:
+            raise RuntimeError("Twilio SMS 400")
+    c, _ = client
+    main_app.dependency_overrides[get_sms] = lambda: Broken()
+    monkeypatch.setattr("app.auth.service.get_settings", lambda: Settings(demo_mode=False))
+    r = c.post("/v1/auth/otp", json={"phone": phone()})
+    assert r.status_code == 503 and r.json()["detail"]["code"] == "SMS_UNAVAILABLE"
+    monkeypatch.setattr("app.auth.service.get_settings", lambda: Settings(demo_mode=True))
+    p = phone()
+    assert c.post("/web/auth/otp", json={"phone": p}).status_code == 200
+    v = c.post("/web/auth/verify", json={"phone": p, "code": "123456"})   # demo fallback code
+    assert v.status_code == 200
