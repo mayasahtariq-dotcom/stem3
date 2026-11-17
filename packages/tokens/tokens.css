@@ -1,0 +1,75 @@
+/* Generated from src/index.ts by `pnpm --filter @mooshala/tokens generate`. Do not edit. */
+@theme {
+  --color-grass: #58CC02;
+  --color-sky: #1CB0F6;
+  --color-sun: #FFC800;
+  --color-flame: #FF9600;
+  --color-berry: #CE82FF;
+  --color-coral: #FF4B4B;
+  --color-ink: #3C3C3C;
+  --color-cloud: #F7F7F7;
+  --color-grass-strong: #2F7A00;
+  --color-grass-edge: #1F5200;
+  --color-sky-strong: #0A6FAD;
+  --color-sky-edge: #07507D;
+  --color-coral-strong: #C62828;
+  --color-sun-edge: #C79A00;
+  --color-leaf: #3E9A2A;
+  --color-meadow: #8EE07A;
+  --color-sky-soft: #DDF3FE;
+  --color-sun-soft: #FFF1B8;
+  --color-wood: #8B5A2B;
+  --color-wood-light: #C08A55;
+  --color-wood-dark: #5C3A1A;
+  --color-soil: #6B4A2E;
+  --color-cream: #FFF8EC;
+  --color-parchment: #F3E7CF;
+  --color-line: #E6DCC8;
+  --color-stone: #6B6257;
+  --color-white: #FFFFFF;
+  --radius-sm: 8px;
+  --radius-button: 12px;
+  --radius-card: 16px;
+  --radius-panel: 20px;
+  --radius-pill: 999px;
+  --text-xs: 13px;
+  --text-xs--line-height: 18px;
+  --text-sm: 15px;
+  --text-sm--line-height: 21px;
+  --text-base: 17px;
+  --text-base--line-height: 24px;
+  --text-lg: 20px;
+  --text-lg--line-height: 27px;
+  --text-xl: 24px;
+  --text-xl--line-height: 31px;
+  --text-2xl: 30px;
+  --text-2xl--line-height: 37px;
+  --text-3xl: 38px;
+  --text-3xl--line-height: 44px;
+  --shadow-float-1: 0 4px 12px rgba(60, 40, 20, 0.14);
+  --shadow-float-2: 0 10px 28px rgba(60, 40, 20, 0.22);
+  --shadow-inset: inset 0 2px 0 rgba(60, 40, 20, 0.08);
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+:root {
+  --space-0: 0px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --lip: 5px;
+  --press: 4px;
+  --duration-instant: 80ms;
+  --duration-fast: 140ms;
+  --duration-base: 220ms;
+  --duration-slow: 360ms;
+  --duration-celebrate: 700ms;
+}
