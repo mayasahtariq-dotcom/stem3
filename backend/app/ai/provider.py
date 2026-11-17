@@ -80,7 +80,8 @@ class FakeLLMProvider:
 
 
 # Busy models fall through to the next one. Google renames models often, so the list is configurable.
-DEFAULT_FALLBACKS = ["gemini-3.8-flash", "gemini-flash-latest", "gemini-3.5-flash", "gemini-flash-lite-latest"]
+DEFAULT_FALLBACKS = ["gemini-flash-lite-latest", "gemini-3.1-flash-lite", "gemini-3.8-flash",
+                     "gemini-flash-latest"]
 RETRYABLE = {429, 500, 502, 503, 504}
 
 
@@ -89,7 +90,7 @@ class GeminiProvider:
 
     URL = "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
 
-    def __init__(self, api_key: str, model: str = "", timeout: float = 45.0,
+    def __init__(self, api_key: str, model: str = "", timeout: float = 30.0,
                  deadline: float = 80.0) -> None:
         self.key = api_key
         self.models = list(dict.fromkeys([m for m in [model, *DEFAULT_FALLBACKS] if m]))
