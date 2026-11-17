@@ -1,0 +1,151 @@
+{
+ "app": {
+  "tagline": "Learn science, one short lesson a day"
+ },
+ "onb": {
+  "chooseLang": "Choose your language",
+  "chooseRole": "Who are you?"
+ },
+ "role": {
+  "student": "Student",
+  "teacher": "Teacher",
+  "parent": "Parent"
+ },
+ "auth": {
+  "phone": "Phone number",
+  "sendCode": "Send code",
+  "code": "6-digit code",
+  "verify": "Continue",
+  "name": "Your name",
+  "devCode": "Demo code: {code}",
+  "codeSent": "We sent a code to your phone",
+  "classKey": "School computer? Use class key",
+  "classKeyLabel": "Class key",
+  "phoneLogin": "Use phone instead",
+  "back": "Back"
+ },
+ "nav": {
+  "learn": "Learn",
+  "quests": "Quests",
+  "league": "League",
+  "profile": "Profile"
+ },
+ "learn": {
+  "continue": "Continue",
+  "start": "Start",
+  "noCourse": "No course yet. Ask your teacher for the class key.",
+  "joinClass": "Join a class",
+  "dailyGoal": "Daily goal",
+  "todayQuests": "Today's quests"
+ },
+ "lesson": {
+  "check": "Check",
+  "continue": "Continue",
+  "correct": "Great job!",
+  "notQuite": "Not quite",
+  "answerWas": "Answer: {answer}",
+  "comeBack": "We'll come back to this one",
+  "true": "True",
+  "false": "False",
+  "typeAnswer": "Type your answer",
+  "matchPairs": "Tap the matching pairs",
+  "done": "I'm done",
+  "watch": "Watch the video",
+  "read": "Read and listen",
+  "transcript": "What the video says",
+  "noHearts": "You're out of hearts. Practise a finished lesson or wait for a heart to refill.",
+  "quit": "Leave lesson",
+  "combo": "Combo x{n}!",
+  "terms": "Terms",
+  "doubt": "Ask a doubt",
+  "listen": "Listen"
+ },
+ "celebrate": {
+  "title": "Lesson complete!",
+  "xp": "Total XP",
+  "accuracy": "Accuracy",
+  "bestCombo": "Best combo",
+  "openPot": "Open the Golu Pot",
+  "newBadge": "New badge!",
+  "questDone": "Quest complete!",
+  "practice": "Practice done: +1 heart",
+  "home": "Back to the path",
+  "stop": "Great work today. See you tomorrow!"
+ },
+ "pot": {
+  "gems": "+{n} gems",
+  "sticker": "New sticker: {item}",
+  "outfit": "New outfit for Golu: {item}"
+ },
+ "terms": {
+  "title": "Terms and glossary",
+  "save": "Save",
+  "saved": "Saved",
+  "empty": "No terms for this course yet."
+ },
+ "doubt": {
+  "title": "Ask Golu a doubt",
+  "placeholder": "Type your question",
+  "send": "Ask",
+  "private": "Only you can see your doubts.",
+  "fromNotes": "From your notes: {src}"
+ },
+ "quests": {
+  "title": "Quests",
+  "daily": "Daily quests",
+  "weekly": "Weekly quest",
+  "revision": "Revision quest (double gems)"
+ },
+ "quest": {
+  "answer_10": "Answer 10 questions",
+  "combo_3": "Get a 3 combo",
+  "lesson_1": "Finish a lesson",
+  "lessons_5": "Finish 5 lessons",
+  "revision_5": "Revise 5 fading ideas"
+ },
+ "league": {
+  "title": "Class league",
+  "you": "You",
+  "rank": "Your rank: {rank}",
+  "notYet": "Earn XP this week to join the league.",
+  "off": "Leagues are switched off for your class.",
+  "zones": "Top {up} move up, bottom {down} move down. Resets Monday."
+ },
+ "tier": {
+  "bronze": "Bronze",
+  "silver": "Silver",
+  "gold": "Gold",
+  "ruby": "Ruby",
+  "diamond": "Diamond"
+ },
+ "profile": {
+  "title": "Profile",
+  "trophies": "Trophy shelf",
+  "golu": "Golu",
+  "nextUnlock": "Next growth at {xp} XP",
+  "shop": "Spend gems",
+  "freeze": "Streak freeze (100 gems)",
+  "refill": "Refill hearts (50 gems)",
+  "outfit": "{item} (30 gems)",
+  "settings": "Settings",
+  "dailyGoal": "Daily goal",
+  "nickname": "Nickname for the league",
+  "leagueOptOut": "Hide me from the league",
+  "sound": "Sounds",
+  "language": "Language",
+  "parentCode": "Code for your parent",
+  "getCode": "Get code",
+  "savedTerms": "Saved terms",
+  "logout": "Log out",
+  "save": "Save"
+ },
+ "common": {
+  "loading": "Loading",
+  "close": "Close",
+  "xp": "XP",
+  "gems": "Gems",
+  "streak": "Day streak",
+  "hearts": "Hearts",
+  "break": "You've played a lot today. Time for a break!"
+ }
+}

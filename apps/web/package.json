@@ -1,0 +1,41 @@
+{
+  "name": "@aaroh/web",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "dev": "next dev -p 3000",
+    "build": "next build",
+    "start": "next start -p 3000",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "gen:api": "openapi-typescript ../../packages/api-client/openapi.json -o src/lib/api-types.ts"
+  },
+  "dependencies": {
+    "@tanstack/react-query": "5",
+    "clsx": "^2.1.1",
+    "framer-motion": "11",
+    "next": "15",
+    "next-intl": "3",
+    "openapi-fetch": "0.13",
+    "react": "19",
+    "react-dom": "19",
+    "zustand": "5"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "4",
+    "@testing-library/jest-dom": "6",
+    "@testing-library/react": "16",
+    "@testing-library/user-event": "14",
+    "@types/node": "22",
+    "@types/react": "19",
+    "@types/react-dom": "19",
+    "@vitejs/plugin-react": "4",
+    "jsdom": "25",
+    "openapi-typescript": "7",
+    "postcss": "^8.5.33",
+    "tailwindcss": "4",
+    "typescript": "5",
+    "vitest": "2"
+  }
+}

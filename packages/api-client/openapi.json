@@ -23,8 +23,15 @@
           "required": true
         },
         "responses": {
-          "204": {
-            "description": "Successful Response"
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OtpSent"
+                }
+              }
+            }
           },
           "422": {
             "description": "Validation Error",
@@ -176,6 +183,7 @@
           "student"
         ],
         "summary": "Start Lesson",
+        "description": "Starts (or restarts) a lesson. Video and reading lessons return their content; quiz and\ninteractive lessons return questions without answers (answers are checked by /attempts).",
         "operationId": "start_lesson_v1_lessons__lesson_id__start_post",
         "parameters": [
           {
@@ -499,6 +507,337 @@
                     "additionalProperties": true
                   },
                   "title": "Response My Concepts V1 Twin Concepts Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/courses/{course_id}/terms": {
+      "get": {
+        "tags": [
+          "learning"
+        ],
+        "summary": "Course Terms",
+        "operationId": "course_terms_v1_courses__course_id__terms_get",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Course Id"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": true
+                  },
+                  "title": "Response Course Terms V1 Courses  Course Id  Terms Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/me/saved-terms": {
+      "get": {
+        "tags": [
+          "learning"
+        ],
+        "summary": "Saved Terms",
+        "operationId": "saved_terms_v1_me_saved_terms_get",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": true
+                  },
+                  "title": "Response Saved Terms V1 Me Saved Terms Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/terms/{term_id}/save": {
+      "post": {
+        "tags": [
+          "learning"
+        ],
+        "summary": "Save Term",
+        "operationId": "save_term_v1_terms__term_id__save_post",
+        "parameters": [
+          {
+            "name": "term_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Term Id"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "learning"
+        ],
+        "summary": "Unsave Term",
+        "operationId": "unsave_term_v1_terms__term_id__save_delete",
+        "parameters": [
+          {
+            "name": "term_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Term Id"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/doubts": {
+      "post": {
+        "tags": [
+          "learning"
+        ],
+        "summary": "Ask Doubt",
+        "description": "Answers from the class notes first (term definitions) and says where it came from.\nFalls back to the AI provider (P3's real model when configured). Doubt text stays private.",
+        "operationId": "ask_doubt_v1_doubts_post",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DoubtIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Ask Doubt V1 Doubts Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "learning"
+        ],
+        "summary": "My Doubts",
+        "operationId": "my_doubts_v1_doubts_get",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": true
+                  },
+                  "title": "Response My Doubts V1 Doubts Get"
                 }
               }
             }
@@ -2699,6 +3038,86 @@
         }
       }
     },
+    "/v1/webhooks/twilio/lang": {
+      "post": {
+        "tags": [
+          "calls"
+        ],
+        "summary": "Tw Lang",
+        "operationId": "tw_lang_v1_webhooks_twilio_lang_post",
+        "parameters": [
+          {
+            "name": "s",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "S"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/webhooks/twilio/confirm": {
+      "post": {
+        "tags": [
+          "calls"
+        ],
+        "summary": "Tw Confirm",
+        "operationId": "tw_confirm_v1_webhooks_twilio_confirm_post",
+        "parameters": [
+          {
+            "name": "s",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "S"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/webhooks/twilio/answer": {
       "post": {
         "tags": [
@@ -2706,6 +3125,66 @@
         ],
         "summary": "Tw Answer",
         "operationId": "tw_answer_v1_webhooks_twilio_answer_post",
+        "parameters": [
+          {
+            "name": "s",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "S"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/webhooks/twilio/incoming": {
+      "post": {
+        "tags": [
+          "calls"
+        ],
+        "summary": "Tw Incoming",
+        "description": "Set as the Twilio number's \"A call comes in\" webhook.",
+        "operationId": "tw_incoming_v1_webhooks_twilio_incoming_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/webhooks/twilio/pick": {
+      "post": {
+        "tags": [
+          "calls"
+        ],
+        "summary": "Tw Pick",
+        "operationId": "tw_pick_v1_webhooks_twilio_pick_post",
         "parameters": [
           {
             "name": "s",
@@ -2750,9 +3229,16 @@
           {
             "name": "s",
             "in": "query",
-            "required": true,
+            "required": false,
             "schema": {
-              "type": "string",
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
               "title": "S"
             }
           }
@@ -2760,6 +3246,131 @@
         "responses": {
           "204": {
             "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/demo/login": {
+      "post": {
+        "tags": [
+          "demo"
+        ],
+        "summary": "Demo Login",
+        "operationId": "demo_login_v1_demo_login_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Demo Login V1 Demo Login Post"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/demo/reset": {
+      "post": {
+        "tags": [
+          "demo"
+        ],
+        "summary": "Demo Reset",
+        "operationId": "demo_reset_v1_demo_reset_post",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Demo Reset V1 Demo Reset Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/demo/state": {
+      "get": {
+        "tags": [
+          "demo"
+        ],
+        "summary": "Demo State",
+        "operationId": "demo_state_v1_demo_state_get",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Demo State V1 Demo State Get"
+                }
+              }
+            }
           },
           "422": {
             "description": "Validation Error",
@@ -3068,6 +3679,14 @@
             },
             "type": "array",
             "title": "Units"
+          },
+          "terms": {
+            "items": {
+              "$ref": "#/components/schemas/TermIn"
+            },
+            "type": "array",
+            "title": "Terms",
+            "default": []
           }
         },
         "type": "object",
@@ -3114,6 +3733,32 @@
         ],
         "title": "DeletionIn"
       },
+      "DoubtIn": {
+        "properties": {
+          "text": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 2,
+            "title": "Text"
+          },
+          "lesson_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lesson Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "text"
+        ],
+        "title": "DoubtIn"
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -3132,6 +3777,23 @@
           "title": {
             "type": "string",
             "title": "Title"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "quiz",
+              "video",
+              "reading",
+              "interactive"
+            ],
+            "title": "Kind",
+            "default": "quiz"
+          },
+          "content": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Content",
+            "default": {}
           },
           "questions": {
             "items": {
@@ -3173,6 +3835,30 @@
           "phone"
         ],
         "title": "OtpRequest"
+      },
+      "OtpSent": {
+        "properties": {
+          "sent": {
+            "type": "boolean",
+            "title": "Sent"
+          },
+          "dev_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dev Code"
+          }
+        },
+        "type": "object",
+        "required": [
+          "sent"
+        ],
+        "title": "OtpSent"
       },
       "OutfitIn": {
         "properties": {
@@ -3397,6 +4083,36 @@
         },
         "type": "object",
         "title": "SettingsIn"
+      },
+      "TermIn": {
+        "properties": {
+          "regional": {
+            "type": "string",
+            "title": "Regional"
+          },
+          "english": {
+            "type": "string",
+            "title": "English"
+          },
+          "definition": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Definition"
+          }
+        },
+        "type": "object",
+        "required": [
+          "regional",
+          "english"
+        ],
+        "title": "TermIn"
       },
       "UnitIn": {
         "properties": {
