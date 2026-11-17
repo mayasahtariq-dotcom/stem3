@@ -37,6 +37,57 @@ def test_new_phone_is_unregistered_until_onboarding(conn: Connection, client: Te
     assert bad.status_code == 400 and bad.json()["detail"]["code"] in ("INVALID_CODE", "OTP_EXPIRED")
 
 
+class FakeVerify:
+    """Stands in for Twilio Verify: it 'texts' a code only it knows, then checks it."""
+
+    def __init__(self, fail_start: bool = False) -> None:
+        self.codes: dict[str, str] = {}
+        self.fail_start = fail_start
+
+    def start(self, to_e164: str, locale: str = "en") -> None:
+        if self.fail_start:
+            raise RuntimeError("Twilio Verify 401: trial account")
+        self.codes[to_e164] = "424242"
+
+    def check(self, to_e164: str, code: str) -> bool:
+        return self.codes.get(to_e164) == code
+
+
+def test_real_login_codes_go_through_twilio_verify(conn: Connection, client: TestClient,
+                                                   monkeypatch: pytest.MonkeyPatch) -> None:
+    from app.auth import service
+    v = FakeVerify()
+    monkeypatch.setattr(service, "get_code_service", lambda: v)
+    r = client.post("/web/auth/otp", json={"phone": "9123400077"})
+    assert r.status_code == 200 and r.json()["dev_code"] is None          # the code is never shown
+    assert "+919123400077" in v.codes
+    stored = conn.execute(text("select code_hash from otp_codes where phone_e164='+919123400077' "
+                               "order by created_at desc limit 1")).scalar_one()
+    assert stored == service.VERIFY_MARK                                   # we keep no code
+    bad = client.post("/web/auth/verify", json={"phone": "9123400077", "code": "111111"})
+    assert bad.status_code == 400 and bad.json()["detail"]["code"] == "INVALID_CODE"
+    ok = client.post("/web/auth/verify", json={"phone": "9123400077", "code": "424242"})
+    assert ok.status_code == 200, ok.text
+    assert ok.json()["access_token"]
+    again = client.post("/web/auth/verify", json={"phone": "9123400077", "code": "424242"})
+    assert again.status_code == 400                                         # used up
+
+
+def test_verify_down_falls_back_only_in_demo_mode(conn: Connection, client: TestClient,
+                                                  monkeypatch: pytest.MonkeyPatch) -> None:
+    from app.auth import service
+    from app.config import get_settings
+    monkeypatch.setattr(service, "get_code_service", lambda: FakeVerify(fail_start=True))
+    monkeypatch.setattr(get_settings(), "demo_mode", False)
+    r = client.post("/web/auth/otp", json={"phone": "9123400078"})
+    assert r.status_code == 503 and r.json()["detail"]["code"] == "SMS_UNAVAILABLE"
+    monkeypatch.setattr(get_settings(), "demo_mode", True)
+    r = client.post("/web/auth/otp", json={"phone": "9123400078"})
+    assert r.status_code == 200 and r.json()["dev_code"] == service.DEMO_FALLBACK_CODE
+    ok = client.post("/web/auth/verify", json={"phone": "9123400078", "code": service.DEMO_FALLBACK_CODE})
+    assert ok.status_code == 200, ok.text
+
+
 def test_class_key_student_plays_a_lesson_in_web_shapes(conn: Connection, client: TestClient) -> None:
     w = make_world(conn, n_lessons=1)
     key = conn.execute(text("select class_key from classrooms where id=:c"), {"c": w["classroom"]}).scalar_one()

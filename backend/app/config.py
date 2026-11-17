@@ -15,6 +15,7 @@ class Settings(BaseSettings):
     twilio_account_sid: str = ""
     twilio_auth_token: str = ""
     twilio_number: str = ""
+    twilio_verify_sid: str = ""       # VA…: login codes go through Twilio Verify when set
     call_hours_enforced: bool = True
     quiet_hours_enforced: bool = True
     demo_mode: bool = False

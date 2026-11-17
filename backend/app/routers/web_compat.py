@@ -172,19 +172,7 @@ def web_verify(body: VerifyIn, db: DbDep) -> dict[str, Any]:
     then sets name, role and language."""
     phone = auth_service.normalize_phone(body.phone)
     if not (_demo_phone(phone) and body.code == DEMO_TEST_CODE):
-        row = db.execute(text("select id, code_hash, attempts, expires_at > now() as live from otp_codes "
-                              "where phone_e164=:p and not consumed order by created_at desc limit 1 for update"),
-                         {"p": phone}).mappings().first()
-        if row is None or not row["live"]:
-            raise HTTPException(400, {"code": "OTP_EXPIRED"})
-        if row["attempts"] >= auth_service.MAX_ATTEMPTS:
-            raise HTTPException(429, {"code": "RATE_LIMITED"})
-        import hmac
-        if not hmac.compare_digest(row["code_hash"], auth_service._hash(phone, body.code)):
-            db.execute(text("update otp_codes set attempts=attempts+1 where id=:i"), {"i": row["id"]})
-            db.commit()
-            raise HTTPException(400, {"code": "INVALID_CODE"})
-        db.execute(text("update otp_codes set consumed=true where id=:i"), {"i": row["id"]})
+        auth_service.check_otp(db, phone, body.code)     # our own code, or Twilio Verify's
     user = db.execute(text("select id, role from users where phone_e164=:p"), {"p": phone}).mappings().first()
     if user is None:
         uid = db.execute(text("insert into users(role, name, phone_e164, registered) values "
