@@ -21,6 +21,8 @@ from app.routers import (
     realtime,
     student,
     teacher,
+    web_compat,
+    web_compat_b,
 )
 
 setup_logging()
@@ -41,8 +43,8 @@ app = FastAPI(title="Aaroh API", version="0.1.0", lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[o.strip() for o in get_settings().web_origins.split(",") if o.strip()],
-    allow_methods=["GET", "POST", "PATCH", "DELETE"],
-    allow_headers=["Authorization", "Content-Type"],
+    allow_methods=["GET", "POST", "PATCH", "PUT", "DELETE"],
+    allow_headers=["Authorization", "Content-Type", "Idempotency-Key", "Accept"],
     allow_credentials=False,          # bearer tokens, no cookies
 )
 app.include_router(auth.router, prefix="/v1")
@@ -57,6 +59,8 @@ app.include_router(realtime.router, prefix="/v1")
 app.include_router(calls.router, prefix="/v1")
 app.include_router(demo.router, prefix="/v1")
 app.include_router(demo.page)
+app.include_router(web_compat.router)
+app.include_router(web_compat_b.router)
 
 
 @app.get("/health")

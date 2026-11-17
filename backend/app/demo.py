@@ -9,9 +9,9 @@ from app.auth.service import normalize_phone
 from app.game import engine, leagues
 from app.people import create_learner
 
-TEACHER_PHONE = "+910000000099"
-RIVALS = [("Meena", "+910000000101", 45), ("Arjun", "+910000000102", 30),
-          ("Fatima", "+910000000103", 20), ("Kiran", "+910000000104", 10)]
+TEACHER_PHONE = "+916000000099"   # demo only: never texted; web login code 123456
+RIVALS = [("Meena", "+916000000101", 45), ("Arjun", "+916000000102", 30),
+          ("Fatima", "+916000000103", 20), ("Kiran", "+916000000104", 10)]
 
 
 def reset_demo(db: Connection) -> None:
@@ -26,7 +26,7 @@ def seed_demo(db: Connection, student_phone: str, parent_phone: str | None) -> d
                               "('teacher','Demo Teacher',:p) returning id"),
                          {"p": TEACHER_PHONE}).scalar_one()
     klass = db.execute(text("insert into classrooms(teacher_id, name, class_key) values "
-                            "(:t,'Class 7 Science','DEMO7SCI') on conflict (class_key) do update "
+                            "(:t,'Class 7 Science','BI07AARH') on conflict (class_key) do update "
                             "set teacher_id=:t returning id"), {"t": teacher}).scalar_one()
     db.execute(text("update classrooms set school_consent=true where id=:k"), {"k": klass})
     now = engine.utcnow()

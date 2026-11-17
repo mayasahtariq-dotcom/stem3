@@ -73,8 +73,9 @@ async def upload_notes(background: BackgroundTasks, db: DbDep, user: Teacher,
         if len(data) > MAX_FILE_BYTES:
             raise HTTPException(413, f"{f.filename} is over 10 MB")
         saved.append((storage.save(data, ALLOWED[mime]), mime))
-    uid = db.execute(text("insert into uploads(teacher_id, language, class_level) values (:t,:l,:c) "
-                          "returning id"), {"t": user.id, "l": language, "c": class_level}).scalar_one()
+    uid = db.execute(text("insert into uploads(teacher_id, language, class_level, started_at) "
+                          "values (:t,:l,:c, now()) returning id"),
+                     {"t": user.id, "l": language, "c": class_level}).scalar_one()
     for n, (path, mime) in enumerate(saved, start=1):
         db.execute(text("insert into upload_pages(upload_id, page_no, storage_path, mime) values "
                         "(:u,:n,:p,:m)"), {"u": uid, "n": n, "p": path, "m": mime})
