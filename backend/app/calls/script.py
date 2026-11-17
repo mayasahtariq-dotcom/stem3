@@ -23,6 +23,13 @@ LINES: dict[str, dict[str, str]] = {
         "bye": "शाबाश! अगली कॉल पर मिलते हैं। अलविदा!",
         "no_lesson": "आज के लिए कोई पाठ नहीं है। अलविदा!",
         "true": "सही", "false": "गलत",
+        "pick": "{n} दबाओ, {name} के लिए।",
+        "closed": "आरोह की कॉल सुबह 9 से रात 9 बजे तक होती हैं। कृपया तब कॉल करें। धन्यवाद!",
+        "cap": "इस हफ्ते के कॉल मिनट पूरे हो गए हैं। अगले हफ्ते मिलते हैं!",
+        "not_active": "अभी इस नंबर के लिए कॉल बंद हैं। धन्यवाद!",
+        "repeat": "{n} दबाओ, सवाल दोबारा सुनने के लिए।",
+        "chosen": "तुमने चुना: {text}। जवाब पक्का करने के लिए 1 दबाओ। सवाल दोबारा सुनने के लिए 2 दबाओ।",
+        "lang_menu": "हिंदी के लिए 1 दबाएँ।",
     },
     "kn": {
         "consent": "ನಮಸ್ಕಾರ. ಇದು ಆರೋಹ, ಮಕ್ಕಳಿಗಾಗಿ ವಿಜ್ಞಾನ ಕಲಿಕೆಯ ಆಟ. ನಾವು {name} ಅವರಿಗೆ ವಾರದಲ್ಲಿ "
@@ -44,9 +51,49 @@ LINES: dict[str, dict[str, str]] = {
         "bye": "ಶಭಾಷ್! ಮುಂದಿನ ಕರೆಯಲ್ಲಿ ಸಿಗೋಣ. ಬೈ!",
         "no_lesson": "ಇಂದು ಯಾವುದೇ ಪಾಠವಿಲ್ಲ. ಬೈ!",
         "true": "ಸರಿ", "false": "ತಪ್ಪು",
+        "pick": "{name} ಗಾಗಿ {n} ಒತ್ತು.",
+        "closed": "ಆರೋಹ ಕರೆಗಳು ಬೆಳಿಗ್ಗೆ 9 ರಿಂದ ರಾತ್ರಿ 9 ರವರೆಗೆ. ದಯವಿಟ್ಟು ಆಗ ಕರೆ ಮಾಡಿ. ಧನ್ಯವಾದಗಳು!",
+        "cap": "ಈ ವಾರದ ಕರೆ ನಿಮಿಷಗಳು ಮುಗಿದಿವೆ. ಮುಂದಿನ ವಾರ ಸಿಗೋಣ!",
+        "not_active": "ಈ ಸಂಖ್ಯೆಗೆ ಈಗ ಕರೆಗಳು ನಿಂತಿವೆ. ಧನ್ಯವಾದಗಳು!",
+        "repeat": "ಪ್ರಶ್ನೆಯನ್ನು ಮತ್ತೆ ಕೇಳಲು {n} ಒತ್ತು.",
+        "chosen": "ನೀನು ಆರಿಸಿದ್ದು: {text}. ಉತ್ತರ ಖಚಿತಪಡಿಸಲು 1 ಒತ್ತು. ಪ್ರಶ್ನೆಯನ್ನು ಮತ್ತೆ ಕೇಳಲು 2 ಒತ್ತು.",
+        "lang_menu": "ಕನ್ನಡಕ್ಕಾಗಿ 2 ಒತ್ತಿ.",
+    },
+    "en": {
+        "consent": "Hello. This is Aaroh, a science learning game for children. We would like to "
+                   "call {name} on a few days each week for short lessons. Calls are never "
+                   "recorded. Press 1 to agree, or press 2 to decline.",
+        "consent_yes": "Thank you! Let's start the first lesson.",
+        "consent_no": "Okay, we will not call. Thank you.",
+        "greet": "Hello {name}! I am Golu. Your streak is {streak} days. "
+                 "Today we will learn: {lesson}.",
+        "hint": "Press 9 to hear it again.",
+        "option": "Press {n} for {text}.",
+        "true_false": "Press 1 for true, press 2 for false.",
+        "correct": "Great job! That's right. Plus {xp} XP.",
+        "combo": "Three in a row!",
+        "not_quite": "Not quite! The answer is: {answer}.",
+        "no_input": "No key was pressed. Let's listen again.",
+        "summary": "Today you earned {xp} XP. Your streak is {streak} days.",
+        "badge": "You earned a new badge!",
+        "rank": "You are number {rank} in your class league.",
+        "bye": "Well done! See you on the next call. Goodbye!",
+        "no_lesson": "There is no lesson for today. Goodbye!",
+        "true": "True", "false": "False",
+        "pick": "Press {n} for {name}.",
+        "closed": "Aaroh calls are available from 9 am to 9 pm. Please call then. Thank you!",
+        "cap": "This week's call minutes are used up. See you next week!",
+        "not_active": "Calls are paused for this number. Thank you!",
+        "repeat": "Press {n} to hear the question again.",
+        "chosen": "You chose: {text}. Press 1 to confirm your answer. "
+                  "Press 2 to hear the question again.",
+        "lang_menu": "For English, press 3.",
     },
 }
 
 
 def line(lang: str, key: str, **kw: object) -> str:
     return LINES.get(lang, LINES["hi"])[key].format(**kw)
+
+
+UNKNOWN_CALLER = "Thank you for calling Aaroh. This number is not registered. Please ask your teacher."

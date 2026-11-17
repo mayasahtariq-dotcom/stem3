@@ -8,7 +8,7 @@ from sqlalchemy import Connection, text
 
 from app.calls import twilio as tw
 from app.calls.provider import TelephonyProvider
-from app.calls.script import line
+from app.calls.script import UNKNOWN_CALLER, line
 from app.config import get_settings
 from app.game import engine, hooks, leagues
 from app.game import rules as r
@@ -34,9 +34,11 @@ def url(path: str, session_id: str) -> str:
     return f"{_base()}/v1/webhooks/twilio/{path}?s={session_id}"
 
 
-def _text(v: Any) -> str:
+def _text(v: Any, lang: str = "hi") -> str:
+    """Pick the right language from {hi|kn|en|regional|english} content, else the plain text."""
     if isinstance(v, dict):
-        return str(v.get("regional") or v.get("english") or "")
+        pref = v.get(lang) or (v.get("english") if lang == "en" else v.get("regional"))
+        return str(pref or v.get("regional") or v.get("english") or "")
     return str(v)
 
 
@@ -54,26 +56,15 @@ def start_call(db: Connection, cs_id: str, teacher_id: str, provider: TelephonyP
         raise HTTPException(409, "Calls are only allowed between 9 am and 9 pm IST")
     if cs["status"] in ("declined", "paused"):
         raise HTTPException(409, f"Calls are {cs['status']} for this student")
-    used = db.execute(text(
-        "select coalesce(sum(seconds_used),0) from call_sessions where call_student_id=:i "
-        "and created_at >= :w"),
-        {"i": cs_id, "w": datetime.combine(r.week_start(r.ist_date(now)), datetime.min.time(),
-                                           tzinfo=r.IST)}).scalar_one()
-    if used >= WEEKLY_CAP_SECONDS:
+    if minutes_used_up(db, cs_id, now):
         raise HTTPException(409, "Weekly call minutes are used up")
     if cs["status"] == "waiting_consent":
         kind, to = "consent", cs["parent_phone_e164"] or cs["phone_e164"]
     else:
-        consented = db.execute(text("select granted from consent_records where learner_id=:l "
-                                    "order by created_at desc limit 1"),
-                               {"l": cs["learner_id"]}).scalar()
-        if not consented:
+        if not consent_on_record(db, cs["learner_id"]):
             raise HTTPException(409, "No consent on record; this number is never called")
         kind, to = "lesson", cs["phone_e164"]
-    sid = db.execute(text(
-        "insert into call_sessions(call_student_id, scheduled_for, status, kind, learner_id) "
-        "values (:c,:n,'ringing',:k,:l) returning id"),
-        {"c": cs_id, "n": now, "k": kind, "l": cs["learner_id"]}).scalar_one()
+    sid = new_session(db, cs_id, cs["learner_id"], kind, now, "ringing")
     _event(db, sid, "placed", {"kind": kind})
     try:
         provider_id = provider.place_call(to, str(sid))
@@ -84,6 +75,85 @@ def start_call(db: Connection, cs_id: str, teacher_id: str, provider: TelephonyP
     db.execute(text("update call_sessions set provider_call_id=:p where id=:s"),
                {"p": provider_id, "s": sid})
     return {"session_id": str(sid), "kind": kind, "status": "ringing"}
+
+
+def minutes_used_up(db: Connection, cs_id: Any, now: datetime) -> bool:
+    used = db.execute(text(
+        "select coalesce(sum(seconds_used),0) from call_sessions where call_student_id=:i "
+        "and created_at >= :w"),
+        {"i": cs_id, "w": datetime.combine(r.week_start(r.ist_date(now)), datetime.min.time(),
+                                           tzinfo=r.IST)}).scalar_one()
+    return bool(used >= WEEKLY_CAP_SECONDS)
+
+
+def consent_on_record(db: Connection, learner_id: Any) -> bool:
+    return bool(db.execute(text("select granted from consent_records where learner_id=:l "
+                                "order by created_at desc limit 1"), {"l": learner_id}).scalar())
+
+
+def new_session(db: Connection, cs_id: Any, learner_id: Any, kind: str, now: datetime,
+                status: str, provider_id: str | None = None) -> Any:
+    return db.execute(text(
+        "insert into call_sessions(call_student_id, scheduled_for, status, kind, learner_id, "
+        "provider_call_id) values (:c,:n,:st,:k,:l,:p) returning id"),
+        {"c": cs_id, "n": now, "st": status, "k": kind, "l": learner_id,
+         "p": provider_id}).scalar_one()
+
+
+# ---------- incoming calls: caller ID -> student -> twin picks the course ----------
+def incoming(db: Connection, from_number: str, call_sid: str, now: datetime) -> str:
+    """A student calls our number. Match the caller to call-only students by phone.
+
+    Unknown numbers get no learner data. Siblings sharing a phone pick with a key press.
+    """
+    rows = db.execute(text(
+        "select cs.id, cs.name, cs.language, cs.status, l.id as learner_id from call_students cs "
+        "join learners l on l.call_student_id=cs.id where cs.phone_e164=:p "
+        "order by cs.created_at"), {"p": from_number}).mappings().all()
+    if not rows:
+        return tw.response(tw.say(UNKNOWN_CALLER, "en"), tw.HANGUP)
+    lang = rows[0]["language"]
+    if get_settings().call_hours_enforced and not within_call_hours(now):
+        return tw.response(tw.say(line(lang, "closed"), lang), tw.HANGUP)
+    if len(rows) == 1:
+        return begin_incoming(db, dict(rows[0]), call_sid, now)
+    first = rows[0]
+    sid = new_session(db, first["id"], first["learner_id"], "lesson", now, "answered", call_sid)
+    save_state(db, sid, {"pick": [str(x["id"]) for x in rows]})
+    prompt = "".join(tw.say(line(x["language"], "pick", n=i, name=x["name"].split()[0]),
+                            x["language"]) for i, x in enumerate(rows, start=1))
+    return tw.response(tw.gather(prompt, url("pick", str(sid))), tw.HANGUP)
+
+
+def begin_incoming(db: Connection, cs: dict[str, Any], call_sid: str, now: datetime,
+                   sid: Any = None) -> str:
+    lang = cs["language"]
+    if cs["status"] in ("declined", "paused"):
+        return tw.response(tw.say(line(lang, "not_active"), lang), tw.HANGUP)
+    if minutes_used_up(db, cs["id"], now):
+        return tw.response(tw.say(line(lang, "cap"), lang), tw.HANGUP)
+    kind = "lesson" if consent_on_record(db, cs["learner_id"]) else "consent"
+    if sid is None:
+        sid = new_session(db, cs["id"], cs["learner_id"], kind, now, "answered", call_sid)
+    else:
+        db.execute(text("update call_sessions set call_student_id=:c, learner_id=:l, kind=:k, "
+                        "state='{}'::jsonb where id=:s"),
+                   {"c": cs["id"], "l": cs["learner_id"], "k": kind, "s": sid})
+    _event(db, sid, "incoming", {"kind": kind})
+    return voice(db, str(sid))
+
+
+def pick(db: Connection, sid: str, digit: str) -> str:
+    sess = load_session(db, sid)
+    ids = (sess["state"] or {}).get("pick", [])
+    n = int(digit) if digit.isdigit() else 0
+    if not 1 <= n <= len(ids):
+        return tw.response(tw.HANGUP)
+    cs = db.execute(text(
+        "select cs.id, cs.name, cs.language, cs.status, l.id as learner_id from call_students cs "
+        "join learners l on l.call_student_id=cs.id where cs.id=:i"),
+        {"i": ids[n - 1]}).mappings().one()
+    return begin_incoming(db, dict(cs), "", engine.utcnow(), sid=sess["id"])
 
 
 def _event(db: Connection, sid: Any, kind: str, payload: dict[str, Any]) -> None:
@@ -138,27 +208,62 @@ def plan_call(db: Connection, sess: dict[str, Any]) -> dict[str, Any]:
 
 
 # ---------- TwiML builders ----------
-def ask(db: Connection, sess: dict[str, Any], state: dict[str, Any], first: bool) -> str:
-    lang = sess["language"]
+LANG_KEYS = {"1": "hi", "2": "kn", "3": "en"}
+
+
+def lang_of(sess: dict[str, Any], state: dict[str, Any]) -> str:
+    """The language chosen on this call (press 1/2/3), else the student's default."""
+    return str(state.get("lang") or sess["language"])
+
+
+def option_choices(q: Any, lang: str) -> list[tuple[Any, str]]:
+    """(value checked against the answer, label spoken to the child) for each key 1..n."""
+    if q["kind"] == "true_false":
+        return [(True, line(lang, "true")), (False, line(lang, "false"))]
+    return [(o, _text(o, lang)) for o in (q["options"] or [])]
+
+
+def language_menu(sid: str) -> str:
+    menu = "".join(tw.say(line(code, "lang_menu"), code) for code in ("hi", "kn", "en"))
+    return tw.gather(menu, url("lang", sid)) + tw.redirect(url("voice", sid))
+
+
+def ask(db: Connection, sess: dict[str, Any], state: dict[str, Any]) -> str:
+    """Question, then 'press 1 for…, press 2 for…', then the next key repeats the question."""
+    lang = lang_of(sess, state)
     q = db.execute(text("select kind, prompt, options from questions where id=:q"),
                    {"q": state["queue"][state["i"]]}).mappings().one()
-    parts = [tw.say(_text(q["prompt"]), lang)]
-    if q["kind"] == "true_false":
-        parts.append(tw.say(line(lang, "true_false"), lang))
-    else:
-        for n, opt in enumerate(q["options"] or [], start=1):
-            parts.append(tw.say(line(lang, "option", n=n, text=_text(opt)), lang))
-    if first:
-        parts.append(tw.say(line(lang, "hint"), lang))
+    choices = option_choices(q, lang)
+    parts = [tw.say(_text(q["prompt"], lang), lang)]
+    parts += [tw.say(line(lang, "option", n=n, text=label), lang)
+              for n, (_, label) in enumerate(choices, start=1)]
+    parts.append(tw.say(line(lang, "repeat", n=len(choices) + 1), lang))
     sid = str(sess["id"])
     return (tw.gather("".join(parts), url("answer", sid))
+            + tw.say(line(lang, "no_input"), lang) + tw.redirect(url("voice", sid)))
+
+
+def confirm_menu(sess: dict[str, Any], state: dict[str, Any]) -> str:
+    lang, sid = lang_of(sess, state), str(sess["id"])
+    return (tw.gather(tw.say(line(lang, "chosen", text=state["pending"]["label"]), lang),
+                      url("confirm", sid))
             + tw.say(line(lang, "no_input"), lang) + tw.redirect(url("voice", sid)))
 
 
 def voice(db: Connection, sid: str) -> str:
     """Entry point when the call is answered, and the re-ask target after silence."""
     sess = load_session(db, sid)
-    lang, state = sess["language"], dict(sess["state"] or {})
+    state = dict(sess["state"] or {})
+    if "lang" not in state:                       # 1 Hindi, 2 Kannada, 3 English
+        if state.get("asked_lang"):
+            state["noinput"] = state.get("noinput", 0) + 1
+            if state["noinput"] > MAX_NO_INPUT:
+                save_state(db, sess["id"], state)
+                return tw.response(tw.HANGUP)
+        state["asked_lang"] = True
+        save_state(db, sess["id"], state, "answered")
+        return tw.response(language_menu(sid))
+    lang = lang_of(sess, state)
     if sess["kind"] == "consent" and not state.get("consented"):
         if state.get("asked_consent"):
             state["noinput"] = state.get("noinput", 0) + 1
@@ -172,16 +277,28 @@ def voice(db: Connection, sid: str) -> str:
                            tw.redirect(url("voice", sid)))
     if "queue" not in state:
         return start_lesson(db, sess)
+    state.pop("pending", None)
     state["noinput"] = state.get("noinput", 0) + 1
     if state["noinput"] > MAX_NO_INPUT:
         return finish(db, sess, state, [])
     save_state(db, sess["id"], state)
-    return tw.response(ask(db, sess, state, first=False))
+    return tw.response(ask(db, sess, state))
+
+
+def choose_language(db: Connection, sid: str, digit: str) -> str:
+    sess = load_session(db, sid)
+    chosen = LANG_KEYS.get(digit)
+    if chosen is None:
+        return tw.response(tw.redirect(url("voice", sid)))
+    state = {**dict(sess["state"] or {}), "lang": chosen, "noinput": 0}
+    save_state(db, sess["id"], state)
+    _event(db, sess["id"], "language", {"lang": chosen})
+    return voice(db, sid)
 
 
 def start_lesson(db: Connection, sess: dict[str, Any], intro: list[str] | None = None) -> str:
-    lang = sess["language"]
     state = {**dict(sess["state"] or {}), **plan_call(db, sess)}
+    lang = lang_of(sess, state)
     parts = list(intro or [])
     if not state["queue"]:
         save_state(db, sess["id"], state, "answered")
@@ -193,12 +310,13 @@ def start_lesson(db: Connection, sess: dict[str, Any], intro: list[str] | None =
                              lesson=state["lesson_title"]), lang))
     save_state(db, sess["id"], state, "answered")
     _event(db, sess["id"], "lesson_started", {"questions": len(state["queue"])})
-    return tw.response(*parts, ask(db, sess, state, first=True))
+    return tw.response(*parts, ask(db, sess, state))
 
 
 def consent(db: Connection, sid: str, digit: str) -> str:
     sess = load_session(db, sid)
-    lang, state = sess["language"], dict(sess["state"] or {})
+    state = dict(sess["state"] or {})
+    lang = lang_of(sess, state)
     if digit == "1":
         record_consent(db, sess["learner_id"], "parent_keypress", True)
         state["consented"] = True
@@ -261,30 +379,48 @@ def record_call_answer(db: Connection, sess: dict[str, Any], state: dict[str, An
 
 
 def answer(db: Connection, sid: str, digit: str) -> str:
+    """A key on the question menu: an option (then confirm), repeat, or # to skip."""
     sess = load_session(db, sid)
-    lang, state = sess["language"], dict(sess["state"] or {})
+    state = dict(sess["state"] or {})
     if "queue" not in state or state["i"] >= len(state["queue"]):
         return tw.response(tw.HANGUP)
     state["noinput"] = 0
-    qid = state["queue"][state["i"]]
-    if digit in ("9", "0"):                     # repeat (0 = simpler explanation, not yet built)
-        save_state(db, sess["id"], state)
-        return tw.response(ask(db, sess, state, first=False))
-    if digit == "#":                            # skip
+    state.pop("pending", None)
+    q = db.execute(text("select kind, options from questions where id=:q"),
+                   {"q": state["queue"][state["i"]]}).mappings().one()
+    choices = option_choices(q, lang_of(sess, state))
+    if digit == "#":                              # skip
         state["i"] += 1
         return _next(db, sess, state, [])
-    q = db.execute(text("select kind, options from questions where id=:q"),
-                   {"q": qid}).mappings().one()
-    if q["kind"] == "true_false":
-        chosen: Any = {"1": True, "2": False}.get(digit)
-    else:
-        opts = q["options"] or []
-        n = int(digit) if digit.isdigit() else 0
-        chosen = _text(opts[n - 1]) if 1 <= n <= len(opts) else None
-    if chosen is None:
+    n = int(digit) if digit.isdigit() else 0
+    if not 1 <= n <= len(choices):                # the repeat key, 9, 0 or anything else
         save_state(db, sess["id"], state)
-        return tw.response(ask(db, sess, state, first=False))
-    res = record_call_answer(db, sess, state, qid, chosen, engine.utcnow())
+        return tw.response(ask(db, sess, state))
+    value, label = choices[n - 1]
+    state["pending"] = {"value": value, "label": label}
+    save_state(db, sess["id"], state)
+    return tw.response(confirm_menu(sess, state))
+
+
+def confirm(db: Connection, sid: str, digit: str) -> str:
+    """'You chose X. Press 1 to confirm, 2 to hear the question again.' Only 1 records it."""
+    sess = load_session(db, sid)
+    state = dict(sess["state"] or {})
+    lang = lang_of(sess, state)
+    pending = state.get("pending")
+    if "queue" not in state or pending is None or state["i"] >= len(state["queue"]):
+        return tw.response(tw.redirect(url("voice", sid)))
+    state["noinput"] = 0
+    if digit == "2":
+        state.pop("pending", None)
+        save_state(db, sess["id"], state)
+        return tw.response(ask(db, sess, state))
+    if digit != "1":
+        save_state(db, sess["id"], state)
+        return tw.response(confirm_menu(sess, state))
+    state.pop("pending", None)
+    res = record_call_answer(db, sess, state, state["queue"][state["i"]], pending["value"],
+                             engine.utcnow())
     if res["correct"]:
         parts = [tw.say(line(lang, "correct", xp=res["xp"]), lang)]
         if res["combo_hit"]:
@@ -292,8 +428,10 @@ def answer(db: Connection, sid: str, digit: str) -> str:
     else:
         ans = res["answer"]
         if res["kind"] == "true_false":
-            ans = line(lang, "true" if ans in (True, "true", "True") else "false")
-        parts = [tw.say(line(lang, "not_quite", answer=_text(ans)), lang)]
+            label = line(lang, "true" if ans in (True, "true", "True") else "false")
+        else:
+            label = _text(ans, lang)
+        parts = [tw.say(line(lang, "not_quite", answer=label), lang)]
     state["i"] += 1
     return _next(db, sess, state, parts)
 
@@ -301,12 +439,12 @@ def answer(db: Connection, sid: str, digit: str) -> str:
 def _next(db: Connection, sess: dict[str, Any], state: dict[str, Any], parts: list[str]) -> str:
     if state["i"] < len(state["queue"]):
         save_state(db, sess["id"], state)
-        return tw.response(*parts, ask(db, sess, state, first=False))
+        return tw.response(*parts, ask(db, sess, state))
     return finish(db, sess, state, parts)
 
 
 def finish(db: Connection, sess: dict[str, Any], state: dict[str, Any], parts: list[str]) -> str:
-    lang, lid, now = sess["language"], sess["learner_id"], engine.utcnow()
+    lang, lid, now = lang_of(sess, state), sess["learner_id"], engine.utcnow()
     st = engine.load_stats(db, lid, now)
     lesson_id = state.get("lesson_id")
     if lesson_id and state.get("lesson_qs"):
@@ -349,7 +487,14 @@ def finish(db: Connection, sess: dict[str, Any], state: dict[str, Any], parts: l
     return tw.response(*parts, tw.HANGUP)
 
 
-def status_update(db: Connection, sid: str, call_status: str, duration: str | None) -> None:
+def status_update(db: Connection, sid: str | None, call_status: str, duration: str | None,
+                  call_sid: str = "") -> None:
+    if sid is None:
+        found = db.execute(text("select id from call_sessions where provider_call_id=:p "
+                                "order by created_at desc limit 1"), {"p": call_sid}).scalar()
+        if found is None:
+            return
+        sid = str(found)
     mapped = {"completed": "completed", "busy": "missed", "no-answer": "missed",
               "failed": "failed", "canceled": "failed"}.get(call_status)
     if mapped is None:

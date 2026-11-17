@@ -93,14 +93,40 @@ async def tw_consent(request: Request, s: str, db: DbRaw) -> Response:
     return await _run(db, flow.consent, s, form.get("Digits", ""))
 
 
+@router.post("/webhooks/twilio/lang")
+async def tw_lang(request: Request, s: str, db: DbRaw) -> Response:
+    form = await _verified_form(request)
+    return await _run(db, flow.choose_language, s, form.get("Digits", ""))
+
+
+@router.post("/webhooks/twilio/confirm")
+async def tw_confirm(request: Request, s: str, db: DbRaw) -> Response:
+    form = await _verified_form(request)
+    return await _run(db, flow.confirm, s, form.get("Digits", ""))
+
+
 @router.post("/webhooks/twilio/answer")
 async def tw_answer(request: Request, s: str, db: DbRaw) -> Response:
     form = await _verified_form(request)
     return await _run(db, flow.answer, s, form.get("Digits", ""))
 
 
+@router.post("/webhooks/twilio/incoming")
+async def tw_incoming(request: Request, db: DbRaw) -> Response:
+    """Set as the Twilio number's "A call comes in" webhook."""
+    form = await _verified_form(request)
+    return _xml(await run_in_threadpool(flow.incoming, db, form.get("From", ""),
+                                        form.get("CallSid", ""), engine.utcnow()))
+
+
+@router.post("/webhooks/twilio/pick")
+async def tw_pick(request: Request, s: str, db: DbRaw) -> Response:
+    form = await _verified_form(request)
+    return await _run(db, flow.pick, s, form.get("Digits", ""))
+
+
 @router.post("/webhooks/twilio/status", status_code=204)
-async def tw_status(request: Request, s: str, db: DbRaw) -> None:
+async def tw_status(request: Request, db: DbRaw, s: str | None = None) -> None:
     form = await _verified_form(request)
     await run_in_threadpool(flow.status_update, db, s, form.get("CallStatus", ""),
-                            form.get("CallDuration"))
+                            form.get("CallDuration"), form.get("CallSid", ""))
