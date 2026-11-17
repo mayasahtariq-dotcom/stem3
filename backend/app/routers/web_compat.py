@@ -23,6 +23,7 @@ from app.game import rules as r
 from app.people import create_learner
 from app.routers import ai as ai_routes
 from app.routers.auth import UserOut
+from app.twin import read as twin_read
 
 router = APIRouter(prefix="/web", tags=["web-compat"])
 SUBJECT_CODE = {"biology": "BI", "chemistry": "CH", "physics": "PH"}
@@ -376,7 +377,11 @@ def start(lesson_id: str, db: DbDep, user: UserDep) -> dict[str, Any]:
     lid = _lid(db, user)
     served = engine.start_lesson(db, user.id, lesson_id)
     ids = {q["id"] for q in served}
-    return {"lesson": lesson_out(db, lesson_id, ids), "stats": stats_out(db, lid), "term_mastery": {}}
+    course = db.execute(text("select u.course_id from lessons l join units u on u.id=l.unit_id where l.id=:l"),
+                        {"l": lesson_id}).scalar()
+    known = twin_read.term_mastery(db, lid, course, engine.utcnow()) if course else {}
+    return {"lesson": lesson_out(db, lesson_id, ids), "stats": stats_out(db, lid),
+            "term_mastery": {term_key(k): v for k, v in known.items()}}
 
 
 class AttemptIn(BaseModel):
@@ -468,8 +473,9 @@ def terms(course_id: str, db: DbDep, user: UserDep) -> list[dict[str, Any]]:
                            "exists (select 1 from saved_terms s where s.term_id=t.id and s.learner_id=:l) as saved "
                            "from terms t where t.course_id=:c order by t.english"),
                       {"c": course_id, "l": lid}).mappings().all()
+    known = twin_read.term_mastery(db, lid, course_id, engine.utcnow())     # Student Twin, with forgetting
     return [{"key": term_key(t["english"]), "content": term_content(t), "source_page": 1,
-             "saved": t["saved"], "mastery": None} for t in rows]
+             "saved": t["saved"], "mastery": known.get(t["english"])} for t in rows]
 
 
 def _term_id(db: Connection, course_id: str, key: str) -> Any:
