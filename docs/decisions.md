@@ -33,3 +33,9 @@
 - scripts/start_demo.py starts the API and tunnel, writes PUBLIC_BASE_URL, restarts the API and points the Twilio number in one command.
 - Calling in without a Twilio number: the /demo console has a phone simulator. It runs the same call engine (POST /v1/demo/sim turns each step's TwiML into a script the browser plays), dials in from the demo student's number so caller ID works, and plays Sarvam clips. It lifts the 9 am to 9 pm rule because nothing real is called. Real dial-in still needs an owned number (Exotel/Twilio).
 - Chatbot answers ONLY from the class notes: no related notes means a fixed reply without asking the AI; answers the AI marks as not-in-notes are discarded; every answer is fact-checked against the same notes by a second AI call; an answer must cite a real page or term. Off-topic and general-knowledge questions get the fixed reply in the student's language.
+
+
+## Mooshala Web frontend added (frontend-sandra)
+- The web app (apps/web), its design tokens and API client (packages/tokens, packages/api-client) were brought over from the earlier `stem` repo, where they were built and tested. Planning and handoff notes are in docs/web/.
+- The web app runs on its built-in fake backend (`NEXT_PUBLIC_USE_FAKES=true`). Its API types were generated from the `stem` backend's contract, which has no `/v1` prefix. This repo's packages/api-client/openapi.json (with `/v1`) is kept as is. Pointing the web app at this backend means regenerating the client from it; see docs/web/backend-handoff.md.
+- docs/translations-to-review.md now holds the full list of Hindi/Kannada drafts the web app uses.
