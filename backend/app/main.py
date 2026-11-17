@@ -43,6 +43,8 @@ app = FastAPI(title="Aaroh API", version="0.1.0", lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[o.strip() for o in get_settings().web_origins.split(",") if o.strip()],
+    # Vercel production + preview deploys (https://<anything>.vercel.app)
+    allow_origin_regex=r"https://[a-z0-9-]+\.vercel\.app",
     allow_methods=["GET", "POST", "PATCH", "PUT", "DELETE"],
     allow_headers=["Authorization", "Content-Type", "Idempotency-Key", "Accept"],
     allow_credentials=False,          # bearer tokens, no cookies
