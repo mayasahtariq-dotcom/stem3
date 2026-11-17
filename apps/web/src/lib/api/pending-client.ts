@@ -11,17 +11,18 @@ import { ApiError, toApiError } from "./errors";
  */
 export interface PendingClient {
   get<T>(path: string): Promise<T>;
-  post<T>(path: string, body?: unknown): Promise<T>;
+  post<T>(path: string, body?: unknown, extraHeaders?: Record<string, string>): Promise<T>;
   patch<T>(path: string, body?: unknown): Promise<T>;
   put<T>(path: string, body?: unknown): Promise<T>;
 }
 
 export function buildPendingClient(getAccessToken: TokenProvider, baseUrl = apiBaseUrl): PendingClient {
-  async function request<T>(method: string, path: string, body?: unknown): Promise<T> {
+  async function request<T>(method: string, path: string, body?: unknown, extra?: Record<string, string>): Promise<T> {
     const token = await getAccessToken();
     const headers: Record<string, string> = { Accept: "application/json" };
     if (token) headers.Authorization = `Bearer ${token}`;
     if (body !== undefined) headers["Content-Type"] = "application/json";
+    if (extra) Object.assign(headers, extra);
     let res: Response;
     try {
       res = await globalThis.fetch(`${baseUrl}${path}`, { method, headers, body: body === undefined ? undefined : JSON.stringify(body) });
@@ -35,7 +36,7 @@ export function buildPendingClient(getAccessToken: TokenProvider, baseUrl = apiB
   }
   return {
     get: (p) => request("GET", p),
-    post: (p, b) => request("POST", p, b),
+    post: (p, b, h) => request("POST", p, b, h),
     patch: (p, b) => request("PATCH", p, b),
     put: (p, b) => request("PUT", p, b),
   };

@@ -41,3 +41,14 @@
 - docs/translations-to-review.md now holds the full list of Hindi/Kannada drafts the web app uses.
 - Web app integration (18 Nov 2026): the backend adapts to apps/web, not the reverse. A compatibility layer at /web (web_compat.py, web_compat_b.py) serves the web app's own contract on top of the real logic; the frontend only changed its base URL and login adapter (backend OTP instead of Supabase). Join keys now use the web format (BI07-K4X2, no 0/O/1/I/L). Demo accounts moved to +91 6000000099 etc. (demo code 123456). Answer attempts use the real clock like consent records.
 - OTP SMS failures never crash login: 503 SMS_UNAVAILABLE normally; in DEMO_MODE the code falls back to 123456. The Twilio trial rejects custom SMS text (error 572006: trial accounts can only use predefined templates), so real OTP and parent texts need an upgraded Twilio account or an Indian SMS provider with DLT templates.
+
+## Farm worlds, Farm Store and placement (web)
+- Five explorable fields (Starter Meadow, Blossom Meadow, Golden Valley, Woodland Farm, Mountain Paradise) unlock at 0 / 2,000 / 4,000 / 6,000 / 8,000 XP, taken from the product owner's Meadow Levels design; this fits the PRD's 2,000 and 8,000 XP milestones.
+- 3D models are CC0 packs from Quaternius and Kenney, converted to optimised GLB (apps/web/public/models/world, credits in CREDITS.md there). Terrain, water, grass, wind and animal motion are procedural.
+- Gems are the store currency (the design's "coins"). Prices are scaled to real earnings (5 gems per lesson): 6 to 200 gems.
+- The world endpoints (/world, /world/store, /world/inventory, /world/fields/{id}/layout) are served by the fake backend only; see docs/web/backend-handoff.md. Purchases use an Idempotency-Key; layouts are saved whole with a version number (409 LAYOUT_CONFLICT if changed elsewhere).
+- Placement rules (inside the field, not on water, paths, steep ground, buildings or other objects) live in apps/web/src/lib/world/placement.ts and are checked both in the editor and by the fake server.
+- Golu in the new world is the farm cow model at a size that grows with the mascot stage; the old outfit accessory is not shown on it yet.
+- Teacher and parent dashboards do not show field progress yet, because their API responses have no total XP. The store and editing are student-only (other roles get 403 NOT_A_STUDENT).
+- The unlock celebration is a pop-up card with a sound, not a cinematic camera move.
+- The old primitive farm (src/three/world/FarmWorld.tsx) is kept for its scene tests; the student farm now renders src/three/worlds/WorldScene.tsx.
