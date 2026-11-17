@@ -190,6 +190,14 @@
     <table id="league"></table>
   </section>
 
+  <section class="card span12" id="chatbot">
+    <h2>Ask Golu: the doubt chatbot (student <span id="chatWho">view</span>)</h2>
+    <p style="margin:0 0 10px;color:var(--muted);font-size:14px">Golu answers only from the class notes the teacher uploaded and shows where the answer came from. Doubts stay private: teachers and parents never see them.</p>
+    <form id="chatForm" style="display:flex;gap:8px"><input id="chatIn" maxlength="500" placeholder="Type a doubt, e.g. What is the powerhouse of the cell?" style="flex:1;font:inherit;padding:12px;border-radius:12px;border:2px solid var(--line)">
+      <button class="primary" style="width:auto;padding:12px 20px" id="chatBtn">Ask</button></form>
+    <div id="chatLog" style="margin-top:12px;display:flex;flex-direction:column;gap:10px"></div>
+  </section>
+
   <section class="card span6">
     <h2>Badges earned</h2>
     <div class="chips" id="badges"><span class="empty">None yet</span></div>
@@ -422,6 +430,36 @@ $("dialBtn").onclick = () => {
 };
 $("hangBtn").onclick = () => endCall();
 
+// ---------- Ask Golu chatbot (as a smartphone classmate) ----------
+let studentToken = null;
+async function studentApi(path, opts = {}) {
+  const r = await fetch(API + path, { ...opts, headers: { "Content-Type": "application/json", Authorization: "Bearer " + studentToken } });
+  const body = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(body.detail || ("Error " + r.status));
+  return body;
+}
+function chatBubble(text, me, cite) {
+  const d = document.createElement("div");
+  d.style.cssText = me ? "align-self:flex-end;background:var(--sky);color:#fff;padding:8px 12px;border-radius:12px;max-width:80%;font-weight:600"
+                       : "align-self:flex-start;background:var(--cloud);border:2px solid var(--line);padding:8px 12px;border-radius:12px;max-width:85%";
+  d.textContent = text;
+  if (cite) { const c = document.createElement("div"); c.className = "pill info"; c.style.marginTop = "6px";
+    c.textContent = "From your notes: " + [cite.course, cite.page ? "page " + cite.page : cite.term].filter(Boolean).join(" · "); d.appendChild(c); }
+  $("chatLog").prepend(d);
+}
+async function loadChat() {
+  if (!studentToken) { $("chatBtn").disabled = true; return; }
+  try { const h = await studentApi("/doubts"); $("chatLog").innerHTML = "";
+        h.slice().reverse().forEach((x) => { chatBubble(x.text, true); chatBubble(x.answer, false, x.citation); }); } catch {}
+}
+$("chatForm").onsubmit = async (e) => {
+  e.preventDefault(); const q = $("chatIn").value.trim(); if (q.length < 2) return;
+  $("chatBtn").disabled = true; chatBubble(q, true); $("chatIn").value = "";
+  try { const a = await studentApi("/doubts", { method: "POST", body: JSON.stringify({ text: q }) }); chatBubble(a.answer, false, a.citation); }
+  catch (err) { chatBubble(err.message, false); }
+  finally { $("chatBtn").disabled = false; }
+};
+
 $("callBtn").onclick = async () => {
   if (busy) return; busy = true; $("callBtn").disabled = true; show("Placing the call…");
   try { const r = await api(`/call-students/${csId}/call-now`, { method: "POST" });
@@ -437,6 +475,7 @@ $("resetBtn").onclick = async () => {
 
 (async () => {
   try { const l = await api("/demo/login", { method: "POST" }); token = l.token; csId = l.call_student_id;
+        studentToken = l.student_token; $("chatWho").textContent = l.student_name ? "view, as " + l.student_name : "view"; loadChat();
         await refresh(); setInterval(refresh, 1500); }
   catch (e) { $("banner").textContent = e.message; $("banner").style.display = "block"; }
 })();
