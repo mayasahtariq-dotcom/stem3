@@ -26,3 +26,4 @@
 - Doubt chatbot answers only from the class notes (OCR pages ranked by word overlap, plus terms) and cites the page; embeddings (BGE-M3) can replace the ranking later.
 - Speech: Sarvam bulbul:v3 (speaker shubh), cached per text+language in audio_cache; files on local disk (UPLOAD_DIR) until Supabase Storage is wired.
 - Call voice: Sarvam clips (8 kHz WAV) played with Twilio <Play>. Fixed lines are pre-recorded when a course is published (or with scripts/prewarm_calls.py); live lines are made in parallel within 7 s, and any slow or failed line falls back to Twilio <Say>. CALL_VOICE=twilio turns it off. Needs PUBLIC_BASE_URL so Twilio can fetch the clips.
+- No canned demo courses: the demo seed creates only the class, the call student and classmates. Courses come from the teacher uploading real notes in the /demo console (upload, review flagged questions, publish to class).

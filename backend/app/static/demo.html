@@ -70,10 +70,21 @@
   .tag { font-size: 11px; font-weight: 700; color: #fff; background: var(--sky); border-radius: 6px; padding: 1px 6px; margin-left: 6px; }
   .chips { display: flex; flex-wrap: wrap; gap: 8px; }
   .chip { background: #F6EBFF; border: 1px solid #E3C2FF; color: #7A2DB8; border-radius: 999px; padding: 4px 12px; font-size: 14px; font-weight: 600; }
-  .steps { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+  .steps { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; }
   @media (max-width: 768px) { .steps { grid-template-columns: 1fr 1fr; } .stats { grid-template-columns: 1fr 1fr; } }
   .step { background: var(--cloud); border-radius: 12px; padding: 12px; font-size: 14px; }
   .step b { display: block; color: var(--grass-dark); font-size: 15px; margin-bottom: 2px; }
+  .drop { border: 3px dashed var(--line); border-radius: 16px; padding: 18px; text-align: center; background: var(--cloud); }
+  .drop.over { border-color: var(--sky); background: #E1F5FE; }
+  .stages { display: flex; gap: 6px; margin: 12px 0; }
+  .stages[hidden] { display: none; }
+  .stage { flex: 1; text-align: center; font-size: 13px; font-weight: 700; padding: 8px 4px; border-radius: 10px; background: var(--cloud); color: var(--muted); }
+  .stage.on { background: #E1F5FE; color: #0B6E99; } .stage.ok { background: #E8F8D8; color: #2F7A00; } .stage.bad { background: #FFE5E5; color: #A31515; }
+  .q { border: 2px solid var(--line); border-radius: 12px; padding: 10px 12px; margin-bottom: 8px; display: flex; gap: 10px; align-items: flex-start; }
+  .q.flag { border-color: #FFE38A; background: #FFFBEA; }
+  .q .txt { flex: 1; } .q small { color: var(--muted); display: block; }
+  .tiny { padding: 6px 10px; font-size: 13px; border-radius: 10px; background: #fff; border: 2px solid var(--line); color: var(--coral); }
+  select, input[type=number] { font: inherit; padding: 8px; border-radius: 10px; border: 2px solid var(--line); }
   .banner { grid-column: span 12; background: #FFF6D6; border: 2px solid #FFE38A; border-radius: 12px; padding: 12px 16px; display: none; }
 </style>
 </head>
@@ -92,12 +103,31 @@
   <section class="card span12">
     <h2>How a call works</h2>
     <div class="steps">
+      <div class="step"><b>0. Notes</b>Teacher uploads a photo of notes; the AI writes the course</div>
       <div class="step"><b>1. Language</b>Press 1 Hindi, 2 Kannada, 3 English</div>
       <div class="step"><b>2. Consent</b>A parent presses 1 to agree (first call only)</div>
       <div class="step"><b>3. Question</b>Press 1, 2, 3 for an option; the next key repeats it</div>
       <div class="step"><b>4. Confirm</b>Press 1 to lock in the answer, 2 to hear it again</div>
       <div class="step"><b>5. Rewards</b>XP, streak, league and the Student Twin update live</div>
     </div>
+  </section>
+
+  <section class="card span12" id="teacher">
+    <h2>Teacher: turn class notes into a course</h2>
+    <div class="drop" id="drop">
+      <p style="margin:0 0 10px"><b>Drop photos or PDFs of class notes here</b>, or choose files. The AI reads them and writes a course in Hindi, Kannada and English.</p>
+      <input type="file" id="files" multiple accept="image/jpeg,image/png,image/webp,application/pdf">
+      <label style="margin-left:10px">Medium <select id="lang"><option value="hi">Hindi</option><option value="kn">Kannada</option><option value="en">English</option></select></label>
+      <label style="margin-left:10px">Class <input type="number" id="level" min="6" max="10" value="7" style="width:70px"></label>
+      <div style="margin-top:12px"><button class="primary" id="uploadBtn" style="width:auto;padding:12px 22px">Make the course</button></div>
+    </div>
+    <div class="stages" id="stages" hidden>
+      <div class="stage" data-s="processing">Uploading</div><div class="stage" data-s="ocr">Reading the notes</div>
+      <div class="stage" data-s="outline">Writing lessons</div><div class="stage" data-s="done">Ready to review</div>
+    </div>
+    <div class="msg" id="umsg"></div>
+    <div id="review"></div>
+    <div id="courses" style="margin-top:10px"></div>
   </section>
 
   <section class="card span4">
@@ -226,6 +256,11 @@ function render(s) {
   $("badges").innerHTML = s.badges.length ? s.badges.map(b => `<span class="chip">${esc(b.title)}</span>`).join("")
     : '<span class="empty">None yet</span>';
 
+  classroomId = s.classroom_id;
+  $("courses").innerHTML = s.courses.length ? "<b>Courses</b> " + s.courses.map((c) =>
+      `<button class="tiny" style="color:var(--ink);margin:4px" data-course="${c.id}">${esc(c.title)} · ${c.status} · ${c.questions} q${c.flagged ? ` · ${c.flagged} to check` : ""}</button>`).join("")
+    : '<span class="empty" style="padding:0">No courses yet. Upload notes to make the first one.</span>';
+  $("courses").querySelectorAll("[data-course]").forEach((b) => b.onclick = () => showReview(b.dataset.course));
   $("sms").innerHTML = s.sms.length ? s.sms.map(x => {
       const [label, cls] = SMS[x.sms_status] || [x.sms_status, ""];
       return `<div style="margin-bottom:10px"><b>${esc(x.title)}</b> finished<br><span class="pill ${cls}">${label}</span></div>`;
@@ -235,6 +270,66 @@ function render(s) {
 async function refresh() {
   try { render(await api("/demo/state")); $("banner").style.display = "none"; }
   catch (e) { $("banner").textContent = e.message; $("banner").style.display = "block"; }
+}
+
+let classroomId = null, polling = null;
+const ORDER = ["processing", "ocr", "outline", "done"];
+function showStage(st) {
+  $("stages").hidden = false;
+  document.querySelectorAll(".stage").forEach((el) => {
+    const i = ORDER.indexOf(el.dataset.s), cur = ORDER.indexOf(st);
+    el.className = "stage" + (st === "failed" ? (i === 0 ? " bad" : "") : i < cur || st === "done" && i === cur ? " ok" : i === cur ? " on" : "");
+  });
+}
+function umsg(t, err) { $("umsg").textContent = t || ""; $("umsg").className = "msg" + (err ? " err" : ""); }
+
+async function upload() {
+  const files = $("files").files;
+  if (!files.length) return umsg("Choose at least one photo or PDF.", true);
+  const fd = new FormData();
+  for (const f of files) fd.append("files", f);
+  fd.append("language", $("lang").value); fd.append("class_level", $("level").value);
+  $("uploadBtn").disabled = true; $("review").innerHTML = ""; showStage("processing"); umsg("Uploading…");
+  try {
+    const r = await fetch(API + "/uploads", { method: "POST", body: fd, headers: { Authorization: "Bearer " + token } });
+    const body = await r.json(); if (!r.ok) throw new Error(body.detail || "Upload failed");
+    const t0 = Date.now();
+    clearInterval(polling);
+    polling = setInterval(async () => {
+      const st = await api("/uploads/" + body.upload_id);
+      showStage(st.status); umsg(`${Math.round((Date.now() - t0) / 1000)} s · ${st.pages} page(s)` + (st.ocr_confidence != null ? ` · reading confidence ${Math.round(st.ocr_confidence * 100)}%` : ""));
+      if (st.status === "done" || st.status === "failed") {
+        clearInterval(polling); $("uploadBtn").disabled = false;
+        if (st.status === "failed") umsg(st.error || "The AI could not make a course. Try a clearer photo.", true);
+        else { umsg(`Course ready in ${(st.elapsed_ms / 1000).toFixed(1)} s. ${st.flagged_questions} question(s) need a look.`); showReview(st.course_id); refresh(); }
+      }
+    }, 1500);
+  } catch (e) { umsg(e.message, true); $("uploadBtn").disabled = false; showStage("failed"); }
+}
+$("uploadBtn").onclick = upload;
+const drop = $("drop");
+drop.ondragover = (e) => { e.preventDefault(); drop.classList.add("over"); };
+drop.ondragleave = () => drop.classList.remove("over");
+drop.ondrop = (e) => { e.preventDefault(); drop.classList.remove("over"); $("files").files = e.dataTransfer.files; };
+
+function label(v) { return v == null ? "" : typeof v === "object" ? (v.en || v.english || v.hi || v.regional || "") : String(v); }
+async function showReview(courseId) {
+  const c = await api("/courses/" + courseId);
+  const lessons = c.units.flatMap((u) => u.lessons);
+  $("review").innerHTML = `<h3 style="margin:14px 0 8px">${esc(c.title)} <span class="pill ${c.status === "published" ? "ok" : "wait"}">${c.status}</span></h3>` +
+    lessons.map((l) => `<div style="margin-bottom:10px"><b>${esc(l.title)}</b> <small style="color:var(--muted)">${l.questions.length} questions</small>` +
+      l.questions.map((q) => `<div class="q ${q.flagged ? "flag" : ""}"><div class="txt">${q.flagged ? '<span class="pill wait">check this</span> ' : ""}${esc(label(q.prompt))}
+        <small>${esc(q.prompt.hi || "")}</small><small>Answer: ${esc(q.kind === "true_false" ? String(q.answer) : label(q.answer))}</small></div>
+        <button class="tiny" data-del="${q.id}">Delete</button></div>`).join("") + `</div>`).join("") +
+    (c.status !== "published" ? `<button class="primary" id="pubBtn" style="width:auto;padding:12px 22px">Publish to Class 7 Science</button>` : "");
+  $("review").querySelectorAll("[data-del]").forEach((b) => b.onclick = async () => {
+    await api("/questions/" + b.dataset.del, { method: "DELETE" }); showReview(courseId); });
+  if ($("pubBtn")) $("pubBtn").onclick = async () => {
+    try { await api(`/courses/${courseId}/publish`, { method: "POST" });
+          await api(`/courses/${courseId}/assign`, { method: "POST", body: JSON.stringify({ classroom_id: classroomId }) });
+          umsg("Published. Golu's voice for this course is being recorded; Ananya can now learn it by phone."); showReview(courseId); refresh(); }
+    catch (e) { umsg(e.message, true); }
+  };
 }
 
 $("callBtn").onclick = async () => {

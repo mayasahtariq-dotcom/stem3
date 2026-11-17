@@ -113,4 +113,12 @@ def demo_state(db: DbDep, _: Teacher) -> dict[str, Any]:
         "badges": [dict(b) for b in badges], "twin": twin_rows, "league": table,
         "call": dict(sess) | {"events": events} if sess else None,
         "sms": [dict(x) for x in sms], "twilio_number": get_settings().twilio_number,
-        "call_student_id": str(cs_id)}
+        "call_student_id": str(cs_id), "classroom_id": str(ids["classroom"]),
+        "courses": [dict(c) | {"id": str(c["id"])} for c in db.execute(text(
+            "select c.id, c.title, c.status, "
+            "(select count(*) from questions q join lessons l on l.id=q.lesson_id join units u "
+            " on u.id=l.unit_id where u.course_id=c.id) as questions, "
+            "(select count(*) from questions q join lessons l on l.id=q.lesson_id join units u "
+            " on u.id=l.unit_id where u.course_id=c.id and q.flagged) as flagged "
+            "from courses c where c.teacher_id=:t order by c.created_at desc"),
+            {"t": ids["teacher"]}).mappings().all()]}
