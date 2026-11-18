@@ -5,7 +5,7 @@ import tempfile
 # Tests must never reach real phone, SMS or AI services, whatever backend/.env says.
 # Environment variables beat the .env file in pydantic-settings.
 os.environ.update({"USE_FAKE_TELEPHONY": "true", "USE_FAKE_SMS": "true", "USE_FAKE_AI": "true",
-                   "USE_FAKE_SPEECH": "true", "TWILIO_AUTH_TOKEN": "", "DEMO_MODE": "false",
+                   "USE_FAKE_SPEECH": "true", "FORCE_FAKES": "true", "TWILIO_AUTH_TOKEN": "", "DEMO_MODE": "false",
                    "PUBLIC_BASE_URL": "", "UPLOAD_DIR": tempfile.mkdtemp(prefix="aaroh-test-"),
                    # separate audio cache keys, so real cached clips in the database never leak in
                    "SARVAM_SPEAKER": "test-speaker", "SARVAM_MODEL": "test-model"})

@@ -22,7 +22,7 @@ PLACEHOLDER = re.compile(r"\[\[VOICE:(\d+)\]\]")
 
 def enabled() -> bool:
     s = get_settings()
-    return (s.call_voice == "sarvam" and not s.use_fake_speech and bool(s.sarvam_api_key)
+    return (s.call_voice == "sarvam" and not s.fake_speech
             and bool(s.public_base_url))
 
 

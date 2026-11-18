@@ -1,4 +1,5 @@
 import asyncio
+import logging
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
@@ -52,6 +53,10 @@ async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
     from app.db.session import get_engine
     titles.refresh_if_stale(get_engine())      # translated course titles into memory
     ensure_phone_sim_schema(get_engine())
+    from app.config import key_status
+    missing = [str(k["name"]) for k in key_status(get_settings()) if not k["set"]]
+    logging.getLogger("app.keys").warning("API keys missing: %s (details at /health/keys)",
+                                          ", ".join(missing) or "none")
     task = None
     if get_settings().scheduler_enabled:       # the PRD's 5-minute job
         task = asyncio.create_task(scheduler_loop(get_settings().scheduler_interval))
@@ -85,6 +90,14 @@ app.include_router(demo.page)
 app.include_router(web_compat.router)
 app.include_router(web_compat_b.router)
 app.include_router(web_sim.router)
+
+
+@app.get("/health/keys")
+async def health_keys() -> dict[str, object]:
+    """Which API keys are set (never their values) and what falls back to a fake without each."""
+    from app.config import key_status
+    keys = key_status(get_settings())
+    return {"missing": [k["name"] for k in keys if not k["set"]], "keys": keys}
 
 
 @app.get("/health")

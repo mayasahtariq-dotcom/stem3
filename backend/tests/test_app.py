@@ -1,4 +1,3 @@
-import pytest
 from fastapi.testclient import TestClient
 
 from app.config import Settings
@@ -19,10 +18,18 @@ def test_fakes_work_without_keys() -> None:
     assert get_telephony(s).place_call("+919999999999", "s1") == "fake-call-1"
 
 
-def test_real_providers_not_wired_yet() -> None:
-    s = Settings(use_fake_ai=False, gemini_api_key="")
-    with pytest.raises(NotImplementedError):
-        get_llm(s)
+def test_providers_follow_the_keys() -> None:
+    from app.ai.provider import FakeLLMProvider, GeminiProvider
+    assert isinstance(get_llm(Settings(use_fake_ai=False, gemini_api_key="", force_fakes=False)), FakeLLMProvider)
+    assert isinstance(get_llm(Settings(use_fake_ai=True, gemini_api_key="k", force_fakes=False)), GeminiProvider)
+    assert isinstance(get_llm(Settings(gemini_api_key="k", force_fakes=True)), FakeLLMProvider)
+
+
+def test_key_status_never_shows_values() -> None:
+    body = TestClient(app).get("/health/keys").json()
+    names = {k["name"] for k in body["keys"]}
+    assert {"GEMINI_API_KEY", "SARVAM_API_KEY", "DATABASE_URL"} <= names
+    assert all(set(k) == {"name", "set", "used_for", "when_missing"} for k in body["keys"])
 
 
 def test_cors_allows_the_web_app_origin() -> None:
