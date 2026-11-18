@@ -9,6 +9,7 @@ import { useBilingual } from "@/lib/i18n/use-bilingual";
 import type { Tri } from "@/lib/i18n/use-tri";
 import {
   useAssignCourse,
+  useClassCourse,
   useCourse,
   useCourses,
   useDashboard,
@@ -139,8 +140,17 @@ export function ClassDetailRoute({ classId }: { classId: string }) {
   const dash = useDashboard(classId);
   const insights = useClassInsights(classId);
   const classroom = classes.data?.find((c) => c.id === classId) ?? null;
+  const courses = useCourses();
+  const toggle = useClassCourse(classId);
+  const onError = useErrorToast();
   return (
     <ClassDetailScreen
+      courses={courses.data}
+      courseIds={dash.data?.courses.map((c) => c.id) ?? []}
+      courseBusyId={toggle.isPending ? toggle.variables.courseId : null}
+      onToggleCourse={(courseId, add) =>
+        toggle.mutate({ courseId, add }, { onSuccess: () => toast("success", add ? t("courseAdded") : t("courseRemoved")), onError })
+      }
       classroom={classroom}
       insights={insights.data}
       students={dash.data?.students}

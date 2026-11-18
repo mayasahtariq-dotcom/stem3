@@ -95,6 +95,23 @@ export function useAssignCourse(id: string) {
   });
 }
 
+/** Adds a course to a class (POST /courses/{id}/assign) or takes it out (POST /courses/{id}/unassign). */
+export function useClassCourse(classId: string) {
+  const { api, pending } = useServices();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ courseId, add }: { courseId: string; add: boolean }) =>
+      add
+        ? unwrap(await api.POST("/courses/{course_id}/assign", { params: { path: { course_id: courseId } }, body: { classroom_ids: [classId], due_at: null } }))
+        : pending.post(`/courses/${encodeURIComponent(courseId)}/unassign`, { classroom_ids: [classId] }),
+    onSuccess: (_d, v) => {
+      void qc.invalidateQueries({ queryKey: queryKeys.teacher.course(v.courseId) });
+      void qc.invalidateQueries({ queryKey: queryKeys.teacher.courses });
+      void qc.invalidateQueries({ queryKey: ["classrooms"] });
+    },
+  });
+}
+
 /** GET /lessons/{id} (as the owner: answers, confidence and flags included) */
 export function useReviewLesson(lessonId: string) {
   const { api } = useServices();

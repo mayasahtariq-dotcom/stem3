@@ -760,7 +760,17 @@
     "topics": "By chapter",
     "missed": "Most often answered wrong",
     "noMissed": "No tricky questions yet.",
-    "missedRate": "{pct}% got this wrong ({n} answers)"
+    "missedRate": "{pct}% got this wrong ({n} answers)",
+    "coursesTitle": "Courses in this class",
+    "addCourse": "Add to class",
+    "removeCourse": "Remove",
+    "inClass": "In this class",
+    "published": "Published: students can play it",
+    "draftNote": "Draft: students see it after you publish",
+    "noCoursesYet": "No courses yet. Upload your notes to make one.",
+    "uploadNotes": "Upload notes",
+    "courseAdded": "Course added to the class",
+    "courseRemoved": "Course removed from the class"
   },
   "allClasses": {
     "title": "All your classes",

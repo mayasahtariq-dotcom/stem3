@@ -847,6 +847,20 @@ def t_assign(course_id: str, body: AssignIn, db: DbDep, user: UserDep) -> dict[s
     return course_out(db, _own_course(db, user, course_id))
 
 
+class UnassignIn(BaseModel):
+    classroom_ids: list[str]
+
+
+@router.post("/courses/{course_id}/unassign")
+def t_unassign(course_id: str, body: UnassignIn, db: DbDep, user: UserDep) -> dict[str, Any]:
+    """Takes a course out of classes (students' progress is kept, so adding it back resumes where they were)."""
+    _own_course(db, user, course_id)
+    for k in body.classroom_ids:
+        _own_class(db, user, k)
+        db.execute(text("delete from course_assignments where course_id=:c and classroom_id=:k"), {"c": course_id, "k": k})
+    return course_out(db, _own_course(db, user, course_id))
+
+
 # ---------- teacher overview, insights, materials, notes ----------
 def _ref(row: dict[str, Any]) -> dict[str, Any]:
     return {"id": row["id"], "name": row["name"], "accuracy": row["accuracy"], "streak": row["streak"],

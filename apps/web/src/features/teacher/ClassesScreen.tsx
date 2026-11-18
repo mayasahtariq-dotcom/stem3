@@ -178,6 +178,11 @@ export interface ClassDetailScreenProps {
   onRetry: () => void;
   onCopy: (code: string) => void;
   onOpenStudent: (id: string) => void;
+  /** All the teacher's courses, and which are in this class. */
+  courses?: Schemas["CourseSummary"][];
+  courseIds?: string[];
+  courseBusyId?: string | null;
+  onToggleCourse?: (courseId: string, add: boolean) => void;
 }
 
 /** Stateless: one class: code, who joined, and how the class is doing. */
@@ -207,6 +212,10 @@ export function ClassDetailScreen(p: ClassDetailScreenProps) {
           <MeterRow label={t("completion")} value={ins?.completion ?? 0} />
         </Card>
       </div>
+
+      {p.onToggleCourse && (
+        <ClassCoursesCard courses={p.courses} inClass={p.courseIds ?? []} busyId={p.courseBusyId ?? null} onToggle={p.onToggleCourse} />
+      )}
 
       <div className="grid gap-4 laptop:grid-cols-2">
         <Card className="flex flex-col gap-3 p-4">
@@ -252,5 +261,51 @@ export function ClassDetailScreen(p: ClassDetailScreenProps) {
         )}
       </Card>
     </div>
+  );
+}
+
+/** The class's courses: add any of the teacher's courses, or take one out. */
+function ClassCoursesCard({ courses, inClass, busyId, onToggle }: { courses: Schemas["CourseSummary"][] | undefined; inClass: string[]; busyId: string | null; onToggle: (courseId: string, add: boolean) => void }) {
+  const t = useBilingual("classes");
+  const tri = useTri();
+  const sorted = [...(courses ?? [])].sort((a, b) => Number(inClass.includes(b.id)) - Number(inClass.includes(a.id)));
+  return (
+    <Card className="flex flex-col gap-3 p-4" data-testid="class-courses">
+      <div className="flex flex-wrap items-center gap-2">
+        <StickerIcon name="books" size={30} />
+        <BilingualText as="h2" size="lg" text={t("coursesTitle")} className="flex-1" />
+        <ChunkyButton asChild size="sm" variant="white">
+          <Link href="/teacher/courses/new">
+            <BilingualText as="span" size="sm" text={t("uploadNotes")} />
+          </Link>
+        </ChunkyButton>
+      </div>
+      {!courses ? (
+        <LoadingState />
+      ) : courses.length === 0 ? (
+        <BilingualText size="sm" text={t("noCoursesYet")} className="text-stone" />
+      ) : (
+        <ul className="flex flex-col gap-2">
+          {sorted.map((c) => {
+            const added = inClass.includes(c.id);
+            const title = tri(c.title as never);
+            return (
+              <li key={c.id} className={`flex flex-wrap items-center gap-3 rounded-2xl p-3 ${added ? "bg-[#ddf7e3]" : "bg-[#fffaf5]"}`}>
+                <span className="flex min-w-0 flex-1 flex-col">
+                  <span className="font-bold">{title.regional}</span>
+                  <span className="text-xs text-stone">
+                    {c.lesson_count} · {c.status === "published" ? t("published").english : t("draftNote").english}
+                  </span>
+                </span>
+                {added && <Pill tone="good">{t("inClass").regional}</Pill>}
+                <ChunkyButton size="sm" variant={added ? "ghost" : "primary"} loading={busyId === c.id} disabled={busyId !== null} onClick={() => onToggle(c.id, !added)} data-testid={`class-course-${c.id}`}>
+                  <BilingualText as="span" size="sm" tone={added ? "default" : "inverse"} text={added ? t("removeCourse") : t("addCourse")} />
+                </ChunkyButton>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </Card>
   );
 }

@@ -9,7 +9,7 @@ import { useBilingual } from "@/lib/i18n/use-bilingual";
 import { useServices } from "@/lib/services";
 import { useAppStore } from "@/lib/store/app-store";
 import { useAuth } from "./hooks";
-import { fetchProfile } from "./profile-api";
+import { fetchProfile, saveProfile } from "./profile-api";
 import { nextRouteFor, requiredRoleFor } from "./routing";
 import type { Session } from "./types";
 
@@ -31,9 +31,21 @@ export function usePostSignIn() {
   return useCallback(
     async (session: Session) => {
       completeSignIn(session);
-      const profile = await qc.fetchQuery({ queryKey: queryKeys.me, queryFn: () => fetchProfile(api) });
-      if (profile.languageMode && profile.languageMode !== readLanguageCookie()) {
-        writeLanguageCookie(profile.languageMode);
+      let profile = await qc.fetchQuery({ queryKey: queryKeys.me, queryFn: () => fetchProfile(api) });
+      // The language picked before sign-in (Hindi + English or Kannada + English) wins and is saved to the
+      // account; with no pick on this device, adopt the account's language.
+      const pickedLanguage = useAppStore.getState().draftLanguage ?? readLanguageCookie();
+      if (pickedLanguage && profile.registered && profile.name && profile.roles.length && profile.languageMode !== pickedLanguage) {
+        try {
+          profile = await saveProfile(api, { name: profile.name, languageMode: pickedLanguage, roles: profile.roles });
+          qc.setQueryData(queryKeys.me, profile);
+        } catch {
+          /* keep the account's language if saving fails */
+        }
+      }
+      const mode = profile.languageMode ?? pickedLanguage;
+      if (mode && mode !== readLanguageCookie()) {
+        writeLanguageCookie(mode);
         router.refresh();
       }
       // The mode picked before sign-in must match the account: never open
