@@ -923,7 +923,10 @@
     "conflict": "Your field changed on another device. We reloaded it, try again.",
     "saveFailed": "Couldn't save your field. Check your connection and try again.",
     "progressTitle": "Farm fields",
-    "progressLine": "{n} of 5 fields unlocked"
+    "progressLine": "{n} of 5 fields unlocked",
+    "dragToFarm": "Drag to farm",
+    "dropHere": "Drop here",
+    "dropBlocked": "That spot is taken. Drag the ring to a free spot, or rotate it."
   },
   "phone": {
     "back": "Back",

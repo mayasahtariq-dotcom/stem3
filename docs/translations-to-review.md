@@ -1606,3 +1606,9 @@ Run `python scripts/export_translations.py` (from backend/) to regenerate `docs/
 | phoneSim.retryLater | We'll try this one again at the end. | यह सवाल आखिर में फिर से आएगा। | ಈ ಪ್ರಶ್ನೆ ಕೊನೆಯಲ್ಲಿ ಮತ್ತೆ ಬರುತ್ತದೆ. | [ ] |
 | phoneSim.option | Option {n}: {title}. | विकल्प {n}: {title}। | ಆಯ್ಕೆ {n}: {title}. | [ ] |
 | phoneSim.pressNumber | To answer, press the option number on your keypad. | जवाब देने के लिए कीपैड पर विकल्प का नंबर दबाएँ। | ಉತ್ತರಿಸಲು ಕೀಪ್ಯಾಡ್‌ನಲ್ಲಿ ಆಯ್ಕೆಯ ಸಂಖ್ಯೆ ಒತ್ತಿ. | [ ] |
+## Farm store drag and drop
+| Key | English | Hindi | Kannada | Reviewed |
+|---|---|---|---|---|
+| world.dragToFarm | Drag to farm | खेत पर खींचो | ಹೊಲಕ್ಕೆ ಎಳೆ | [ ] |
+| world.dropHere | Drop here | यहाँ छोड़ो | ಇಲ್ಲಿ ಬಿಡು | [ ] |
+| world.dropBlocked | That spot is taken. Drag the ring to a free spot, or rotate it. | वह जगह भरी है। घेरे को खाली जगह पर खींचो, या घुमाओ। | ಆ ಜಾಗ ತುಂಬಿದೆ. ಉಂಗುರವನ್ನು ಖಾಲಿ ಜಾಗಕ್ಕೆ ಎಳೆ, ಅಥವಾ ತಿರುಗಿಸು. | [ ] |

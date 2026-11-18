@@ -57,6 +57,11 @@ export function useFieldEditor(field: FieldId, enabled = true) {
       const obj = { uid: draft.uid, item_id: draft.item_id, x: draft.x, z: draft.z, rotation: draft.rotation };
       persist([...objects.filter((o) => o.uid !== obj.uid), { ...obj, x: +obj.x.toFixed(2), z: +obj.z.toFixed(2), rotation: +obj.rotation.toFixed(3) }], onDone, onFail);
     },
+    /** Why an object could not stand at this spot (null when it fits). For drag and drop. */
+    problemAt: (d: PlacedObject) => placementProblem(g, d, visible.filter((o) => o.uid !== d.uid)),
+    /** Places an object exactly here (drag and drop from the store). */
+    placeAt: (d: PlacedObject, onDone?: () => void, onFail?: (e: unknown) => void) =>
+      persist([...objects.filter((o) => o.uid !== d.uid), { ...d, x: +d.x.toFixed(2), z: +d.z.toFixed(2), rotation: +d.rotation.toFixed(3) }], onDone, onFail),
     /** Takes a placed object back to the inventory. */
     putAway: (uid: string, onDone?: () => void, onFail?: (e: unknown) => void) => persist(objects.filter((o) => o.uid !== uid), onDone, onFail),
   };

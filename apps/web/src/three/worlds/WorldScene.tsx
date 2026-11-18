@@ -17,6 +17,7 @@ import { FieldScene } from "./FieldScene";
 import { ground, type Wrap } from "./fields/common";
 import { ItemModel } from "./items";
 import { FIELD_LOOKS } from "./looks";
+import { groundPicker } from "./ground-picker";
 import { Model } from "./Model";
 
 export interface PlacementView {
@@ -150,6 +151,28 @@ function PlacementDrag({ placement }: { placement: PlacementView }) {
   return null;
 }
 
+/** Lets the store's drag-and-drop turn a screen point into a spot on the ground. */
+function GroundPickerRegistrar() {
+  const { gl, camera, scene } = useThree();
+  useEffect(() => {
+    const ray = new THREE.Raycaster();
+    const ndc = new THREE.Vector2();
+    groundPicker.pick = (cx, cy) => {
+      const r = gl.domElement.getBoundingClientRect();
+      if (cx < r.left || cx > r.right || cy < r.top || cy > r.bottom) return null;
+      ndc.set(((cx - r.left) / r.width) * 2 - 1, -((cy - r.top) / r.height) * 2 + 1);
+      ray.setFromCamera(ndc, camera);
+      const ground = scene.getObjectByName("terrain-ground");
+      const p = ground ? ray.intersectObject(ground, false)[0]?.point : undefined;
+      return p ? { x: p.x, z: p.z } : null;
+    };
+    return () => {
+      groundPicker.pick = null;
+    };
+  }, [gl, camera, scene]);
+  return null;
+}
+
 /** Keeps the camera target inside the field when the student pans. */
 function PanBounds({ limit }: { limit: number }) {
   const controls = useThree((s) => s.controls) as unknown as { target: THREE.Vector3 } | null;
@@ -279,6 +302,7 @@ export function WorldScene({ field, quality, scene = EMPTY_SCENE, selected, onSe
             );
           })()}
         {placement && <PlacementDrag placement={placement} />}
+        <GroundPickerRegistrar />
         {extras}
       </FieldScene>
       {controls && (
