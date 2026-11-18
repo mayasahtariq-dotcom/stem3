@@ -279,7 +279,7 @@ class AudioIn(BaseModel):
 @router.post("/audio")
 def make_audio(body: AudioIn, db: DbDep, user: UserDep) -> dict[str, str]:
     """Cached Sarvam audio. The same text and language is only synthesised once."""
-    rate_limit(f"audio:{user.id}", 120, 3600)
+    rate_limit(f"audio:{user.id}", 1500, 3600)    # a phone-simulator lesson speaks ~40 lines
     try:
         audio_id = speech_cache.get_or_make(db, body.text, body.language, speech_cache.WEB_RATE)
     except Exception as exc:

@@ -120,7 +120,7 @@ export function appCallBackend(deps: {
         deps.setSession(null);
         throw new SimAuthError("not_student");
       }
-      return { name: (me.name ?? "").split(" ")[0] || id };
+      return { name: (me.name ?? "").split(" ")[0] || id, language: me.languageMode };
     },
     async courses() {
       const home = unwrap(await api.GET("/me/home"));

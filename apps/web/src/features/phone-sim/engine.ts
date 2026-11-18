@@ -30,6 +30,8 @@ export type Line = { who: "ai" | "me"; parts: Prompt[] };
 
 export interface SimStudent {
   name: string;
+  /** The student's chosen language; the call switches to it after sign-in. */
+  language?: "hindi" | "kannada" | null;
 }
 export interface SimCourse {
   id: string;

@@ -5,6 +5,8 @@ import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore
 import { useAuthStore } from "@/features/auth/auth-store";
 import type { ApiClient } from "@mooshala/api-client";
 import { useServices } from "@/lib/services";
+import { useRouter } from "next/navigation";
+import { localeFor, writeLanguageCookie } from "@/lib/i18n/language";
 import type { BilingualString } from "@/lib/i18n/use-bilingual";
 import type { Tri } from "@/lib/i18n/use-tri";
 import { appCallBackend, browserResumeStore } from "./app-backend";
@@ -27,6 +29,10 @@ function browserSpeak(text: string, lang: string): Promise<void> {
     if (typeof window === "undefined" || !("speechSynthesis" in window) || !text) return done();
     const u = new SpeechSynthesisUtterance(text);
     u.lang = lang;
+    // pick a Hindi or Kannada voice explicitly; left to itself the browser may use its English voice
+    const code = lang.slice(0, 2).toLowerCase();
+    const match = window.speechSynthesis.getVoices().find((v) => v.lang.replace("_", "-").toLowerCase().startsWith(code));
+    if (match) u.voice = match;
     u.rate = 1.05;
     const cap = window.setTimeout(done, 12000 + text.length * 60);
     u.onend = u.onerror = () => (window.clearTimeout(cap), done());
@@ -40,6 +46,8 @@ function browserSpeak(text: string, lang: string): Promise<void> {
  */
 export function appVoice(api: ApiClient): Voice {
   let current: HTMLAudioElement | null = null;
+  // browsers load their voice list late; ask early so a Hindi/Kannada voice can be picked
+  if (typeof window !== "undefined" && "speechSynthesis" in window) window.speechSynthesis.getVoices();
   return {
     async speak(text, lang) {
       const language = lang.startsWith("kn") ? "kn" : "hi";
@@ -153,6 +161,17 @@ export function usePhoneCall(opts: {
   const [seconds, setSeconds] = useState(0);
   const spoken = useRef(0);
   const speaking = useRef(Promise.resolve());
+  const gen = useRef(0); // bumps when a key interrupts the voice, so queued lines are dropped
+  const router = useRouter();
+
+  // after sign-in the call (text and voice) switches to the student's own language
+  const studentLang = state.student?.language ?? null;
+  useEffect(() => {
+    if (studentLang && localeFor(studentLang) !== locale) {
+      writeLanguageCookie(studentLang);
+      router.refresh();
+    }
+  }, [locale, router, studentLang]);
 
   // speak each new AI line in order; after feedback has been heard, go on
   useEffect(() => {
@@ -162,9 +181,13 @@ export function usePhoneCall(opts: {
     const lang = locale === "kn" ? "kn-IN" : "hi-IN";
     const phase = state.phase;
     const seq = state.speakSeq;
+    const my = gen.current;
     speaking.current = speaking.current.then(async () => {
       if (muted) return;
-      for (const l of fresh) await voice.speak(text(l.parts).regional, lang);
+      for (const l of fresh) {
+        if (my !== gen.current) return;
+        await voice.speak(text(l.parts).regional, lang);
+      }
     });
     if (phase === "feedback") {
       const wait = muted ? new Promise((r) => setTimeout(r, 1800)) : speaking.current;
@@ -186,6 +209,7 @@ export function usePhoneCall(opts: {
 
   const press = useCallback(
     (k: Key) => {
+      gen.current++;
       voice.stop(); // a key press interrupts the voice, like a real phone menu
       speaking.current = Promise.resolve();
       pressKey(engine, k);
