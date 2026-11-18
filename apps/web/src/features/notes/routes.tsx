@@ -3,7 +3,7 @@ import { toast } from "@/components/ui";
 import { useSelectedClass } from "@/features/teacher/api";
 import { asApiError } from "@/lib/api/errors";
 import { useBilingual } from "@/lib/i18n/use-bilingual";
-import { readAsDataUrl, useMyNotes, useShareNote, useTeacherNotes } from "./api";
+import { readAsDataUrl, useDeleteNote, useMyNotes, useShareNote, useTeacherNotes } from "./api";
 import { StudentNotesScreen, TeacherNotesScreen, type NoteDraft } from "./NotesScreens";
 
 export function TeacherNotesRoute() {
@@ -12,6 +12,7 @@ export function TeacherNotesRoute() {
   const { classes, classId } = useSelectedClass();
   const notes = useTeacherNotes();
   const share = useShareNote();
+  const del = useDeleteNote();
   const onShare = async (d: NoteDraft) => {
     try {
       const file = d.file ? { name: d.file.name, type: d.file.type || "application/octet-stream", data_url: await readAsDataUrl(d.file) } : null;
@@ -36,6 +37,12 @@ export function TeacherNotesRoute() {
       defaultClassId={classId}
       sharing={share.isPending}
       onShare={onShare}
+      deletingId={del.isPending ? del.variables : null}
+      onDelete={(note) => {
+        if (!window.confirm(`${t("deleteConfirm", { title: note.title }).regional}
+${t("deleteConfirm", { title: note.title }).english}`)) return;
+        del.mutate(note.id, { onSuccess: () => toast("success", t("deleted")) });
+      }}
     />
   );
 }

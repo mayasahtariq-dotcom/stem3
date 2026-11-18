@@ -38,6 +38,20 @@ describe("class notes", () => {
     expect(screen.getAllByText(/Ravi Sir · Class 9-A Science/)).toHaveLength(2);
   });
 
+  it("a teacher deletes a shared note, after confirming", async () => {
+    const ravi = await as(DEMO.teacherPhone);
+    renderWithProviders(<TeacherNotesRoute />, { services: ravi });
+    fireEvent.change(await screen.findByLabelText(/Title/), { target: { value: "Old notes" } });
+    fireEvent.change(screen.getByLabelText(/Notes \(type here\)/), { target: { value: "To be removed." } });
+    fireEvent.click(screen.getByTestId("share-note"));
+    const card = (await screen.findByText("Old notes")).closest("[data-testid=note-card]") as HTMLElement;
+    const confirm = vi.spyOn(window, "confirm").mockReturnValue(true);
+    fireEvent.click(card.querySelector("[data-testid=delete-note]")!);
+    expect(confirm).toHaveBeenCalled();
+    await waitFor(async () => expect((await ravi.pending.get<ClassNote[]>("/teacher/notes")).map((n) => n.title)).not.toContain("Old notes"));
+    confirm.mockRestore();
+  });
+
   it("only teachers can share, and students only see notes from their own classes", async () => {
     const asha = await as(DEMO.studentPhone);
     await expect(asha.pending.post(`/classrooms/c-bio9a/notes`, { title: "x", body: "y" })).rejects.toMatchObject({ status: 403 });

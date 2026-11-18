@@ -40,7 +40,8 @@ function FileLink({ file }: { file: NonNullable<ClassNote["file"]> }) {
   );
 }
 
-export function NoteCard({ note, showClass = true }: { note: ClassNote; showClass?: boolean }) {
+export function NoteCard({ note, showClass = true, onDelete, deleting = false }: { note: ClassNote; showClass?: boolean; onDelete?: (note: ClassNote) => void; deleting?: boolean }) {
+  const td = useBilingual("notes");
   return (
     <Card className="flex flex-col gap-3 p-4" data-testid="note-card">
       <div className="flex items-start gap-3">
@@ -51,6 +52,12 @@ export function NoteCard({ note, showClass = true }: { note: ClassNote; showClas
             {[note.teacher_name, showClass ? note.classroom : null, fmtDate(note.created_at)].filter(Boolean).join(" · ")}
           </p>
         </div>
+        {onDelete && (
+          <ChunkyButton size="sm" variant="ghost" loading={deleting} onClick={() => onDelete(note)} aria-label={td("deleteNote").english} title={td("deleteNote").english} data-testid="delete-note">
+            <StickerIcon name="trash" size={20} />
+            <span className="text-sm font-bold text-coral-strong">{td("deleteNote").regional}</span>
+          </ChunkyButton>
+        )}
       </div>
       {note.body && <p className="whitespace-pre-wrap break-words leading-relaxed">{note.body}</p>}
       {note.file && <FileLink file={note.file} />}
@@ -88,13 +95,13 @@ function NoteSummary({ noteId }: { noteId: string }) {
   );
 }
 
-function NotesList({ notes, empty, showClass }: { notes: ClassNote[]; empty: React.ReactNode; showClass?: boolean }) {
+function NotesList({ notes, empty, showClass, onDelete, deletingId }: { notes: ClassNote[]; empty: React.ReactNode; showClass?: boolean; onDelete?: (note: ClassNote) => void; deletingId?: string | null }) {
   if (!notes.length) return <>{empty}</>;
   return (
     <ul className="flex flex-col gap-4" data-testid="notes-list">
       {notes.map((n) => (
         <li key={n.id}>
-          <NoteCard note={n} showClass={showClass} />
+          <NoteCard note={n} showClass={showClass} onDelete={onDelete} deleting={deletingId === n.id} />
         </li>
       ))}
     </ul>
@@ -118,6 +125,9 @@ export interface TeacherNotesScreenProps {
   sharing?: boolean;
   /** Resolves true when the note was shared, so the form can clear. */
   onShare: (draft: NoteDraft) => Promise<boolean>;
+  /** Removes a shared note from its class. */
+  onDelete?: (note: ClassNote) => void;
+  deletingId?: string | null;
 }
 
 /** Stateless (form fields aside): teacher shares notes with a class and sees what they shared. */
@@ -213,7 +223,7 @@ export function TeacherNotesScreen(p: TeacherNotesScreenProps) {
           </Card>
           <section className="flex flex-col gap-3">
             <BilingualText as="h2" size="lg" text={t("shared")} />
-            <NotesList notes={p.notes ?? []} empty={<EmptyState message={t("teacherEmpty")} />} />
+            <NotesList notes={p.notes ?? []} empty={<EmptyState message={t("teacherEmpty")} />} onDelete={p.onDelete} deletingId={p.deletingId} />
           </section>
         </>
       )}

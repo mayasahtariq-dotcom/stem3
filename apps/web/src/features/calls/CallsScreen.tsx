@@ -26,8 +26,6 @@ export interface CallsScreenProps {
   onSelect: (id: string) => void;
   onCallNow: (id: string) => void;
   onTogglePause: (s: CallStudent) => void;
-  /** Opens the phone simulator for this student (hear the call, press keys; nothing is dialled). */
-  onSimulate?: (s: CallStudent) => void;
   onRetry: () => void;
   formatDateTime: (iso: string) => string;
 }
@@ -145,12 +143,6 @@ export function CallsScreen(p: CallsScreenProps) {
                       </ChunkyButton>
                     );
                   })()}
-                  {p.onSimulate && (
-                    <ChunkyButton variant="sky" onClick={() => p.onSimulate?.(selected)} data-testid="open-simulator">
-                      <StickerIcon name="chat" size={20} />
-                      <BilingualText as="span" size="sm" tone="inverse" text={t("simTry")} />
-                    </ChunkyButton>
-                  )}
                   <ChunkyButton variant="white" size="sm" onClick={() => p.onTogglePause(selected)} loading={p.pausingId === selected.id} disabled={selected.status === "in_call"} data-testid="toggle-pause">
                     <BilingualText as="span" size="sm" text={selected.status === "paused" ? t("resume") : t("pause")} />
                   </ChunkyButton>

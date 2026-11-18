@@ -31,7 +31,7 @@ import { AllClassesPanel, MaterialsPanel } from "./OverviewPanels";
 import { ClassDetailScreen, ClassesScreen } from "./ClassesScreen";
 import { useClassInsights, useCreateClass, useMaterials, useTeacherOverview } from "./insights-api";
 import { useClassStore } from "./class-store";
-import { useTeacherNotes } from "@/features/notes/api";
+import { useDeleteNote, useTeacherNotes } from "@/features/notes/api";
 import { StudentParentLinkCard } from "@/features/parent/share-link";
 import type { Schemas } from "@mooshala/api-client";
 import { optionLabels, publishBlock, reviewItems } from "./review";
@@ -145,10 +145,18 @@ export function ClassDetailRoute({ classId }: { classId: string }) {
   const courses = useCourses();
   const toggle = useClassCourse(classId);
   const notes = useTeacherNotes();
+  const delNote = useDeleteNote();
+  const nt = useBilingual("notes");
   const onError = useErrorToast();
   return (
     <ClassDetailScreen
       notes={notes.data?.filter((n) => n.classroom_id === classId)}
+      deletingNoteId={delNote.isPending ? delNote.variables : null}
+      onDeleteNote={(note) => {
+        if (!window.confirm(`${nt("deleteConfirm", { title: note.title }).regional}
+${nt("deleteConfirm", { title: note.title }).english}`)) return;
+        delNote.mutate(note.id, { onSuccess: () => toast("success", nt("deleted")), onError });
+      }}
       onShareNotes={() => {
         setClassId(classId);
         router.push("/teacher/notes");

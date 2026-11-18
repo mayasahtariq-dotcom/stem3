@@ -8,7 +8,6 @@ import { useSelectedClass } from "@/features/teacher/api";
 import { asApiError } from "@/lib/api/errors";
 import { env } from "@/lib/env";
 import { useBilingual } from "@/lib/i18n/use-bilingual";
-import { PhoneSimulator } from "./PhoneSimulator";
 import { AddCallStudentScreen } from "./AddCallStudentScreen";
 import { useAddCallStudent, useCallStudents, useDemoClock, useLiveCall, usePatchCallStudent, useTwin } from "./api";
 import { CallsScreen } from "./CallsScreen";
@@ -33,13 +32,9 @@ export function CallsRoute() {
   const patch = usePatchCallStudent(classId);
   const demo = useDemoClock(classId);
   const [callError, setCallError] = useState<unknown>(null);
-  const [simFor, setSimFor] = useState<CallStudent | null>(null);
   const onError = (e: unknown) => toast("error", errors(asApiError(e).code));
   return (
-    <>
-    <PhoneSimulator open={simFor !== null} onOpenChange={(o) => !o && setSimFor(null)} studentId={simFor?.id ?? null} studentName={simFor?.name ?? ""} />
     <CallsScreen
-      onSimulate={env.useFakes ? undefined : (s) => setSimFor(s)}
       students={list.data}
       loading={classes.isLoading || list.isLoading}
       error={classes.error ?? list.error}
@@ -76,7 +71,6 @@ export function CallsRoute() {
       onRetry={() => void (classes.error ? classes.refetch() : list.refetch())}
       formatDateTime={fmt}
     />
-    </>
   );
 }
 

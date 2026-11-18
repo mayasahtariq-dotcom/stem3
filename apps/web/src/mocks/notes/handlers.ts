@@ -46,6 +46,15 @@ export function makeNotesHandlers(base: string) {
       if (!u.roles.includes("teacher")) return err(403, "NOT_A_TEACHER");
       return HttpResponse.json(notesState().notes.filter((n) => n.ownerId === u.id).map(out));
     }),
+    http.delete(`${base}/notes/:id`, ({ request, params }) => {
+      const u = auth(request);
+      if (!u) return err(401, "UNAUTHORIZED");
+      const st = notesState();
+      const i = st.notes.findIndex((n) => n.id === String(params.id) && n.ownerId === u.id);
+      if (i < 0) return err(404, "NOT_FOUND");
+      st.notes.splice(i, 1);
+      return new HttpResponse(null, { status: 204 });
+    }),
     http.get(`${base}/me/notes`, ({ request }) => {
       const u = auth(request);
       if (!u) return err(401, "UNAUTHORIZED");

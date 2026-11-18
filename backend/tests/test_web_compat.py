@@ -345,21 +345,23 @@ def test_each_student_has_a_private_parent_link(conn: Connection, client: TestCl
     assert client.get(f"/web/share/{new['token']}").status_code == 200
 
 
-def test_phone_simulator_runs_a_call_for_any_phone_student(conn: Connection, client: TestClient) -> None:
+def test_student_dials_in_from_their_number_in_demo_mode(conn: Connection, client: TestClient,
+                                                         monkeypatch: pytest.MonkeyPatch) -> None:
+    from app.config import get_settings
     w = make_world(conn)
-    h = w["teacher"]["headers"]
-    cs = client.post(f"/web/classrooms/{w['classroom']}/call-students", headers=h, json={
-        "name": "Ananya", "parent_phone": "+919876500111", "language": "hindi",
-        "window": {"start": "17:00", "end": "19:00"}, "days": [1, 2, 3]}).json()
-    first = client.post(f"/web/call-students/{cs['id']}/simulate", headers=h, json={"step": "incoming"})
-    assert first.status_code == 200, first.text
-    g = first.json()["gather"]
-    assert g and g["session"] and g["step"] and (g["items"] or first.json()["before"])      # it speaks, then waits for a key
-    nxt = client.post(f"/web/call-students/{cs['id']}/simulate", headers=h,
-                      json={"step": g["step"], "session": g["session"], "digits": "1"})
-    assert nxt.status_code == 200, nxt.text
-    body = nxt.json()
-    assert body["gather"] or body["redirect"] or body["hangup"] or body["before"]          # the call moves on
-    other = make_user(conn, "teacher")
-    assert client.post(f"/web/call-students/{cs['id']}/simulate", headers=other["headers"],
-                       json={"step": "incoming"}).status_code == 404
+    client.post(f"/web/classrooms/{w['classroom']}/call-students", headers=w["teacher"]["headers"], json={
+        "name": "Ananya", "parent_phone": "+919876500222", "language": "hindi",
+        "window": {"start": "17:00", "end": "19:00"}, "days": [1, 2, 3]})
+    assert client.post("/web/phone/call", json={"from_phone": "9876500222"}).status_code == 404   # off outside demo
+    monkeypatch.setattr(get_settings(), "demo_mode", True)
+    r = client.post("/web/phone/call", json={"from_phone": "9876500222"})
+    assert r.status_code == 200, r.text
+    g = r.json()["gather"]
+    assert g and g["session"]
+    nxt = client.post("/web/phone/call", json={"from_phone": "9876500222", "step": g["step"], "session": g["session"], "digits": "1"})
+    assert nxt.status_code == 200
+    # another number cannot drive this call
+    assert client.post("/web/phone/call", json={"from_phone": "9876500333", "step": g["step"],
+                                                "session": g["session"], "digits": "1"}).status_code == 404
+    unknown = client.post("/web/phone/call", json={"from_phone": "9876500444"}).json()
+    assert unknown["hangup"] and not unknown["gather"]                     # unknown number: told and hung up

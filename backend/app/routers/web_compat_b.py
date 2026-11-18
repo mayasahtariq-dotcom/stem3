@@ -374,24 +374,19 @@ class SimStepIn(BaseModel):
     digits: str | None = Field(default=None, max_length=8)
 
 
-@router.post("/call-students/{cs_id}/simulate")
-def c_simulate(cs_id: str, body: SimStepIn, request: Request, db: DbDep, user: UserDep) -> dict[str, Any]:
-    """Phone simulator: one step of a real call for this phone student, run by the same call engine a
-    Twilio webhook uses (Sarvam voices when on). Nothing is dialled and the 9 am to 9 pm rule is lifted.
-    Returns what the phone says (clips to play, or lines to speak) and what keys it waits for."""
+def _sim_step(db: Connection, request: Request, phone: str, body: SimStepIn, owns_session: Any) -> dict[str, Any]:
+    """One step of a real call from `phone`, run by the call engine a Twilio webhook uses (Sarvam voices when on).
+    Nothing is dialled and the 9 am to 9 pm rule is lifted. Returns what the phone says and what keys it waits for."""
     import uuid
 
     from app.calls.voice import with_voice
     from app.routers.demo import SIM_STEPS, twiml_to_steps
-    cs = _own_call_student(db, user, cs_id)
     said: dict[str, str] = {}
     if body.step == "incoming":
-        phone = db.execute(text("select phone_e164 from call_students where id=:i"), {"i": cs["id"]}).scalar_one()
         xml = with_voice(lambda d: flow.incoming(d, phone, f"SIM-{uuid.uuid4().hex[:12]}", engine.utcnow(),
                                                  enforce_hours=False), db, transcript=said)
     elif body.step in SIM_STEPS and body.session:
-        if db.execute(text("select 1 from call_sessions where id=cast(:s as uuid) and call_student_id=:c"),
-                      {"s": body.session, "c": cs["id"]}).scalar() is None:
+        if not owns_session(body.session):
             raise HTTPException(404, {"code": "NOT_FOUND"})
         fn = {"lang": flow.choose_language, "consent": flow.consent, "pick": flow.pick,
               "answer": flow.answer, "confirm": flow.confirm}.get(body.step)
@@ -412,6 +407,26 @@ def c_simulate(cs_id: str, body: SimStepIn, request: Request, db: DbDep, user: U
     if out["gather"]:
         out["gather"]["items"] = [local(i) for i in out["gather"]["items"]]
     return out
+
+
+class DialIn(SimStepIn):
+    from_phone: str
+
+
+@router.post("/phone/call")
+def phone_call(body: DialIn, request: Request, db: DbDep) -> dict[str, Any]:
+    """'Call Aaroh' page: a student without a smartphone dials in from their number, like a real call.
+    Aaroh recognises them by that number (the one their teacher added) and starts their lesson and quiz.
+    No sign-in, so it only exists in DEMO_MODE (a real call proves the number; a web page cannot)."""
+    from app.auth.service import normalize_phone, rate_limit
+    from app.config import get_settings
+    if not get_settings().demo_mode:
+        raise HTTPException(404, {"code": "NOT_FOUND"})
+    rate_limit(f"dial-ip:{request.client.host if request.client else '?'}", 300, 3600)
+    phone = normalize_phone(body.from_phone)
+    return _sim_step(db, request, phone, body, lambda sid: db.execute(text(
+        "select 1 from call_sessions s join call_students cs on cs.id=s.call_student_id where s.id=cast(:s as uuid) "
+        "and s.provider_call_id like 'SIM-%' and cs.phone_e164=:p"), {"s": sid, "p": phone}).scalar() is not None)
 
 
 @router.get("/call-students/{cs_id}/twin")

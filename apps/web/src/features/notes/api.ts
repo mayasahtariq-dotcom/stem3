@@ -29,6 +29,19 @@ export function useShareNote() {
   });
 }
 
+/** DELETE /notes/{id}: the teacher removes a note from the class (students no longer see it). */
+export function useDeleteNote() {
+  const { pending } = useServices();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (noteId: string) => pending.del(`/notes/${encodeURIComponent(noteId)}`),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: noteKeys.teacher });
+      void qc.invalidateQueries({ queryKey: noteKeys.mine });
+    },
+  });
+}
+
 /** POST /notes/{id}/summary: a short summary in en/hi/kn, made once on the server. */
 export function useNoteSummary(noteId: string) {
   const { pending } = useServices();
