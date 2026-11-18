@@ -300,3 +300,46 @@ def test_question_audio_survives_a_wiped_disk(conn: Connection, client: TestClie
     (storage.root() / path).unlink()                                             # like a redeploy wiping the disk
     clip = client.get(url.split("testserver")[-1])
     assert clip.status_code == 200 and len(clip.content) > 0
+
+
+def test_demo_mode_lets_any_indian_mobile_sign_in_with_123456(conn: Connection, client: TestClient,
+                                                               monkeypatch: pytest.MonkeyPatch) -> None:
+    from app.config import get_settings
+    monkeypatch.setattr(get_settings(), "demo_mode", True)
+    r = client.post("/web/auth/otp", json={"phone": "8123499001"})
+    assert r.status_code == 200 and r.json()["dev_code"] == "123456"
+    ok = client.post("/web/auth/verify", json={"phone": "8123499001", "code": "123456"})
+    assert ok.status_code == 200 and ok.json()["access_token"]
+    assert client.post("/web/auth/verify", json={"phone": "8123499001", "code": "111111"}).status_code == 400
+    monkeypatch.setattr(get_settings(), "demo_mode", False)                  # off: no shortcut
+    assert client.post("/web/auth/verify", json={"phone": "8123499002", "code": "123456"}).status_code == 400
+
+
+def test_note_summary_for_class_members_is_made_once(conn: Connection, client: TestClient) -> None:
+    w = make_world(conn)
+    th, sh = w["teacher"]["headers"], w["student"]["headers"]
+    note = client.post(f"/web/classrooms/{w['classroom']}/notes", headers=th,
+                       json={"title": "Cells", "body": "The cell is the smallest unit of life."}).json()
+    r = client.post(f"/web/notes/{note['id']}/summary", headers=sh)
+    assert r.status_code == 200, r.text
+    assert set(r.json()["summary"]) == {"en", "hi", "kn"} and r.json()["summary"]["hi"]
+    stored = conn.execute(text("select summary from class_notes where id=:n"), {"n": note["id"]}).scalar_one()
+    assert stored == r.json()["summary"]                                        # kept: not made again
+    outsider = make_user(conn, "student")
+    assert client.post(f"/web/notes/{note['id']}/summary", headers=outsider["headers"]).status_code == 404
+
+
+def test_each_student_has_a_private_parent_link(conn: Connection, client: TestClient) -> None:
+    w = make_world(conn)
+    sh, th = w["student"]["headers"], w["teacher"]["headers"]
+    link = client.get("/web/me/parent-link", headers=sh).json()
+    assert link["path"] == f"/p/{link['token']}" and len(link["token"]) >= 20
+    assert client.get("/web/me/parent-link", headers=sh).json()["token"] == link["token"]     # stable
+    sid = client.get(f"/web/classrooms/{w['classroom']}/dashboard", headers=th).json()["students"][0]["id"]
+    assert client.get(f"/web/classrooms/{w['classroom']}/students/{sid}/parent-link", headers=th).json()["token"] == link["token"]
+    page = client.get(f"/web/share/{link['token']}")                                         # no sign-in
+    assert page.status_code == 200 and page.json()["child"]["name"] == "Ravi" and "week" in page.json()
+    new = client.post("/web/me/parent-link/reset", headers=sh).json()
+    assert new["token"] != link["token"]
+    assert client.get(f"/web/share/{link['token']}").status_code == 404                      # old link stops working
+    assert client.get(f"/web/share/{new['token']}").status_code == 200

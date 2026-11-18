@@ -44,7 +44,7 @@ export function AuthFrame({ title, subtitle, golu, backHref, children }: AuthFra
             <BilingualText text={golu.says} size="sm" />
           </SpeechBubble>
         )}
-        <section className="flex flex-col gap-5 rounded-[28px] bg-white p-5 shadow-[0_16px_40px_rgb(140_60_0/0.22)]">
+        <section className="flex flex-col gap-5 rounded-[28px] bg-white p-5 shadow-[0_16px_40px_rgb(20_70_160/0.22)]">
           <header className="flex flex-col gap-1">
             <BilingualText as="h1" text={title} size="2xl" />
             {subtitle && <BilingualText text={subtitle} size="sm" />}
@@ -63,7 +63,7 @@ export function ChoiceCard({ text, hint, icon, onClick, selected }: { text: Bili
       type="button"
       onClick={onClick}
       aria-pressed={selected}
-      className={`flex min-h-16 w-full items-center gap-4 rounded-3xl border-2 px-4 py-3 text-left transition-transform hover:-translate-y-0.5 ${selected ? "border-[#ff8a3d] bg-[#fff1e6] shadow-[0_6px_0_#ffb27a]" : "border-[#f3e6da] bg-white shadow-[0_6px_0_#f3e6da] hover:bg-[#fffaf5]"}`}
+      className={`flex min-h-16 w-full items-center gap-4 rounded-3xl border-2 px-4 py-3 text-left transition-transform hover:-translate-y-0.5 ${selected ? "border-[#2f8cf0] bg-[#e8f3ff] shadow-[0_6px_0_#8ec5ff]" : "border-[#d7e6f7] bg-white shadow-[0_6px_0_#d7e6f7] hover:bg-[#f5f9ff]"}`}
     >
       {icon}
       <span className="flex flex-col">

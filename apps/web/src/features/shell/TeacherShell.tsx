@@ -23,17 +23,17 @@ export function TeacherShell({ children }: { children: ReactNode }) {
   return (
     <PlayfulPage tone="sun">
       <header className="sticky top-0 z-20 mx-auto max-w-[1440px] px-3 pt-3 tablet:px-5">
-        <div className="rounded-[24px] bg-white/95 shadow-[0_8px_24px_rgb(120_70_20/0.10)] backdrop-blur">
+        <div className="rounded-[24px] glass">
         <div className="mx-auto flex max-w-[1440px] flex-wrap items-center gap-3 px-4 py-3">
-          <span className="flex items-center gap-2 text-2xl font-extrabold text-[#ff7a1a]">
-            <span className="grid size-11 place-items-center rounded-full bg-[#ffe7d4]"><StickerIcon name="sprout" size={28} /></span>
+          <span className="flex items-center gap-2 text-2xl font-extrabold text-[#1d6fe0]">
+            <span className="grid size-11 place-items-center rounded-full bg-[#dcefff]"><StickerIcon name="sprout" size={28} /></span>
             <span className="font-display tracking-wide">{c("appName").regional}</span>
           </span>
           <RoleBadge role="teacher" />
           <label className="ml-auto flex items-center gap-2 text-sm font-semibold">
             <span>{n("classSwitcher").regional}</span>
             <select
-              className="min-h-11 rounded-full border-2 border-[#f3e6da] bg-[#fffaf5] px-4 font-semibold"
+              className="min-h-11 rounded-full border-2 border-[#d7e6f7] bg-[#f5f9ff] px-4 font-semibold"
               value={selected}
               onChange={(e) => setClassId(e.target.value)}
               disabled={!classes.data?.length}
@@ -57,7 +57,7 @@ export function TeacherShell({ children }: { children: ReactNode }) {
             const available = isAvailable(item);
             const cls = cn(
               "flex min-h-11 shrink-0 items-center gap-2 rounded-full px-4 font-bold transition-colors",
-              active ? "bg-[#ff8a3d] text-white shadow-[0_4px_0_#d96a1f] [&_span]:!text-white" : "bg-[#fff4ea] text-stone hover:bg-[#ffe7d4]",
+              active ? "bg-[#2f8cf0] text-white shadow-[0_4px_0_#1b62b8] [&_span]:!text-white" : "bg-[#eef5ff] text-stone hover:bg-[#dcefff]",
               !available && "cursor-not-allowed opacity-60",
             );
             const body = (

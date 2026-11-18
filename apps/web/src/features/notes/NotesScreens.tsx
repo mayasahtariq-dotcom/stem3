@@ -4,7 +4,9 @@ import { useRef, useState, type FormEvent } from "react";
 import type { ClassNote, Schemas } from "@mooshala/api-client";
 import { BilingualText, Card, ChunkyButton, EmptyState, ErrorState, LoadingState, StickerIcon, TextField } from "@/components/ui";
 import { useBilingual } from "@/lib/i18n/use-bilingual";
-import { NOTE_ACCEPT, noteProblem, openableUrl, type NoteProblem } from "./api";
+import { useSpeak } from "@/features/learning/use-speak";
+import { useTri } from "@/lib/i18n/use-tri";
+import { NOTE_ACCEPT, noteProblem, openableUrl, useNoteSummary, type NoteProblem } from "./api";
 
 const fmtDate = (iso: string) => new Date(iso).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
 
@@ -52,7 +54,37 @@ export function NoteCard({ note, showClass = true }: { note: ClassNote; showClas
       </div>
       {note.body && <p className="whitespace-pre-wrap break-words leading-relaxed">{note.body}</p>}
       {note.file && <FileLink file={note.file} />}
+      <NoteSummary noteId={note.id} />
     </Card>
+  );
+}
+
+/** "Summary": Golu sums the note up in a few lines (Hindi or Kannada + English) and reads it aloud. */
+function NoteSummary({ noteId }: { noteId: string }) {
+  const t = useBilingual("notes");
+  const tri = useTri();
+  const summary = useNoteSummary(noteId);
+  const { speak, speaking } = useSpeak();
+  const text = summary.data ? tri(summary.data.summary) : null;
+  return (
+    <div className="flex flex-col gap-2 rounded-2xl bg-sky-soft/70 p-3" data-testid="note-summary">
+      <div className="flex flex-wrap items-center gap-2">
+        <StickerIcon name="sparkle" size={22} />
+        <span className="flex-1 text-sm font-bold">{t("summaryTitle").regional} · <span lang="en" className="font-medium text-stone">{t("summaryTitle").english}</span></span>
+        {!text ? (
+          <ChunkyButton size="sm" variant="white" loading={summary.isPending} onClick={() => summary.mutate()} data-testid="make-summary">
+            <BilingualText as="span" size="sm" text={t("makeSummary")} />
+          </ChunkyButton>
+        ) : (
+          <ChunkyButton size="sm" variant="white" loading={speaking} onClick={() => void speak(text.regional)} data-testid="listen-summary">
+            <StickerIcon name="speaker" size={18} />
+            <BilingualText as="span" size="sm" text={t("listenSummary")} />
+          </ChunkyButton>
+        )}
+      </div>
+      {summary.isError && <p role="alert" className="text-sm font-bold text-coral-strong">{t("summaryFailed").regional} · {t("summaryFailed").english}</p>}
+      {text && <BilingualText size="sm" text={text} />}
+    </div>
   );
 }
 

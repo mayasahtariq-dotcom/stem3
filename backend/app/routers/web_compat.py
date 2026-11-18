@@ -150,15 +150,17 @@ def _session(user_id: Any, role: str) -> dict[str, Any]:
 
 
 def _demo_phone(phone: str) -> bool:
+    """In DEMO_MODE every Indian mobile number (starting 6-9) signs in with 123456 and no SMS is sent.
+    Turn DEMO_MODE off for real SMS codes (Twilio Verify)."""
     from app.demo import DEMO_PHONES
-    return get_settings().demo_mode and phone in DEMO_PHONES
+    return get_settings().demo_mode and (phone in DEMO_PHONES or re.fullmatch(r"\+91[6-9]\d{9}", phone) is not None)
 
 
 @router.post("/auth/otp")
 def web_otp(body: OtpIn, request: Request, db: DbDep,
             sms: Annotated[SmsProvider, Depends(get_sms)]) -> dict[str, Any]:
     phone = auth_service.normalize_phone(body.phone)
-    if _demo_phone(phone):                       # demo accounts use code 123456, no SMS
+    if _demo_phone(phone):                       # demo mode: code 123456, no SMS
         return {"sent": True, "dev_code": DEMO_TEST_CODE}
     auth_service.rate_limit(f"otp-ip:{request.client.host if request.client else '?'}", 20, 3600)
     code = auth_service.request_otp(db, sms, phone)

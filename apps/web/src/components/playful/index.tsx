@@ -32,9 +32,17 @@ export function Sparkles({ className, light = true }: { className?: string; ligh
 
 /** Page background for a playful mode. */
 export function PlayfulPage({ tone, className, children }: { tone: PlayTone; className?: string; children: ReactNode }) {
+  const blobs = tone === "sun"
+    ? [["#7cc4ff", "8%", "10%", "34rem"], ["#a78bfa", "70%", "4%", "28rem"], ["#5eead4", "60%", "62%", "30rem"]]
+    : [["#c4b5fd", "6%", "12%", "32rem"], ["#93c5fd", "68%", "8%", "28rem"], ["#f9a8d4", "40%", "66%", "26rem"]];
   return (
-    <div className={cn("playful min-h-dvh", tone === "sun" ? "playful-sun-page" : "playful-lavender playful-lavender-page", className)}>
-      {children}
+    <div className={cn("playful relative min-h-dvh", tone === "sun" ? "playful-sun-page" : "playful-lavender playful-lavender-page", className)}>
+      <div aria-hidden className="blob-field">
+        {blobs.map(([c, x, y, s], i) => (
+          <span key={i} className="blob" style={{ background: c, left: x, top: y, width: s, height: s, animationDelay: `${i * -6}s` }} />
+        ))}
+      </div>
+      <div className="relative z-10">{children}</div>
     </div>
   );
 }
@@ -46,7 +54,7 @@ export function ChunkyTitle({ text, as: Tag = "h1", inverse = true, size = "xl",
     <Tag className={cn("flex flex-col", className)}>
       <span className={cn("font-regional font-extrabold leading-tight", size === "xl" ? "text-3xl tablet:text-4xl" : "text-2xl", inverse ? "text-white [text-shadow:0_2px_0_rgb(0_0_0/0.12)]" : "text-ink")}>{text.regional}</span>
       {!same && (
-        <span lang="en" className={cn("font-display uppercase leading-none", size === "xl" ? "text-4xl tablet:text-5xl" : "text-2xl", inverse ? "text-[#4a2600]/80" : "text-[#ff7a1a]")}>
+        <span lang="en" className={cn("font-display uppercase leading-none", size === "xl" ? "text-4xl tablet:text-5xl" : "text-2xl", inverse ? "text-[#0b2a5c]/80" : "text-[#1d6fe0]")}>
           {text.english}
         </span>
       )}
@@ -61,6 +69,9 @@ export function Hero({ tone = "sun", eyebrow, title, subtitle, pose = "wave", ac
 }) {
   return (
     <section className={cn("relative isolate overflow-hidden rounded-[28px] p-5 tablet:p-7", tone === "sun" ? "sunburst" : "lavender-burst", className)} data-testid="hero">
+      <span aria-hidden className="hero-shine" />
+      <span aria-hidden className="pointer-events-none absolute -right-16 -top-20 size-64 rounded-full bg-white/20 blur-2xl" />
+      <span aria-hidden className="pointer-events-none absolute -bottom-24 left-1/3 size-72 rounded-full bg-white/10 blur-3xl" />
       <Sparkles />
       <div className="relative flex items-center gap-4">
         <div className="flex min-w-0 flex-1 flex-col gap-2">
@@ -71,7 +82,7 @@ export function Hero({ tone = "sun", eyebrow, title, subtitle, pose = "wave", ac
           )}
           <ChunkyTitle text={title} as={titleAs} />
           {subtitle && (
-            <p className="flex flex-col text-sm font-semibold text-[#4a2600]/85">
+            <p className="flex flex-col text-sm font-semibold text-[#0b2a5c]/85">
               <span className="font-regional">{subtitle.regional}</span>
               {subtitle.english !== subtitle.regional && <span lang="en" className="text-xs opacity-80">{subtitle.english}</span>}
             </p>
@@ -94,7 +105,7 @@ export function Hero({ tone = "sun", eyebrow, title, subtitle, pose = "wave", ac
 }
 
 export const PASTELS = {
-  peach: { bg: "bg-[#ffe7d4]", ring: "bg-[#ff8a3d]", text: "text-[#b24a00]" },
+  blue: { bg: "bg-[#dcefff]", ring: "bg-[#2f8cf0]", text: "text-[#0d4f9e]" },
   lavender: { bg: "bg-[#ece6ff]", ring: "bg-[#7c5cff]", text: "text-[#4b2fc4]" },
   sky: { bg: "bg-[#dff0ff]", ring: "bg-[#1c8fe0]", text: "text-[#0a5a99]" },
   lemon: { bg: "bg-[#fff3c4]", ring: "bg-[#f2b500]", text: "text-[#8a6400]" },
@@ -104,7 +115,7 @@ export const PASTELS = {
 export type Pastel = keyof typeof PASTELS;
 
 /** A sticker in a soft coloured circle. */
-export function IconBubble({ icon, pastel = "peach", size = 44 }: { icon: StickerIconName; pastel?: Pastel; size?: number }) {
+export function IconBubble({ icon, pastel = "blue", size = 44 }: { icon: StickerIconName; pastel?: Pastel; size?: number }) {
   return (
     <span className={cn("grid shrink-0 place-items-center rounded-full", PASTELS[pastel].bg)} style={{ width: size + 16, height: size + 16 }}>
       <StickerIcon name={icon} size={size} />
@@ -113,9 +124,9 @@ export function IconBubble({ icon, pastel = "peach", size = 44 }: { icon: Sticke
 }
 
 /** Stat tile like "6 Day streak": icon bubble, big number, label. */
-export function PlayStat({ icon, value, label, pastel = "peach", warn = false }: { icon: StickerIconName; value: string; label: BilingualString; pastel?: Pastel; warn?: boolean }) {
+export function PlayStat({ icon, value, label, pastel = "blue", warn = false }: { icon: StickerIconName; value: string; label: BilingualString; pastel?: Pastel; warn?: boolean }) {
   return (
-    <div className={cn("flex flex-col items-center gap-1 rounded-3xl bg-white p-4 text-center shadow-[0_8px_22px_rgb(120_70_20/0.08)]", warn && "ring-2 ring-[#f0566b]")}>
+    <div className={cn("play-stat glass flex flex-col items-center gap-1 rounded-3xl p-4 text-center", warn && "ring-2 ring-[#f0566b]")}>
       <IconBubble icon={icon} pastel={warn ? "rose" : pastel} size={30} />
       <span className="text-2xl font-extrabold tabular-nums text-ink">{value}</span>
       <span className="flex flex-col text-xs leading-tight">

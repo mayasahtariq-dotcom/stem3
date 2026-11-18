@@ -43,7 +43,7 @@ export function useRoleScreen() {
 }
 
 const ICON: Record<Role, StickerIconName> = { student: "backpack", teacher: "teacher", parent: "people" };
-const TILE: Record<Role, string> = { student: "bg-[#ddf7e3]", teacher: "bg-[#ffe7d4]", parent: "bg-[#ece6ff]" };
+const TILE: Record<Role, string> = { student: "bg-[#ddf7e3]", teacher: "bg-[#dcefff]", parent: "bg-[#ece6ff]" };
 
 function RoleArt({ role }: { role: Role }) {
   return (

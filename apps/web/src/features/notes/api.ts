@@ -29,6 +29,14 @@ export function useShareNote() {
   });
 }
 
+/** POST /notes/{id}/summary: a short summary in en/hi/kn, made once on the server. */
+export function useNoteSummary(noteId: string) {
+  const { pending } = useServices();
+  return useMutation({
+    mutationFn: () => pending.post<{ summary: { en: string; hi: string; kn: string } }>(`/notes/${encodeURIComponent(noteId)}/summary`),
+  });
+}
+
 export type NoteProblem = "classMissing" | "titleMissing" | "contentMissing" | "fileTooBig";
 
 /** Pure check for the share-notes form. */

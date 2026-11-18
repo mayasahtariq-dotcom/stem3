@@ -113,7 +113,8 @@
     "wrongMode_teacher": "This number isn't a teacher account. Pick its mode above, or use a teacher number.",
     "wrongMode_parent": "This number isn't a parent account. Pick its mode above, or use a parent number.",
     "demoNumber": "Demo number for this mode: {phone}",
-    "useDemo": "Use it"
+    "useDemo": "Use it",
+    "demoCode": "Demo code: {code}"
   },
   "school": {
     "title": "School computer sign-in",
@@ -475,7 +476,19 @@
     "parentNotYet": "Not approved yet",
     "removeParent": "Remove {name}",
     "parentsLoadFailed": "Couldn't load your parents. Try again later.",
-    "heroTitle": "Watch them grow"
+    "heroTitle": "Watch them grow",
+    "myLinkTitle": "Link for your parent",
+    "myLinkHint": "Send this link to your parent. It opens your progress page, no app or login needed.",
+    "copyLink": "Copy link",
+    "linkCopied": "Link copied",
+    "shareWhatsApp": "Share on WhatsApp",
+    "newLink": "Make a new link",
+    "newLinkDone": "New link made. The old one no longer works.",
+    "teacherLinkTitle": "Parent link",
+    "teacherLinkHint": "Give this link to {name}'s parent. It opens their child's progress page, no login needed.",
+    "shareTitle": "{name}'s progress",
+    "shareNotFound": "This link does not work any more. Ask your child or the teacher for a new one.",
+    "accuracyWeek": "Correct this week"
   },
   "lesson": {
     "loading": "Getting your lesson ready…",
@@ -770,7 +783,11 @@
     "noCoursesYet": "No courses yet. Upload your notes to make one.",
     "uploadNotes": "Upload notes",
     "courseAdded": "Course added to the class",
-    "courseRemoved": "Course removed from the class"
+    "courseRemoved": "Course removed from the class",
+    "notesTitle": "Class notes",
+    "shareNotes": "Share notes",
+    "makeCourse": "Make a course from notes",
+    "noNotesYet": "No notes shared with this class yet."
   },
   "allClasses": {
     "title": "All your classes",
@@ -820,7 +837,11 @@
     "contentMissing": "Type some notes or attach a file.",
     "fileTooBig": "That file is too large. Keep it under 1.5 MB.",
     "open": "Open",
-    "download": "Download"
+    "download": "Download",
+    "summaryTitle": "Summary",
+    "makeSummary": "Make a summary",
+    "listenSummary": "Listen",
+    "summaryFailed": "Could not make a summary. Try again."
   },
   "world": {
     "fields": "Fields",

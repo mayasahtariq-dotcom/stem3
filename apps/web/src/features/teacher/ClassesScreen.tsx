@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useState, type FormEvent } from "react";
-import type { ClassInsights, Schemas } from "@mooshala/api-client";
+import type { ClassInsights, ClassNote, Schemas } from "@mooshala/api-client";
 import { BilingualText, Card, ChunkyButton, Dialog, EmptyState, ErrorState, LoadingState, StickerIcon, TextField } from "@/components/ui";
 import { useBilingual } from "@/lib/i18n/use-bilingual";
 import { useTri } from "@/lib/i18n/use-tri";
@@ -183,6 +183,10 @@ export interface ClassDetailScreenProps {
   courseIds?: string[];
   courseBusyId?: string | null;
   onToggleCourse?: (courseId: string, add: boolean) => void;
+  /** This class's shared notes, and shortcuts to share more or make a course from notes. */
+  notes?: ClassNote[];
+  onShareNotes?: () => void;
+  onMakeCourse?: () => void;
 }
 
 /** Stateless: one class: code, who joined, and how the class is doing. */
@@ -212,6 +216,10 @@ export function ClassDetailScreen(p: ClassDetailScreenProps) {
           <MeterRow label={t("completion")} value={ins?.completion ?? 0} />
         </Card>
       </div>
+
+      {p.onShareNotes && p.onMakeCourse && (
+        <ClassNotesCard notes={p.notes} onShare={p.onShareNotes} onMakeCourse={p.onMakeCourse} />
+      )}
 
       {p.onToggleCourse && (
         <ClassCoursesCard courses={p.courses} inClass={p.courseIds ?? []} busyId={p.courseBusyId ?? null} onToggle={p.onToggleCourse} />
@@ -290,7 +298,7 @@ function ClassCoursesCard({ courses, inClass, busyId, onToggle }: { courses: Sch
             const added = inClass.includes(c.id);
             const title = tri(c.title as never);
             return (
-              <li key={c.id} className={`flex flex-wrap items-center gap-3 rounded-2xl p-3 ${added ? "bg-[#ddf7e3]" : "bg-[#fffaf5]"}`}>
+              <li key={c.id} className={`flex flex-wrap items-center gap-3 rounded-2xl p-3 ${added ? "bg-[#ddf7e3]" : "bg-[#f5f9ff]"}`}>
                 <span className="flex min-w-0 flex-1 flex-col">
                   <span className="font-bold">{title.regional}</span>
                   <span className="text-xs text-stone">
@@ -304,6 +312,45 @@ function ClassCoursesCard({ courses, inClass, busyId, onToggle }: { courses: Sch
               </li>
             );
           })}
+        </ul>
+      )}
+    </Card>
+  );
+}
+
+/** The class's notes (what students can re-read), with buttons to share notes or turn notes into a course. */
+function ClassNotesCard({ notes, onShare, onMakeCourse }: { notes: ClassNote[] | undefined; onShare: () => void; onMakeCourse: () => void }) {
+  const t = useBilingual("classes");
+  const nt = useBilingual("notes");
+  return (
+    <Card className="flex flex-col gap-3 p-4" data-testid="class-notes">
+      <div className="flex flex-wrap items-center gap-2">
+        <StickerIcon name="doc" size={30} />
+        <BilingualText as="h2" size="lg" text={t("notesTitle")} className="flex-1" />
+        <ChunkyButton size="sm" variant="white" onClick={onShare} data-testid="share-class-notes">
+          <BilingualText as="span" size="sm" text={t("shareNotes")} />
+        </ChunkyButton>
+        <ChunkyButton size="sm" onClick={onMakeCourse} data-testid="make-class-course">
+          <BilingualText as="span" size="sm" tone="inverse" text={t("makeCourse")} />
+        </ChunkyButton>
+      </div>
+      {!notes ? (
+        <LoadingState />
+      ) : notes.length === 0 ? (
+        <BilingualText size="sm" text={t("noNotesYet")} className="text-stone" />
+      ) : (
+        <ul className="grid gap-2 tablet:grid-cols-2">
+          {notes.slice(0, 6).map((n) => (
+            <li key={n.id} className="flex items-center gap-3 rounded-2xl bg-white/70 p-3">
+              <StickerIcon name={n.file ? (n.file.type.startsWith("image/") ? "image" : "doc") : "pencil"} size={26} />
+              <span className="min-w-0 flex-1 truncate font-bold">{n.title}</span>
+              {n.file && (
+                <a href={n.file.url} target="_blank" rel="noopener" className="text-sm font-bold text-sky-strong underline">
+                  {nt("open").regional}
+                </a>
+              )}
+            </li>
+          ))}
         </ul>
       )}
     </Card>

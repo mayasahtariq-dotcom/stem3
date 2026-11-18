@@ -5,6 +5,7 @@ import { BilingualText, Card, ChunkyButton, Pill, StickerIcon, toast } from "@/c
 import { asApiError } from "@/lib/api/errors";
 import { useBilingual } from "@/lib/i18n/use-bilingual";
 import { useCreateLinkCode, useMyParents, useRemoveParent } from "./api";
+import { MyParentLinkCard } from "./share-link";
 
 export interface ParentLinkPanelProps {
   parents: Schemas["ParentOut"][] | undefined;
@@ -64,7 +65,9 @@ export function ParentLinkCard() {
   const remove = useRemoveParent();
   const onError = (e: unknown) => toast("error", errors(asApiError(e).code));
   return (
-    <ParentLinkPanel
+    <>
+      <MyParentLinkCard />
+      <ParentLinkPanel
       parents={parents.data}
       parentsError={parents.error}
       code={create.data}
@@ -73,6 +76,7 @@ export function ParentLinkCard() {
       onCreate={() => !create.isPending && create.mutate(undefined, { onError })}
       onRemove={(id) => remove.mutate(id, { onError })}
       formatTime={(iso) => new Intl.DateTimeFormat(locale === "kn" ? "kn-IN" : "hi-IN", { day: "numeric", month: "short", hour: "numeric", minute: "2-digit", timeZone: "Asia/Kolkata" }).format(new Date(iso))}
-    />
+      />
+    </>
   );
 }

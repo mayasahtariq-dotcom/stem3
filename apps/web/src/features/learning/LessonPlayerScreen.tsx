@@ -24,6 +24,7 @@ import {
   XpPop,
 } from "./feedback/FarmFeedback";
 import { QuestionStage } from "./minigames";
+import { optionText, type QuestionContent, type TermMap } from "./content";
 import { progress } from "./session";
 import type { LessonPlayerModel } from "./use-lesson-player";
 
@@ -234,7 +235,7 @@ export function LessonPlayerScreen({
                 <ChunkyButton
                   variant="white"
                   size="icon"
-                  onClick={() => onSpeak(prompt.regional)}
+                  onClick={() => onSpeak(spokenQuestion(question.content, lesson.terms, tri, t))}
                   aria-label={t("listen").english}
                   title={t("listen").regional}
                 >
@@ -401,4 +402,13 @@ function FeedbackSheet({
       </div>
     </section>
   );
+}
+
+/** What the speaker button reads: the question and its choices ("1 ... 2 ..."), so a quiz can be heard, not only read. */
+function spokenQuestion(c: QuestionContent, terms: TermMap, tri: ReturnType<typeof useTri>, t: ReturnType<typeof useBilingual>): string {
+  const lines = [tri(c.prompt).regional];
+  if (c.type === "multiple_choice") c.options.forEach((o, i) => lines.push(`${i + 1}. ${tri(optionText(o, terms)).regional}`));
+  else if (c.type === "true_false") lines.push(tri(c.statement).regional, `1. ${t("true").regional}. 2. ${t("false").regional}.`);
+  else if (c.type === "match_pairs") c.pairs.forEach((p) => lines.push(`${tri(optionText(p.left, terms)).regional} - ${tri(optionText(p.right, terms)).regional}`));
+  return lines.join(". ");
 }

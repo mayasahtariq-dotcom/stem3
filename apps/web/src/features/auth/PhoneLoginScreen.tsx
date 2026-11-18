@@ -25,6 +25,8 @@ export interface PhoneLoginState {
   sending: boolean;
   verifying: boolean;
   resendIn: number;
+  /** Demo mode: the code the server says to use (no SMS was sent). */
+  devCode?: string | null;
 }
 
 const toCode = (e: unknown) => (e instanceof AuthError ? e.code : "unknown");
@@ -48,7 +50,8 @@ export function usePhoneLogin(onSignedIn: (s: Session) => Promise<void>) {
     patch({ sending: true, phoneError: null, codeError: null });
     try {
       await auth.requestOtp(toE164(parsed.data));
-      patch({ step: "code", sending: false, resendIn: RESEND_SECONDS, code: "" });
+      const devCode = (auth as { lastDevCode?: string | null }).lastDevCode ?? null;
+      patch({ step: "code", sending: false, resendIn: RESEND_SECONDS, code: "", devCode });
       toast("info", t("codeSent"));
     } catch (e) {
       if (toCode(e) === "unknown") reporter.capture(e, { where: "requestOtp" });
@@ -187,6 +190,11 @@ export function PhoneLoginScreen({ state, onPhoneChange, onCodeChange, onSend, o
             value={state.code}
             onChange={(e) => onCodeChange(e.target.value)}
           />
+        )}
+        {state.step === "code" && state.devCode && (
+          <p className="rounded-2xl bg-sky-soft px-3 py-2 text-center text-sm font-bold text-sky-strong" data-testid="demo-code">
+            {t("demoCode", { code: state.devCode }).regional} · <span lang="en">{t("demoCode", { code: state.devCode }).english}</span>
+          </p>
         )}
         <ChunkyButton type="submit" size="lg" block loading={state.sending || state.verifying}>
           <BilingualText as="span" align="center" tone="inverse" text={state.step === "phone" ? t("sendCode") : t("verify")} />
