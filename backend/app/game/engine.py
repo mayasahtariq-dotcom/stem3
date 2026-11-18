@@ -116,8 +116,12 @@ def check_lesson_access(db: Connection, user_id: str, lesson_id: str) -> None:
 
 
 def _require_consent(db: Connection, lid: Any) -> None:
+    from app.config import get_settings
+    if get_settings().demo_mode:          # demo only: classes made during a demo work at once (turn DEMO_MODE off for real use)
+        return
     if not has_consent(db, lid):
-        raise HTTPException(403, "A parent or school must give consent first")
+        raise HTTPException(403, {"code": "CONSENT_REQUIRED",
+                                  "message": "A parent or school must give consent first"})
 
 
 # ---------- lessons ----------

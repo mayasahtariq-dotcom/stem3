@@ -413,3 +413,17 @@ def test_course_titles_are_shown_in_the_students_language(conn: Connection, clie
     path = client.get(f"/web/courses/{w['course']}/path", headers=w["student"]["headers"]).json()
     assert path["title"] == {"en": f"EN {course_title}", "hi": f"HI {course_title}", "kn": f"KN {course_title}"}
     titles.CACHE.clear()                                                                 # leave no test titles behind
+
+
+def test_lesson_start_without_consent_says_so_and_demo_mode_lets_students_play(conn: Connection, client: TestClient,
+                                                                               monkeypatch: pytest.MonkeyPatch) -> None:
+    from app.config import get_settings
+    w = make_world(conn, n_lessons=1)
+    key = conn.execute(text("select class_key from classrooms where id=:c"), {"c": w["classroom"]}).scalar_one()
+    conn.execute(text("update classrooms set school_consent=false where id=:c"), {"c": w["classroom"]})
+    tok = client.post("/web/auth/class-key", json={"class_key": key, "name": "Masala"}).json()["access_token"]
+    h = {"Authorization": f"Bearer {tok}"}
+    r = client.post(f"/web/lessons/{w['lessons'][0]}/start", headers=h)
+    assert r.status_code == 403 and r.json()["detail"]["code"] == "CONSENT_REQUIRED"      # the app shows a clear message
+    monkeypatch.setattr(get_settings(), "demo_mode", True)
+    assert client.post(f"/web/lessons/{w['lessons'][0]}/start", headers=h).status_code == 200

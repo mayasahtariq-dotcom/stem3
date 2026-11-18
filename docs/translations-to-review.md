@@ -1484,3 +1484,8 @@ Run `python scripts/export_translations.py` (from backend/) to regenerate `docs/
 | materials.deleteConfirm | Delete these uploaded files? | ये अपलोड की गई फ़ाइलें हटाएँ? | ಈ ಅಪ್‌ಲೋಡ್ ಮಾಡಿದ ಫೈಲ್‌ಗಳನ್ನು ಅಳಿಸುವುದೇ? | [ ] |
 | materials.deleteConfirmCourse | Delete these uploaded files? The course made from them stays. | ये अपलोड की गई फ़ाइलें हटाएँ? इनसे बना कोर्स बना रहेगा। | ಈ ಅಪ್‌ಲೋಡ್ ಫೈಲ್‌ಗಳನ್ನು ಅಳಿಸುವುದೇ? ಇವುಗಳಿಂದ ಮಾಡಿದ ಕೋರ್ಸ್ ಉಳಿಯುತ್ತದೆ. | [ ] |
 | materials.deleted | Files deleted | फ़ाइलें हटा दीं | ಫೈಲ್‌ಗಳನ್ನು ಅಳಿಸಲಾಗಿದೆ | [ ] |
+
+## Consent message (lesson start)
+| Key | English | Hindi | Kannada | Reviewed |
+|---|---|---|---|---|
+| errors.CONSENT_REQUIRED | Ask your teacher to turn on school consent, or ask your parent to approve. Then you can play. | शिक्षक से स्कूल की सहमति चालू करने को कहो, या माता-पिता से अनुमति दिलवाओ। फिर तुम खेल सकोगे। | ಶಾಲೆಯ ಒಪ್ಪಿಗೆ ಆನ್ ಮಾಡಲು ಶಿಕ್ಷಕರನ್ನು ಕೇಳು, ಅಥವಾ ಪೋಷಕರಿಂದ ಒಪ್ಪಿಗೆ ಪಡೆ. ನಂತರ ನೀನು ಆಡಬಹುದು. | [ ] |

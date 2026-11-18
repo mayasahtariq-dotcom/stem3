@@ -31,7 +31,7 @@
     "LANGUAGE_NOT_ALLOWED": "This class doesn't use your language.",
     "TOO_MANY_ATTEMPTS": "Too many tries. Please wait a while and try again.",
     "PHONE_IN_USE": "This phone number is already in use.",
-    "CONSENT_REQUIRED": "A parent needs to give consent first.",
+    "CONSENT_REQUIRED": "Ask your teacher to turn on school consent, or ask your parent to approve. Then you can play.",
     "VALIDATION": "Some details aren't right. Please check them.",
     "NETWORK": "No internet connection. Check it and try again.",
     "SERVER": "Our server is having trouble. Please try again soon.",
