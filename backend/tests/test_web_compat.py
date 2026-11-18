@@ -343,3 +343,23 @@ def test_each_student_has_a_private_parent_link(conn: Connection, client: TestCl
     assert new["token"] != link["token"]
     assert client.get(f"/web/share/{link['token']}").status_code == 404                      # old link stops working
     assert client.get(f"/web/share/{new['token']}").status_code == 200
+
+
+def test_phone_simulator_runs_a_call_for_any_phone_student(conn: Connection, client: TestClient) -> None:
+    w = make_world(conn)
+    h = w["teacher"]["headers"]
+    cs = client.post(f"/web/classrooms/{w['classroom']}/call-students", headers=h, json={
+        "name": "Ananya", "parent_phone": "+919876500111", "language": "hindi",
+        "window": {"start": "17:00", "end": "19:00"}, "days": [1, 2, 3]}).json()
+    first = client.post(f"/web/call-students/{cs['id']}/simulate", headers=h, json={"step": "incoming"})
+    assert first.status_code == 200, first.text
+    g = first.json()["gather"]
+    assert g and g["session"] and g["step"] and (g["items"] or first.json()["before"])      # it speaks, then waits for a key
+    nxt = client.post(f"/web/call-students/{cs['id']}/simulate", headers=h,
+                      json={"step": g["step"], "session": g["session"], "digits": "1"})
+    assert nxt.status_code == 200, nxt.text
+    body = nxt.json()
+    assert body["gather"] or body["redirect"] or body["hangup"] or body["before"]          # the call moves on
+    other = make_user(conn, "teacher")
+    assert client.post(f"/web/call-students/{cs['id']}/simulate", headers=other["headers"],
+                       json={"step": "incoming"}).status_code == 404
