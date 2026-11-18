@@ -30,11 +30,28 @@ setup_logging()
 register_all()
 
 
+def ensure_phone_sim_schema(engine: object) -> None:
+    """The host starts the API without running Alembic, so the phone simulator's schema (migration 0019,
+    written to be safe to run again) is applied here too. Best effort: a failure is logged, not fatal."""
+    import logging
+    from pathlib import Path
+
+    from sqlalchemy import text
+    sql = (Path(__file__).resolve().parent / "db" / "sql" / "0020_phone_sim.sql").read_text(encoding="utf-8")
+    try:
+        with engine.begin() as c:  # type: ignore[attr-defined]
+            c.execute(text("select pg_advisory_xact_lock(20201118)"))
+            c.exec_driver_sql(sql)
+    except Exception:
+        logging.getLogger(__name__).warning("phone simulator schema not applied", exc_info=True)
+
+
 @asynccontextmanager
 async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
     from app import titles
     from app.db.session import get_engine
     titles.refresh_if_stale(get_engine())      # translated course titles into memory
+    ensure_phone_sim_schema(get_engine())
     task = None
     if get_settings().scheduler_enabled:       # the PRD's 5-minute job
         task = asyncio.create_task(scheduler_loop(get_settings().scheduler_interval))
