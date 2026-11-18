@@ -22,6 +22,7 @@ export const NAV: Record<Role, NavItem[]> = {
     { key: "farm", label: "farm", icon: "home", href: "/farm", phase: 1 },
     { key: "learn", label: "learn", icon: "book", href: "/farm/learn", phase: 2 },
     { key: "notes", label: "notes", icon: "doc", href: "/farm/notes", phase: 3 },
+    { key: "ask", label: "ask", icon: "chat", href: "/farm/ask", phase: 2 },
     { key: "quests", label: "quests", icon: "quests", href: "/farm/quests", phase: 4 },
     { key: "league", label: "league", icon: "trophy", href: "/farm/league", phase: 4 },
     { key: "profile", label: "profile", icon: "backpack", href: "/farm/profile", phase: 2 },

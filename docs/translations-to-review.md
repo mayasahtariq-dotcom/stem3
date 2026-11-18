@@ -1612,3 +1612,8 @@ Run `python scripts/export_translations.py` (from backend/) to regenerate `docs/
 | world.dragToFarm | Drag to farm | खेत पर खींचो | ಹೊಲಕ್ಕೆ ಎಳೆ | [ ] |
 | world.dropHere | Drop here | यहाँ छोड़ो | ಇಲ್ಲಿ ಬಿಡು | [ ] |
 | world.dropBlocked | That spot is taken. Drag the ring to a free spot, or rotate it. | वह जगह भरी है। घेरे को खाली जगह पर खींचो, या घुमाओ। | ಆ ಜಾಗ ತುಂಬಿದೆ. ಉಂಗುರವನ್ನು ಖಾಲಿ ಜಾಗಕ್ಕೆ ಎಳೆ, ಅಥವಾ ತಿರುಗಿಸು. | [ ] |
+
+## Student nav: Ask Golu
+| Key | English | Hindi | Kannada | Reviewed |
+|---|---|---|---|---|
+| nav.ask | Ask Golu | गोलू से पूछो | ಗೋಲುವನ್ನು ಕೇಳು | [ ] |
