@@ -368,6 +368,52 @@ def c_call(cs_id: str, db: DbDep, user: UserDep) -> dict[str, Any]:
     return _session_out(s)
 
 
+class SimStepIn(BaseModel):
+    step: str = "incoming"            # incoming | lang | consent | pick | answer | confirm | voice
+    session: str | None = None
+    digits: str | None = Field(default=None, max_length=8)
+
+
+@router.post("/call-students/{cs_id}/simulate")
+def c_simulate(cs_id: str, body: SimStepIn, request: Request, db: DbDep, user: UserDep) -> dict[str, Any]:
+    """Phone simulator: one step of a real call for this phone student, run by the same call engine a
+    Twilio webhook uses (Sarvam voices when on). Nothing is dialled and the 9 am to 9 pm rule is lifted.
+    Returns what the phone says (clips to play, or lines to speak) and what keys it waits for."""
+    import uuid
+
+    from app.calls.voice import with_voice
+    from app.routers.demo import SIM_STEPS, twiml_to_steps
+    cs = _own_call_student(db, user, cs_id)
+    said: dict[str, str] = {}
+    if body.step == "incoming":
+        phone = db.execute(text("select phone_e164 from call_students where id=:i"), {"i": cs["id"]}).scalar_one()
+        xml = with_voice(lambda d: flow.incoming(d, phone, f"SIM-{uuid.uuid4().hex[:12]}", engine.utcnow(),
+                                                 enforce_hours=False), db, transcript=said)
+    elif body.step in SIM_STEPS and body.session:
+        if db.execute(text("select 1 from call_sessions where id=cast(:s as uuid) and call_student_id=:c"),
+                      {"s": body.session, "c": cs["id"]}).scalar() is None:
+            raise HTTPException(404, {"code": "NOT_FOUND"})
+        fn = {"lang": flow.choose_language, "consent": flow.consent, "pick": flow.pick,
+              "answer": flow.answer, "confirm": flow.confirm}.get(body.step)
+        xml = (with_voice(flow.voice, db, body.session, transcript=said) if fn is None
+               else with_voice(fn, db, body.session, body.digits or "", transcript=said))
+    else:
+        raise HTTPException(422, {"code": "UNKNOWN_STEP"})
+    db.commit()
+    out = twiml_to_steps(xml, said)
+    base = str(request.base_url).rstrip("/")
+
+    def local(item: dict[str, Any]) -> dict[str, Any]:     # clips play from the backend this browser talks to
+        if item.get("type") == "play" and "/v1/audio/" in item.get("url", ""):
+            item["url"] = base + "/v1/audio/" + item["url"].split("/v1/audio/", 1)[1]
+        return item
+    out["before"] = [local(i) for i in out["before"]]
+    out["after"] = [local(i) for i in out["after"]]
+    if out["gather"]:
+        out["gather"]["items"] = [local(i) for i in out["gather"]["items"]]
+    return out
+
+
 @router.get("/call-students/{cs_id}/twin")
 def c_twin(cs_id: str, db: DbDep, user: UserDep) -> dict[str, Any]:
     cs = _own_call_student(db, user, cs_id)

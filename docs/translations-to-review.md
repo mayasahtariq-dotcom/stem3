@@ -1434,3 +1434,24 @@ Run `python scripts/export_translations.py` (from backend/) to regenerate `docs/
 | parent.shareTitle | {name}'s progress | {name} की प्रगति | {name} ಅವರ ಪ್ರಗತಿ | [ ] |
 | parent.shareNotFound | This link does not work any more. Ask your child or the teacher for a new one. | यह लिंक अब काम नहीं करता। बच्चे या शिक्षक से नया लिंक माँगें। | ಈ ಲಿಂಕ್ ಇನ್ನು ಕೆಲಸ ಮಾಡುವುದಿಲ್ಲ. ಮಗು ಅಥವಾ ಶಿಕ್ಷಕರಿಂದ ಹೊಸದನ್ನು ಕೇಳಿ. | [ ] |
 | parent.accuracyWeek | Correct this week | इस हफ़्ते सही | ಈ ವಾರ ಸರಿ | [ ] |
+
+## Phone simulator
+| Key | English | Hindi | Kannada | Reviewed |
+|---|---|---|---|---|
+| calls.simTry | Try on phone simulator | फ़ोन सिम्युलेटर पर आज़माएँ | ಫೋನ್ ಸಿಮ್ಯುಲೇಟರ್‌ನಲ್ಲಿ ಪ್ರಯತ್ನಿಸಿ | [ ] |
+| calls.simTitle | Phone simulator | फ़ोन सिम्युलेटर | ಫೋನ್ ಸಿಮ್ಯುಲೇಟರ್ | [ ] |
+| calls.simHint | Hear exactly what {name} hears on a call, and press keys like on a real phone. Nothing is dialled. | सुनिए {name} कॉल पर क्या सुनती/सुनता है, और असली फ़ोन की तरह बटन दबाइए। कोई कॉल नहीं होती। | {name} ಕರೆಯಲ್ಲಿ ಕೇಳುವುದನ್ನೇ ಕೇಳಿ, ನಿಜವಾದ ಫೋನ್‌ನಂತೆ ಬಟನ್ ಒತ್ತಿ. ಯಾವ ಕರೆಯೂ ಹೋಗುವುದಿಲ್ಲ. | [ ] |
+| calls.simCalling | Calling Aaroh… | आरोह को कॉल हो रही है… | ಆರೋಹಕ್ಕೆ ಕರೆ ಮಾಡಲಾಗುತ್ತಿದೆ… | [ ] |
+| calls.simConnected | Connected | जुड़ गया | ಸಂಪರ್ಕವಾಯಿತು | [ ] |
+| calls.simEnded | Call ended | कॉल खत्म | ಕರೆ ಮುಗಿಯಿತು | [ ] |
+| calls.simFailed | The call could not continue. Try again. | कॉल आगे नहीं चल सकी। फिर कोशिश करें। | ಕರೆ ಮುಂದುವರಿಯಲಿಲ್ಲ. ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ. | [ ] |
+| calls.simReady | Ready to call | कॉल के लिए तैयार | ಕರೆಗೆ ಸಿದ್ಧ | [ ] |
+| calls.simTranscript | What the call says | कॉल में क्या कहा गया | ಕರೆಯಲ್ಲಿ ಹೇಳಿದ್ದು | [ ] |
+| calls.simEmpty | Press Call to start | शुरू करने के लिए कॉल दबाएँ | ಆರಂಭಿಸಲು ಕರೆ ಒತ್ತಿ | [ ] |
+| calls.simPressed | Pressed | दबाया | ಒತ್ತಲಾಗಿದೆ | [ ] |
+| calls.simKeypad | Keypad | कीपैड | ಕೀಪ್ಯಾಡ್ | [ ] |
+| calls.simNoAnswer | No key | कोई बटन नहीं | ಯಾವ ಬಟನ್ ಇಲ್ಲ | [ ] |
+| calls.simHangUp | Hang up | कॉल काटें | ಕರೆ ಕಡಿತಗೊಳಿಸಿ | [ ] |
+| calls.simCall | Call | कॉल करें | ಕರೆ ಮಾಡಿ | [ ] |
+| calls.simAgain | Call again | फिर कॉल करें | ಮತ್ತೆ ಕರೆ ಮಾಡಿ | [ ] |
+| calls.simClose | Close | बंद करें | ಮುಚ್ಚಿ | [ ] |
