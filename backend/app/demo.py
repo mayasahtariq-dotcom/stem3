@@ -12,10 +12,13 @@ from app.people import create_learner
 TEACHER_PHONE = "+916000000099"   # demo only: never texted; web login code 123456
 RIVALS = [("Meena", "+916000000101", 45), ("Arjun", "+916000000102", 30),
           ("Fatima", "+916000000103", 20), ("Kiran", "+916000000104", 10)]
+PARENT_PHONE = "+916000000201"    # demo only: never texted; web login code 123456
+PARENT_CHILDREN = ["+916000000101", "+916000000102"]   # Meena and Arjun
+DEMO_PHONES = {TEACHER_PHONE, PARENT_PHONE, *(p for _, p, _ in RIVALS)}
 
 
 def reset_demo(db: Connection) -> None:
-    phones = [TEACHER_PHONE] + [p for _, p, _ in RIVALS]
+    phones = list(DEMO_PHONES)
     db.execute(text("delete from users where phone_e164 = any(:p)"), {"p": phones})
 
 
@@ -44,5 +47,19 @@ def seed_demo(db: Connection, student_phone: str, parent_phone: str | None) -> d
         {"k": klass, "p": normalize_phone(student_phone),
          "pp": normalize_phone(parent_phone) if parent_phone else None}).scalar_one()
     learner = create_learner(db, call_student_id=cs)
+    ensure_demo_parent(db)
     return {"teacher_id": str(teacher), "classroom_id": str(klass), "call_student_id": str(cs),
             "learner_id": str(learner)}
+
+
+def ensure_demo_parent(db: Connection) -> str:
+    """The demo parent, linked to Meena and Arjun. Safe to run again: adds only what is missing."""
+    pid = db.execute(text("select id from users where phone_e164=:p"), {"p": PARENT_PHONE}).scalar()
+    if pid is None:
+        pid = db.execute(text("insert into users(role, name, phone_e164, registered) values "
+                              "('parent','Demo Parent',:p,true) returning id"), {"p": PARENT_PHONE}).scalar_one()
+    for phone in PARENT_CHILDREN:
+        db.execute(text("insert into parent_links(parent_id, learner_id) select :pid, l.id from learners l "
+                        "join users u on u.id=l.user_id where u.phone_e164=:p on conflict do nothing"),
+                   {"pid": pid, "p": phone})
+    return str(pid)

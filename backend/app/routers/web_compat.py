@@ -150,8 +150,8 @@ def _session(user_id: Any, role: str) -> dict[str, Any]:
 
 
 def _demo_phone(phone: str) -> bool:
-    from app.demo import RIVALS, TEACHER_PHONE
-    return get_settings().demo_mode and phone in {TEACHER_PHONE, *(p for _, p, _ in RIVALS)}
+    from app.demo import DEMO_PHONES
+    return get_settings().demo_mode and phone in DEMO_PHONES
 
 
 @router.post("/auth/otp")
