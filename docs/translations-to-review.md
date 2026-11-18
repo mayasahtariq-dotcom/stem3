@@ -1397,3 +1397,40 @@ Run `python scripts/export_translations.py` (from backend/) to regenerate `docs/
 | classes.uploadNotes | Upload notes | नोट्स अपलोड करें | ನೋಟ್ಸ್ ಅಪ್‌ಲೋಡ್ ಮಾಡಿ | [ ] |
 | classes.courseAdded | Course added to the class | कोर्स क्लास में जुड़ गया | ಕೋರ್ಸ್ ತರಗತಿಗೆ ಸೇರಿತು | [ ] |
 | classes.courseRemoved | Course removed from the class | कोर्स क्लास से हटा दिया | ಕೋರ್ಸ್ ತರಗತಿಯಿಂದ ತೆಗೆಯಲಾಗಿದೆ | [ ] |
+
+## Demo login code
+| Key | English | Hindi | Kannada | Reviewed |
+|---|---|---|---|---|
+| login.demoCode | Demo code: {code} | डेमो कोड: {code} | ಡೆಮೊ ಕೋಡ್: {code} | [ ] |
+
+## Classroom notes
+| Key | English | Hindi | Kannada | Reviewed |
+|---|---|---|---|---|
+| classes.notesTitle | Class notes | क्लास के नोट्स | ತರಗತಿಯ ನೋಟ್ಸ್ | [ ] |
+| classes.shareNotes | Share notes | नोट्स साझा करें | ನೋಟ್ಸ್ ಹಂಚಿ | [ ] |
+| classes.makeCourse | Make a course from notes | नोट्स से कोर्स बनाएँ | ನೋಟ್ಸ್‌ನಿಂದ ಕೋರ್ಸ್ ಮಾಡಿ | [ ] |
+| classes.noNotesYet | No notes shared with this class yet. | इस क्लास के साथ अभी कोई नोट्स साझा नहीं। | ಈ ತರಗತಿಯೊಂದಿಗೆ ಇನ್ನೂ ನೋಟ್ಸ್ ಹಂಚಿಲ್ಲ. | [ ] |
+
+## Notes summary and voice
+| Key | English | Hindi | Kannada | Reviewed |
+|---|---|---|---|---|
+| notes.summaryTitle | Summary | सारांश | ಸಾರಾಂಶ | [ ] |
+| notes.makeSummary | Make a summary | सारांश बनाओ | ಸಾರಾಂಶ ಮಾಡು | [ ] |
+| notes.listenSummary | Listen | सुनो | ಕೇಳು | [ ] |
+| notes.summaryFailed | Could not make a summary. Try again. | सारांश नहीं बन सका। फिर कोशिश करो। | ಸಾರಾಂಶ ಆಗಲಿಲ್ಲ. ಮತ್ತೆ ಪ್ರಯತ್ನಿಸು. | [ ] |
+
+## Parent link
+| Key | English | Hindi | Kannada | Reviewed |
+|---|---|---|---|---|
+| parent.myLinkTitle | Link for your parent | माता-पिता के लिए लिंक | ಪೋಷಕರಿಗಾಗಿ ಲಿಂಕ್ | [ ] |
+| parent.myLinkHint | Send this link to your parent. It opens your progress page, no app or login needed. | यह लिंक अपने माता-पिता को भेजो। इससे तुम्हारी प्रगति दिखती है, कोई ऐप या लॉगिन नहीं चाहिए। | ಈ ಲಿಂಕ್ ಅನ್ನು ನಿನ್ನ ಪೋಷಕರಿಗೆ ಕಳುಹಿಸು. ಇದು ನಿನ್ನ ಪ್ರಗತಿ ತೋರಿಸುತ್ತದೆ, ಆ್ಯಪ್ ಅಥವಾ ಲಾಗಿನ್ ಬೇಡ. | [ ] |
+| parent.copyLink | Copy link | लिंक कॉपी करें | ಲಿಂಕ್ ನಕಲಿಸಿ | [ ] |
+| parent.linkCopied | Link copied | लिंक कॉपी हो गया | ಲಿಂಕ್ ನಕಲಾಗಿದೆ | [ ] |
+| parent.shareWhatsApp | Share on WhatsApp | WhatsApp पर भेजें | WhatsApp ನಲ್ಲಿ ಕಳುಹಿಸಿ | [ ] |
+| parent.newLink | Make a new link | नया लिंक बनाएँ | ಹೊಸ ಲಿಂಕ್ ಮಾಡಿ | [ ] |
+| parent.newLinkDone | New link made. The old one no longer works. | नया लिंक बन गया। पुराना अब नहीं चलेगा। | ಹೊಸ ಲಿಂಕ್ ಆಯಿತು. ಹಳೆಯದು ಇನ್ನು ಕೆಲಸ ಮಾಡುವುದಿಲ್ಲ. | [ ] |
+| parent.teacherLinkTitle | Parent link | माता-पिता का लिंक | ಪೋಷಕರ ಲಿಂಕ್ | [ ] |
+| parent.teacherLinkHint | Give this link to {name}'s parent. It opens their child's progress page, no login needed. | यह लिंक {name} के माता-पिता को दें। इससे बच्चे की प्रगति दिखती है, लॉगिन नहीं चाहिए। | ಈ ಲಿಂಕ್ ಅನ್ನು {name} ಅವರ ಪೋಷಕರಿಗೆ ಕೊಡಿ. ಇದು ಮಗುವಿನ ಪ್ರಗತಿ ತೋರಿಸುತ್ತದೆ, ಲಾಗಿನ್ ಬೇಡ. | [ ] |
+| parent.shareTitle | {name}'s progress | {name} की प्रगति | {name} ಅವರ ಪ್ರಗತಿ | [ ] |
+| parent.shareNotFound | This link does not work any more. Ask your child or the teacher for a new one. | यह लिंक अब काम नहीं करता। बच्चे या शिक्षक से नया लिंक माँगें। | ಈ ಲಿಂಕ್ ಇನ್ನು ಕೆಲಸ ಮಾಡುವುದಿಲ್ಲ. ಮಗು ಅಥವಾ ಶಿಕ್ಷಕರಿಂದ ಹೊಸದನ್ನು ಕೇಳಿ. | [ ] |
+| parent.accuracyWeek | Correct this week | इस हफ़्ते सही | ಈ ವಾರ ಸರಿ | [ ] |

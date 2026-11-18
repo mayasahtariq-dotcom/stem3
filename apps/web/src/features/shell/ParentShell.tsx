@@ -12,7 +12,7 @@ export function ParentShell({ children }: { children: ReactNode }) {
   return (
     <PlayfulPage tone="lavender">
       <header className="sticky top-0 z-10 mx-auto max-w-xl px-3 pt-3 laptop:max-w-4xl">
-        <div className="flex items-center justify-between rounded-[24px] bg-white/95 px-4 py-2 shadow-[0_8px_24px_rgb(80_60_160/0.10)] backdrop-blur">
+        <div className="flex items-center justify-between rounded-[24px] glass px-4 py-2">
           <span className="flex items-center gap-2 text-xl font-extrabold text-[#6a4bf0]">
             <span className="grid size-10 place-items-center rounded-full bg-[#ece6ff]"><StickerIcon name="sprout" size={26} /></span>
             <span className="font-display tracking-wide">{c("appName").regional}</span>

@@ -1041,6 +1041,49 @@ def t_add_note(classroom_id: str, body: NoteIn, request: Request, db: DbDep, use
     return _notes(db, "n.id=:n", {"n": nid}, request)[0]
 
 
+SUMMARY_SCHEMA = {"type": "object", "properties": {"summary": {
+    "type": "object", "properties": {"en": {"type": "string"}, "hi": {"type": "string"}, "kn": {"type": "string"}},
+    "required": ["en", "hi", "kn"]}}, "required": ["summary"]}
+SUMMARY_SYSTEM = ("You summarise a teacher's class notes for school students in India. Use ONLY what the notes say; "
+                  "add nothing new. Write 3 to 5 short, simple sentences a 12-year-old can follow, the same summary in "
+                  "English (en), Hindi (hi) and Kannada (kn). Keep science words in English in brackets where helpful.")
+
+
+@router.post("/notes/{note_id}/summary")
+def note_summary(note_id: str, db: DbDep, user: UserDep,
+                 model: Annotated[Any, Depends(ai_routes.llm)]) -> dict[str, Any]:
+    """A short summary of a class note in English, Hindi and Kannada (made once, then kept). For the teacher who owns
+    the class and its students; the web app reads it aloud with POST /audio."""
+    from app.ai.provider import Part
+    n = db.execute(text(
+        "select n.id, n.title, n.body, n.file_type, n.file_data, n.summary, p.ocr_text, k.teacher_id from class_notes n "
+        "join classrooms k on k.id=n.classroom_id left join upload_pages p on p.id=n.upload_page_id where n.id=:n and "
+        "(k.teacher_id=:u or exists (select 1 from memberships m where m.classroom_id=k.id and m.user_id=:u))"),
+        {"n": note_id, "u": user.id}).mappings().first()
+    if n is None:
+        raise HTTPException(404, {"code": "NOT_FOUND"})
+    if n["summary"]:
+        return {"summary": n["summary"]}
+    ai_routes.rate_limit(f"summary:{user.id}", 30, 3600)
+    notes = "\n".join(x for x in (n["body"], n["ocr_text"]) if x).strip()
+    parts = None
+    if not notes and n["file_data"] is not None and (n["file_type"] or "") in ai_routes.ALLOWED and len(n["file_data"]) <= 8_000_000:
+        parts = [Part(n["file_type"], bytes(n["file_data"]))]        # read the photo or PDF itself
+    if not notes and parts is None:
+        raise HTTPException(422, {"code": "NOTHING_TO_SUMMARISE"})
+    try:
+        out = model.generate_json(f"Title: {n['title']}\n\nClass notes:\n{notes or '(see the attached file)'}",
+                                  SUMMARY_SCHEMA, parts=parts, system=SUMMARY_SYSTEM)
+    except Exception as exc:
+        raise HTTPException(503, {"code": "AI_UNAVAILABLE", "message": "Could not make a summary right now."}) from exc
+    summary = {k: str((out.get("summary") or {}).get(k, "")).strip() for k in ("en", "hi", "kn")}
+    if not summary["en"]:
+        raise HTTPException(503, {"code": "AI_UNAVAILABLE"})
+    db.execute(text("update class_notes set summary=cast(:s as jsonb) where id=:n"),
+               {"s": json.dumps(summary, ensure_ascii=False), "n": note_id})
+    return {"summary": summary}
+
+
 @router.delete("/notes/{note_id}", status_code=204)
 def t_delete_note(note_id: str, db: DbDep, user: UserDep) -> None:
     _teacher(user)
@@ -1197,6 +1240,14 @@ def p_delete(child_id: str, db: DbDep, user: UserDep) -> dict[str, Any]:
 @router.get("/parent/children/{child_id}/dashboard")
 def p_dashboard(child_id: str, db: DbDep, user: UserDep) -> dict[str, Any]:
     _linked(db, user, child_id)
+    return child_dashboard(db, child_id, user.id)
+
+
+NOBODY = "00000000-0000-0000-0000-000000000000"
+
+
+def child_dashboard(db: Connection, child_id: Any, viewer_id: str) -> dict[str, Any]:
+    """A child's week for a parent: from the parent screens, or from the child's private parent link."""
     now = engine.utcnow()
     st = engine.load_stats(db, child_id, now, lock=False)
 
@@ -1225,7 +1276,7 @@ def p_dashboard(child_id: str, db: DbDep, user: UserDep) -> dict[str, Any]:
                                   {"l": child_id}).scalars().all())
     summary = (f"{_child_name(db, child_id)} finished {this_w} lessons this week"
                f"{f' with {round(a_this * 100)}% accuracy' if a_this is not None else ''}.")
-    return {"child": child_out(db, user.id, child_id), "has_activity": this_w > 0 or a_this is not None,
+    return {"child": child_out(db, viewer_id, child_id), "has_activity": this_w > 0 or a_this is not None,
             "week": {"lessons_this_week": this_w, "lessons_last_week": last_w,
                      "arrow": "up" if this_w > last_w else "down" if this_w < last_w else "same",
                      "minutes_this_week": minutes, "streak": engine.display_streak(st, now)},
@@ -1236,3 +1287,52 @@ def p_dashboard(child_id: str, db: DbDep, user: UserDep) -> dict[str, Any]:
                              "status": "done" if x["id"] in done_courses else "pending"} for x in assignments],
             "classes": _child_classes(db, child_id), "summary": tri(summary)}
 
+
+
+# ---------- private parent link: each student has one link a parent can open without signing in ----------
+def _parent_token(db: Connection, learner_id: Any, fresh: bool = False) -> str:
+    import secrets
+    if fresh:
+        db.execute(text("delete from parent_share_links where learner_id=:l"), {"l": learner_id})
+    tok = db.execute(text("select token from parent_share_links where learner_id=:l"), {"l": learner_id}).scalar()
+    if tok is None:
+        tok = secrets.token_urlsafe(18)
+        db.execute(text("insert into parent_share_links(learner_id, token) values (:l,:t)"), {"l": learner_id, "t": tok})
+    return str(tok)
+
+
+def _link_out(tok: str) -> dict[str, str]:
+    return {"token": tok, "path": f"/p/{tok}"}
+
+
+@router.get("/me/parent-link")
+def s_parent_link(db: DbDep, user: UserDep) -> dict[str, str]:
+    """The student's private link for their parent (made on first ask)."""
+    return _link_out(_parent_token(db, _lid(db, user)))
+
+
+@router.post("/me/parent-link/reset")
+def s_parent_link_reset(db: DbDep, user: UserDep) -> dict[str, str]:
+    """A new link; the old one stops working."""
+    return _link_out(_parent_token(db, _lid(db, user), fresh=True))
+
+
+@router.get("/classrooms/{classroom_id}/students/{student_id}/parent-link")
+def t_parent_link(classroom_id: str, student_id: str, db: DbDep, user: UserDep) -> dict[str, str]:
+    """The teacher can hand a student's parent link to the parent."""
+    c = _own_class(db, user, classroom_id)
+    s = next((x for x in _students(db, c["id"]) if str(x["id"]) == student_id), None)
+    if s is None:
+        raise HTTPException(404, {"code": "NOT_FOUND"})
+    return _link_out(_parent_token(db, s["lid"]))
+
+
+@router.get("/share/{token}")
+def shared_dashboard(token: str, request: Request, db: DbDep) -> dict[str, Any]:
+    """The parent link page: the child's week, with no sign-in. The token is the only key."""
+    from app.auth.service import rate_limit
+    rate_limit(f"share-ip:{request.client.host if request.client else '?'}", 120, 3600)
+    lid = db.execute(text("select learner_id from parent_share_links where token=:t"), {"t": token}).scalar()
+    if lid is None:
+        raise HTTPException(404, {"code": "LINK_NOT_FOUND"})
+    return child_dashboard(db, lid, NOBODY)

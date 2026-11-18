@@ -113,7 +113,7 @@
 .sunburst {
   background:
     repeating-conic-gradient(from 0deg at 50% 38%, rgb(255 255 255 / 0.18) 0deg 8deg, transparent 8deg 16deg),
-    radial-gradient(circle at 50% 38%, #ffe7a3 0%, #ffc45e 38%, #ff9a3c 100%);
+    radial-gradient(circle at 50% 38%, #dff1ff 0%, #7cc4ff 38%, #2f7de1 100%);
 }
 .lavender-burst {
   background:
@@ -122,9 +122,9 @@
 }
 .playful-sun-page {
   background:
-    radial-gradient(60rem 30rem at 100% -10%, #ffe1c7 0%, transparent 60%),
-    radial-gradient(40rem 26rem at -10% 30%, #fff0c9 0%, transparent 60%),
-    #fff8f0;
+    radial-gradient(60rem 30rem at 100% -10%, #d6ecff 0%, transparent 60%),
+    radial-gradient(40rem 26rem at -10% 30%, #e6f0ff 0%, transparent 60%),
+    #f4f9ff;
 }
 .playful-lavender-page {
   background:
@@ -139,7 +139,45 @@
 
 /* Cards inside the playful modes: rounder, white, soft shadow. Unlayered, so it wins over the utilities;
    a card that sets its own colour (warnings, consent) keeps it. */
-.playful [data-surface="card"] { border-radius: 24px; box-shadow: 0 10px 28px rgb(120 70 20 / 0.10); }
+.playful [data-surface="card"] { border-radius: 24px; box-shadow: 0 10px 28px rgb(30 70 140 / 0.10); }
 .playful [data-surface="card"][class~="bg-cream"] { background-color: #fff; }
 .playful [data-surface="card"][class~="border-line"] { border-color: transparent; }
 .playful-lavender [data-surface="card"] { box-shadow: 0 10px 28px rgb(80 60 160 / 0.10); }
+
+/* ---------- Glass + motion layer for the playful modes (teacher, parent, parent link) ---------- */
+.glass {
+  background: rgb(255 255 255 / 0.58);
+  backdrop-filter: blur(18px) saturate(150%);
+  -webkit-backdrop-filter: blur(18px) saturate(150%);
+  border: 1px solid rgb(255 255 255 / 0.75);
+  box-shadow: 0 1px 0 rgb(255 255 255 / 0.9) inset, 0 12px 32px rgb(30 70 140 / 0.12);
+}
+/* drifting colour blobs behind the page */
+.blob-field { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+.blob { position: absolute; border-radius: 9999px; filter: blur(60px); opacity: 0.55; animation: drift 18s ease-in-out infinite alternate; }
+@keyframes drift {
+  0% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(6vw, -4vh) scale(1.12); }
+  100% { transform: translate(-4vw, 5vh) scale(0.95); }
+}
+/* cards rise in one after another */
+@keyframes rise { from { opacity: 0; transform: translateY(14px) scale(0.98); } }
+.playful main [data-surface="card"], .playful .play-stat, .playful [data-testid="hero"] { animation: rise 0.55s cubic-bezier(.2,.9,.3,1.2) both; }
+.playful main > div > :nth-child(2), .playful main section > :nth-child(2) { animation-delay: 60ms; }
+.playful main > div > :nth-child(3), .playful main section > :nth-child(3) { animation-delay: 120ms; }
+.playful main > div > :nth-child(4), .playful main section > :nth-child(4) { animation-delay: 180ms; }
+.playful main > div > :nth-child(5), .playful main section > :nth-child(5) { animation-delay: 240ms; }
+.playful main > div > :nth-child(n+6) { animation-delay: 300ms; }
+/* frosted cards inside the playful modes */
+.playful [data-surface="card"][class~="bg-cream"] {
+  background-color: rgb(255 255 255 / 0.6);
+  backdrop-filter: blur(16px) saturate(150%);
+  -webkit-backdrop-filter: blur(16px) saturate(150%);
+}
+.playful [data-surface="card"] { border: 1px solid rgb(255 255 255 / 0.7); transition: transform .25s ease, box-shadow .25s ease; }
+.playful [data-surface="card"]:hover { transform: translateY(-2px); box-shadow: 0 16px 36px rgb(30 70 140 / 0.16); }
+.play-stat { transition: transform .25s ease, box-shadow .25s ease; }
+.play-stat:hover { transform: translateY(-4px) rotate(-0.5deg); box-shadow: 0 18px 34px rgb(30 70 140 / 0.18); }
+/* a soft shine that sweeps across the hero */
+@keyframes shine { 0% { transform: translateX(-120%) skewX(-18deg); } 60%, 100% { transform: translateX(260%) skewX(-18deg); } }
+.hero-shine { position: absolute; inset: 0 auto 0 0; width: 35%; background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.35), transparent); animation: shine 5.5s ease-in-out infinite; pointer-events: none; }

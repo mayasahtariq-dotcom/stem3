@@ -132,7 +132,7 @@ function TopLearners({ students, onOpen }: { students: Schemas["DashboardOut"]["
       <ol className="flex flex-col gap-2">
         {top.map((s, i) => (
           <li key={s.id}>
-            <button type="button" onClick={() => onOpen(s.id)} className={`flex min-h-12 w-full items-center gap-3 rounded-2xl px-3 py-2 text-left transition-colors ${i === 0 ? "bg-[#fff3c4]" : "bg-[#fffaf5] hover:bg-[#fff1e6]"}`}>
+            <button type="button" onClick={() => onOpen(s.id)} className={`flex min-h-12 w-full items-center gap-3 rounded-2xl px-3 py-2 text-left transition-colors ${i === 0 ? "bg-[#fff3c4]" : "bg-[#f5f9ff] hover:bg-[#e8f3ff]"}`}>
               <span className={`grid size-8 shrink-0 place-items-center rounded-full text-sm font-extrabold ${MEDAL[i] ?? "bg-white text-stone"}`}>{i + 1}</span>
               <span className="font-bold">{s.name}</span>
               {s.streak > 0 && <span className="text-xs font-bold text-flame">{s.streak}d</span>}

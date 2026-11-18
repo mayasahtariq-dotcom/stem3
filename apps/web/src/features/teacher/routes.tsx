@@ -31,6 +31,8 @@ import { AllClassesPanel, MaterialsPanel } from "./OverviewPanels";
 import { ClassDetailScreen, ClassesScreen } from "./ClassesScreen";
 import { useClassInsights, useCreateClass, useMaterials, useTeacherOverview } from "./insights-api";
 import { useClassStore } from "./class-store";
+import { useTeacherNotes } from "@/features/notes/api";
+import { StudentParentLinkCard } from "@/features/parent/share-link";
 import type { Schemas } from "@mooshala/api-client";
 import { optionLabels, publishBlock, reviewItems } from "./review";
 import { StudentDetailScreen } from "./StudentDetailScreen";
@@ -142,9 +144,19 @@ export function ClassDetailRoute({ classId }: { classId: string }) {
   const classroom = classes.data?.find((c) => c.id === classId) ?? null;
   const courses = useCourses();
   const toggle = useClassCourse(classId);
+  const notes = useTeacherNotes();
   const onError = useErrorToast();
   return (
     <ClassDetailScreen
+      notes={notes.data?.filter((n) => n.classroom_id === classId)}
+      onShareNotes={() => {
+        setClassId(classId);
+        router.push("/teacher/notes");
+      }}
+      onMakeCourse={() => {
+        setClassId(classId);
+        router.push("/teacher/courses/new");
+      }}
       courses={courses.data}
       courseIds={dash.data?.courses.map((c) => c.id) ?? []}
       courseBusyId={toggle.isPending ? toggle.variables.courseId : null}
@@ -199,6 +211,7 @@ export function StudentDetailRoute({ studentId }: { studentId: string }) {
   const { classes, classId } = useSelectedClass();
   const detail = useStudentDetail(classId, studentId);
   return (
+    <div className="flex flex-col gap-5">
     <StudentDetailScreen
       data={detail.data}
       loading={classes.isLoading || detail.isLoading}
@@ -213,6 +226,8 @@ export function StudentDetailRoute({ studentId }: { studentId: string }) {
         }).format(new Date(iso))
       }
     />
+    {detail.data && <StudentParentLinkCard classId={classId} studentId={studentId} name={detail.data.name} />}
+    </div>
   );
 }
 

@@ -41,7 +41,7 @@ export function ParentHomeScreen(p: ParentHomeScreenProps) {
             <li key={ch.id}>
               <Link href={`/parent/child/${ch.id}`} className="block rounded-card focus-visible:outline-4" data-testid={`child-${ch.id}`}>
                 <Card className="flex items-center gap-3 transition-transform hover:-translate-y-0.5">
-                  <IconBubble icon="backpack" pastel={(["lavender", "peach", "sky", "mint"] as const)[i % 4]} size={34} />
+                  <IconBubble icon="backpack" pastel={(["lavender", "blue", "sky", "mint"] as const)[i % 4]} size={34} />
                   <div className="flex-1">
                     <p className="text-lg font-extrabold">{ch.name}</p>
                     <p className="text-sm text-stone">{ch.classes.map((x) => x.name).join(", ")}</p>
