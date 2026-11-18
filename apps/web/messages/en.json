@@ -15,7 +15,8 @@
     "resetDemo": "Reset demo data",
     "save": "Save",
     "cancel": "Cancel",
-    "tagline": "Learn through play"
+    "tagline": "Learn through play",
+    "callAaroh": "No smartphone? Call Aaroh"
   },
   "errors": {
     "UNAUTHORIZED": "Please sign in again.",
@@ -731,9 +732,6 @@
     "confirmSave": "Yes, add this student",
     "edit": "Change details",
     "added": "{name} is added. Waiting for the parent's consent.",
-    "simTry": "Try on phone simulator",
-    "simTitle": "Phone simulator",
-    "simHint": "Hear exactly what {name} hears on a call, and press keys like on a real phone. Nothing is dialled.",
     "simCalling": "Calling Aaroh…",
     "simConnected": "Connected",
     "simEnded": "Call ended",
@@ -746,8 +744,7 @@
     "simNoAnswer": "No key",
     "simHangUp": "Hang up",
     "simCall": "Call",
-    "simAgain": "Call again",
-    "simClose": "Close"
+    "simAgain": "Call again"
   },
   "offline": {
     "offline": "You're offline. You can keep playing a lesson you already started.",
@@ -858,7 +855,10 @@
     "summaryTitle": "Summary",
     "makeSummary": "Make a summary",
     "listenSummary": "Listen",
-    "summaryFailed": "Could not make a summary. Try again."
+    "summaryFailed": "Could not make a summary. Try again.",
+    "deleteNote": "Delete",
+    "deleteConfirm": "Delete \"{title}\"? Students will no longer see it.",
+    "deleted": "Note deleted"
   },
   "world": {
     "fields": "Fields",
@@ -920,5 +920,16 @@
     "saveFailed": "Couldn't save your field. Check your connection and try again.",
     "progressTitle": "Farm fields",
     "progressLine": "{n} of 5 fields unlocked"
+  },
+  "phone": {
+    "back": "Back",
+    "title": "Call Aaroh",
+    "hint": "No smartphone? Call Aaroh from your phone. Golu teaches the lesson and asks the quiz; you answer by pressing keys.",
+    "yourNumber": "Your phone number",
+    "numberHint": "Use the number your teacher added for you. Aaroh knows you by it.",
+    "badNumber": "Enter a 10-digit mobile number.",
+    "next": "Next",
+    "callingFrom": "From",
+    "changeNumber": "Use another number"
   }
 }

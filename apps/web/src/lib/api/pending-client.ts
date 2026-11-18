@@ -14,6 +14,7 @@ export interface PendingClient {
   post<T>(path: string, body?: unknown, extraHeaders?: Record<string, string>): Promise<T>;
   patch<T>(path: string, body?: unknown): Promise<T>;
   put<T>(path: string, body?: unknown): Promise<T>;
+  del<T = null>(path: string): Promise<T>;
 }
 
 export function buildPendingClient(getAccessToken: TokenProvider, baseUrl = apiBaseUrl): PendingClient {
@@ -39,5 +40,6 @@ export function buildPendingClient(getAccessToken: TokenProvider, baseUrl = apiB
     post: (p, b, h) => request("POST", p, b, h),
     patch: (p, b) => request("PATCH", p, b),
     put: (p, b) => request("PUT", p, b),
+    del: (p) => request("DELETE", p),
   };
 }

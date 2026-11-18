@@ -1455,3 +1455,24 @@ Run `python scripts/export_translations.py` (from backend/) to regenerate `docs/
 | calls.simCall | Call | कॉल करें | ಕರೆ ಮಾಡಿ | [ ] |
 | calls.simAgain | Call again | फिर कॉल करें | ಮತ್ತೆ ಕರೆ ಮಾಡಿ | [ ] |
 | calls.simClose | Close | बंद करें | ಮುಚ್ಚಿ | [ ] |
+
+## Call Aaroh page
+| Key | English | Hindi | Kannada | Reviewed |
+|---|---|---|---|---|
+| phone.back | Back | पीछे | ಹಿಂದೆ | [ ] |
+| phone.title | Call Aaroh | आरोह को कॉल करो | ಆರೋಹಕ್ಕೆ ಕರೆ ಮಾಡು | [ ] |
+| phone.hint | No smartphone? Call Aaroh from your phone. Golu teaches the lesson and asks the quiz; you answer by pressing keys. | स्मार्टफ़ोन नहीं? अपने फ़ोन से आरोह को कॉल करो। गोलू पाठ पढ़ाएगा और क्विज़ पूछेगा; तुम बटन दबाकर जवाब दोगे। | ಸ್ಮಾರ್ಟ್‌ಫೋನ್ ಇಲ್ಲವೇ? ನಿನ್ನ ಫೋನ್‌ನಿಂದ ಆರೋಹಕ್ಕೆ ಕರೆ ಮಾಡು. ಗೋಲು ಪಾಠ ಹೇಳಿ ಕ್ವಿಜ್ ಕೇಳುತ್ತದೆ; ನೀನು ಬಟನ್ ಒತ್ತಿ ಉತ್ತರಿಸು. | [ ] |
+| phone.yourNumber | Your phone number | तुम्हारा फ़ोन नंबर | ನಿನ್ನ ಫೋನ್ ಸಂಖ್ಯೆ | [ ] |
+| phone.numberHint | Use the number your teacher added for you. Aaroh knows you by it. | वही नंबर डालो जो शिक्षक ने तुम्हारे लिए जोड़ा है। आरोह तुम्हें उसी से पहचानता है। | ಶಿಕ್ಷಕರು ನಿನಗಾಗಿ ಸೇರಿಸಿದ ಸಂಖ್ಯೆ ಬಳಸು. ಆರೋಹ ನಿನ್ನನ್ನು ಅದರಿಂದ ಗುರುತಿಸುತ್ತದೆ. | [ ] |
+| phone.badNumber | Enter a 10-digit mobile number. | 10 अंकों का मोबाइल नंबर डालो। | 10 ಅಂಕಿಯ ಮೊಬೈಲ್ ಸಂಖ್ಯೆ ನಮೂದಿಸು. | [ ] |
+| phone.next | Next | आगे | ಮುಂದೆ | [ ] |
+| phone.callingFrom | From | से | ಇಂದ | [ ] |
+| phone.changeNumber | Use another number | दूसरा नंबर | ಬೇರೆ ಸಂಖ್ಯೆ | [ ] |
+| common.callAaroh | No smartphone? Call Aaroh | स्मार्टफ़ोन नहीं? आरोह को कॉल करो | ಸ್ಮಾರ್ಟ್‌ಫೋನ್ ಇಲ್ಲವೇ? ಆರೋಹಕ್ಕೆ ಕರೆ ಮಾಡು | [ ] |
+
+## Delete notes
+| Key | English | Hindi | Kannada | Reviewed |
+|---|---|---|---|---|
+| notes.deleteNote | Delete | हटाएँ | ಅಳಿಸಿ | [ ] |
+| notes.deleteConfirm | Delete "{title}"? Students will no longer see it. | "{title}" हटाएँ? छात्र इसे फिर नहीं देख पाएँगे। | "{title}" ಅಳಿಸುವುದೇ? ವಿದ್ಯಾರ್ಥಿಗಳು ಇದನ್ನು ಇನ್ನು ನೋಡುವುದಿಲ್ಲ. | [ ] |
+| notes.deleted | Note deleted | नोट हटा दिया | ನೋಟ್ ಅಳಿಸಲಾಗಿದೆ | [ ] |

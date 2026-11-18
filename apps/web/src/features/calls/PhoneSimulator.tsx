@@ -1,13 +1,12 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { BilingualText, ChunkyButton, Dialog, GoluMascot, StickerIcon } from "@/components/ui";
+import { GoluMascot, StickerIcon } from "@/components/ui";
 import { useBilingual } from "@/lib/i18n/use-bilingual";
-import { useServices } from "@/lib/services";
 import { cn } from "@/lib/utils/cn";
 
 /*
- * Phone simulator: the teacher hears exactly what a phone student hears. Each step runs the real call
- * engine on the server (POST /call-students/{id}/simulate, Sarvam voices when on); nothing is dialled.
+ * Phone simulator: a student without a smartphone "calls Aaroh" from their number. Each step runs the real call
+ * engine on the server (POST /phone/call, Sarvam voices when on); nothing is dialled.
  * Clips play in order, then the keypad waits for a key, like a real phone.
  */
 type Item = { type: "say" | "play"; text: string; url?: string; lang?: string };
@@ -18,8 +17,11 @@ type Phase = "idle" | "dialing" | "talking" | "waiting" | "ended" | "error";
 
 const KEYS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "*", "0", "#"];
 
-export function usePhoneSimulator(studentId: string | null) {
-  const { pending } = useServices();
+type SimBody = { step: string; session?: string; digits?: string };
+type Poster = (body: SimBody) => Promise<Step>;
+
+/** Runs a simulated call; `post` sends one step to the server (null = not ready). */
+export function usePhoneSimulator(post: Poster | null) {
   const [phase, setPhase] = useState<Phase>("idle");
   const [lines, setLines] = useState<Line[]>([]);
   const [seconds, setSeconds] = useState(0);
@@ -90,9 +92,9 @@ export function usePhoneSimulator(studentId: string | null) {
   };
 
   const send = async (step: string, session?: string, digits?: string) => {
-    if (!studentId) return;
+    if (!post) return;
     try {
-      const s = await pending.post<Step>(`/call-students/${encodeURIComponent(studentId)}/simulate`, { step, session, digits });
+      const s = await post({ step, session, digits });
       await handle(s);
     } catch {
       run.current++;
@@ -156,25 +158,17 @@ export function usePhoneSimulator(studentId: string | null) {
   return { phase, lines, seconds, start, press, noAnswer, hangUp };
 }
 
-/** The simulator in a dialog: a glassy phone with the caller, the transcript, a keypad and a red hang-up. */
-export function PhoneSimulator({ open, onOpenChange, studentId, studentName }: { open: boolean; onOpenChange: (o: boolean) => void; studentId: string | null; studentName: string }) {
+/** The phone itself: caller, live transcript, keypad, call / hang-up. */
+export function PhoneDevice({ sim, callerLabel }: { sim: ReturnType<typeof usePhoneSimulator>; callerLabel?: string }) {
   const t = useBilingual("calls");
-  const sim = usePhoneSimulator(open ? studentId : null);
   const feed = useRef<HTMLOListElement>(null);
   useEffect(() => {
     feed.current?.scrollTo({ top: feed.current.scrollHeight, behavior: "smooth" });
   }, [sim.lines.length]);
-  const close = (o: boolean) => {
-    if (!o) sim.hangUp();
-    onOpenChange(o);
-  };
   const live = sim.phase === "talking" || sim.phase === "waiting";
   const clock = `${String(Math.floor(sim.seconds / 60)).padStart(2, "0")}:${String(sim.seconds % 60).padStart(2, "0")}`;
-  const status = sim.phase === "dialing" ? t("simCalling") : live ? `${t("simConnected").regional} · ${clock}` : sim.phase === "ended" ? t("simEnded").regional : sim.phase === "error" ? t("simFailed").regional : t("simReady").regional;
+  const status = sim.phase === "dialing" ? t("simCalling").regional : live ? `${t("simConnected").regional} · ${clock}` : sim.phase === "ended" ? t("simEnded").regional : sim.phase === "error" ? t("simFailed").regional : t("simReady").regional;
   return (
-    <Dialog open={open} onOpenChange={close} title={t("simTitle")} description={t("simHint", { name: studentName })}>
-      <div className="flex flex-col items-center gap-3">
-        <BilingualText size="sm" align="center" text={t("simHint", { name: studentName })} className="text-stone" />
         <div className="w-full max-w-[300px] rounded-[44px] bg-gradient-to-b from-[#1c2a4a] to-[#0d1526] p-3 shadow-[0_24px_60px_rgb(10_30_80/0.45)]" data-testid="phone-sim" data-phase={sim.phase}>
           <div className="relative flex flex-col gap-3 overflow-hidden rounded-[34px] bg-gradient-to-b from-[#2b6fd6] via-[#3b82f6] to-[#1e3a8a] p-4 text-white">
             <span aria-hidden className="mx-auto h-1.5 w-20 rounded-full bg-black/30" />
@@ -184,9 +178,8 @@ export function PhoneSimulator({ open, onOpenChange, studentId, studentName }: {
               </div>
               <div className="min-w-0">
                 <p className="font-display text-xl tracking-wide">Aaroh</p>
-                <p className="text-xs text-white/85" aria-live="polite" data-testid="sim-status">
-                  {typeof status === "string" ? status : `${status.regional}`}
-                </p>
+                {callerLabel && <p className="truncate text-[11px] text-white/70">{callerLabel}</p>}
+                <p className="text-xs text-white/85" aria-live="polite" data-testid="sim-status">{status}</p>
               </div>
             </div>
             <ol ref={feed} className="flex h-44 flex-col gap-1.5 overflow-y-auto rounded-2xl bg-white/12 p-2 text-sm backdrop-blur-sm" aria-label={t("simTranscript").english} data-testid="sim-transcript">
@@ -231,10 +224,5 @@ export function PhoneSimulator({ open, onOpenChange, studentId, studentName }: {
             </div>
           </div>
         </div>
-        <ChunkyButton variant="ghost" size="sm" onClick={() => close(false)}>
-          <BilingualText as="span" size="sm" text={t("simClose")} />
-        </ChunkyButton>
-      </div>
-    </Dialog>
   );
 }

@@ -51,6 +51,11 @@ export function AuthFrame({ title, subtitle, golu, backHref, children }: AuthFra
           </header>
           {children}
         </section>
+        <Link href="/phone" className="glass mx-auto inline-flex min-h-11 items-center gap-2 rounded-full px-4 font-bold text-ink hover:bg-white" data-testid="call-aaroh-link">
+          <StickerIcon name="speaker" size={22} />
+          <span>{c("callAaroh").regional}</span>
+          <span lang="en" className="text-sm font-medium text-stone">{c("callAaroh").english}</span>
+        </Link>
       </main>
     </div>
   );

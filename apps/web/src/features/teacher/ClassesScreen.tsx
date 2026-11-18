@@ -186,6 +186,8 @@ export interface ClassDetailScreenProps {
   /** This class's shared notes, and shortcuts to share more or make a course from notes. */
   notes?: ClassNote[];
   onShareNotes?: () => void;
+  onDeleteNote?: (note: ClassNote) => void;
+  deletingNoteId?: string | null;
   onMakeCourse?: () => void;
 }
 
@@ -218,7 +220,7 @@ export function ClassDetailScreen(p: ClassDetailScreenProps) {
       </div>
 
       {p.onShareNotes && p.onMakeCourse && (
-        <ClassNotesCard notes={p.notes} onShare={p.onShareNotes} onMakeCourse={p.onMakeCourse} />
+        <ClassNotesCard notes={p.notes} onShare={p.onShareNotes} onMakeCourse={p.onMakeCourse} onDelete={p.onDeleteNote} deletingId={p.deletingNoteId ?? null} />
       )}
 
       {p.onToggleCourse && (
@@ -319,7 +321,7 @@ function ClassCoursesCard({ courses, inClass, busyId, onToggle }: { courses: Sch
 }
 
 /** The class's notes (what students can re-read), with buttons to share notes or turn notes into a course. */
-function ClassNotesCard({ notes, onShare, onMakeCourse }: { notes: ClassNote[] | undefined; onShare: () => void; onMakeCourse: () => void }) {
+function ClassNotesCard({ notes, onShare, onMakeCourse, onDelete, deletingId }: { notes: ClassNote[] | undefined; onShare: () => void; onMakeCourse: () => void; onDelete?: (note: ClassNote) => void; deletingId: string | null }) {
   const t = useBilingual("classes");
   const nt = useBilingual("notes");
   return (
@@ -340,7 +342,7 @@ function ClassNotesCard({ notes, onShare, onMakeCourse }: { notes: ClassNote[] |
         <BilingualText size="sm" text={t("noNotesYet")} className="text-stone" />
       ) : (
         <ul className="grid gap-2 tablet:grid-cols-2">
-          {notes.slice(0, 6).map((n) => (
+          {notes.map((n) => (
             <li key={n.id} className="flex items-center gap-3 rounded-2xl bg-white/70 p-3">
               <StickerIcon name={n.file ? (n.file.type.startsWith("image/") ? "image" : "doc") : "pencil"} size={26} />
               <span className="min-w-0 flex-1 truncate font-bold">{n.title}</span>
@@ -348,6 +350,11 @@ function ClassNotesCard({ notes, onShare, onMakeCourse }: { notes: ClassNote[] |
                 <a href={n.file.url} target="_blank" rel="noopener" className="text-sm font-bold text-sky-strong underline">
                   {nt("open").regional}
                 </a>
+              )}
+              {onDelete && (
+                <ChunkyButton size="sm" variant="ghost" loading={deletingId === n.id} onClick={() => onDelete(n)} aria-label={nt("deleteNote").english} title={nt("deleteNote").english} data-testid={`delete-class-note-${n.id}`}>
+                  <StickerIcon name="trash" size={18} />
+                </ChunkyButton>
               )}
             </li>
           ))}
