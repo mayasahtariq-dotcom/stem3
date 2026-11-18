@@ -1,6 +1,6 @@
 "use client";
 import dynamic from "next/dynamic";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { StoreItem, WorldField } from "@mooshala/api-client";
 import { BilingualText, ChunkyButton, EmptyState, ErrorState, LoadingState, ProgressBar, StickerIcon, toast } from "@/components/ui";
 import { asApiError } from "@/lib/api/errors";
@@ -13,6 +13,7 @@ import { FIELD_UNLOCK_XP, isFieldId, type FieldId } from "@/lib/world/fields";
 import { useCelebrateField, usePurchase, useStoreItems, useWorld } from "./api";
 import type { useFieldEditor } from "./use-field-editor";
 import { useWorldUi } from "./world-store";
+import { groundPicker } from "@/three/worlds/ground-picker";
 
 const ItemPreview = dynamic(() => import("@/three/worlds/ItemPreview"), { ssr: false, loading: () => <div className="size-full animate-pulse rounded-card bg-[#dff0cf]" /> });
 
@@ -92,7 +93,28 @@ function FieldCard({ f, xp, here, onEnter }: { f: WorldField; xp: number; here: 
 }
 
 /** The Farm Store: categories, prices, owned counts and a turning 3D preview. */
-export function StoreSheet({ onClose, onPlace }: { onClose: () => void; onPlace: (itemId: string) => void }) {
+/** The grip on an owned item: press and drag it onto the farm. Pointer events, so it works with touch too. */
+function DragGrip({ onStart, testId }: { onStart: (e: React.PointerEvent) => void; testId: string }) {
+  const t = useBilingual("world");
+  return (
+    <span
+      role="button"
+      tabIndex={-1}
+      onPointerDown={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        onStart(e);
+      }}
+      className="inline-flex cursor-grab touch-none select-none items-center gap-1 rounded-full bg-sky-soft px-2 py-1 text-[11px] font-bold text-sky-strong active:cursor-grabbing"
+      data-testid={testId}
+      title={t("dragToFarm").english}
+    >
+      <StickerIcon name="sparkle" size={14} /> {t("dragToFarm").regional}
+    </span>
+  );
+}
+
+export function StoreSheet({ onClose, onPlace, onDragStart }: { onClose: () => void; onPlace: (itemId: string) => void; onDragStart?: (itemId: string, e: React.PointerEvent) => void }) {
   const t = useBilingual("world");
   const errors = useBilingual("errors");
   const tri = useTri();
@@ -150,6 +172,7 @@ export function StoreSheet({ onClose, onPlace }: { onClose: () => void; onPlace:
                   </span>
                   {i.owned > 0 && <span className="text-xs font-bold text-grass-strong">{t("owned", { n: i.owned }).regional}</span>}
                 </button>
+                {i.owned > 0 && onDragStart && <DragGrip onStart={(e) => onDragStart(i.id, e)} testId={`drag-store-${i.id}`} />}
               </li>
             ))}
           </ul>
@@ -179,7 +202,7 @@ export function StoreSheet({ onClose, onPlace }: { onClose: () => void; onPlace:
 }
 
 /** What the student owns and how many are still free to place in this field. */
-export function InventorySheet({ editor, onClose, onPlace, onStore }: { editor: Editor; onClose: () => void; onPlace: (itemId: string) => void; onStore: () => void }) {
+export function InventorySheet({ editor, onClose, onPlace, onStore, onDragStart }: { editor: Editor; onClose: () => void; onPlace: (itemId: string) => void; onStore: () => void; onDragStart?: (itemId: string, e: React.PointerEvent) => void }) {
   const t = useBilingual("world");
   const tri = useTri();
   const items = useStoreItems();
@@ -210,6 +233,7 @@ export function InventorySheet({ editor, onClose, onPlace, onStore }: { editor: 
                 <div className="min-w-0">
                   {item && <BilingualText as="span" size="sm" text={tri(item.name) as never} />}
                   <BilingualText size="sm" text={left ? t("available", { n: left }) : t("allPlaced")} />
+                  {left > 0 && onDragStart && <DragGrip onStart={(ev) => onDragStart(e.item_id, ev)} testId={`drag-inv-${e.item_id}`} />}
                 </div>
                 <ChunkyButton size="sm" disabled={!left} onClick={() => onPlace(e.item_id)} data-testid={`place-${e.item_id}`}>
                   {t("place").regional} · {t("place").english}
@@ -243,6 +267,51 @@ export function WorldOverlay({ editor, field }: { editor: Editor; field: FieldId
     ui.startDraft({ uid: newUid(), item_id: itemId, x: spot.x, z: spot.z, rotation: 0, isNew: true });
   };
   const saveError = (e: unknown) => toast("error", asApiError(e).code === "LAYOUT_CONFLICT" ? t("conflict") : t("saveFailed"));
+
+  // Drag and drop from the store or inventory: the sheet steps aside, the item follows the pointer over the farm
+  // (with its green/red ring), and letting go places it there.
+  const [ghost, setGhost] = useState<{ itemId: string; x: number; y: number; overFarm: boolean } | null>(null);
+  const editorRef = useRef(editor);
+  useEffect(() => {
+    editorRef.current = editor;
+  });
+  const startDrag = (itemId: string, e: React.PointerEvent) => {
+    if ((editor.available[itemId] ?? 0) <= 0) return toast("info", t("allPlaced"));
+    const uid = newUid();
+    ui.openSheet(null);
+    setGhost({ itemId, x: e.clientX, y: e.clientY, overFarm: false });
+    const move = (ev: PointerEvent) => {
+      const p = groundPicker.pick?.(ev.clientX, ev.clientY) ?? null;
+      setGhost({ itemId, x: ev.clientX, y: ev.clientY, overFarm: Boolean(p) });
+      if (!p) return;
+      const cur = useWorldUi.getState().draft;
+      if (cur?.uid === uid) useWorldUi.getState().moveDraft(p.x, p.z);
+      else useWorldUi.getState().startDraft({ uid, item_id: itemId, x: p.x, z: p.z, rotation: 0, isNew: true });
+    };
+    const up = (ev: PointerEvent) => {
+      window.removeEventListener("pointermove", move);
+      window.removeEventListener("pointerup", up);
+      window.removeEventListener("pointercancel", up);
+      setGhost(null);
+      const p = groundPicker.pick?.(ev.clientX, ev.clientY) ?? null;
+      const cur = useWorldUi.getState().draft;
+      if (!p || cur?.uid !== uid) {
+        if (cur?.uid === uid) ui.cancelDraft();          // let go over the menus: nothing placed
+        return;
+      }
+      const placed = { uid, item_id: itemId, x: p.x, z: p.z, rotation: cur.rotation };
+      useWorldUi.getState().moveDraft(p.x, p.z);
+      if (editorRef.current.problemAt(placed)) return toast("info", t("dropBlocked"));   // keep the draft to adjust
+      sounds.play("pop");
+      editorRef.current.placeAt(placed, () => {
+        useWorldUi.getState().cancelDraft();
+        toast("success", t("placed"));
+      }, saveError);
+    };
+    window.addEventListener("pointermove", move);
+    window.addEventListener("pointerup", up);
+    window.addEventListener("pointercancel", up);
+  };
 
   // The first time a new field opens, celebrate it.
   const fresh = world.data?.fields.find((f) => f.unlocked && !f.celebrated && f.id !== "starter-meadow");
@@ -326,8 +395,18 @@ export function WorldOverlay({ editor, field }: { editor: Editor; field: FieldId
       )}
 
       {ui.sheet === "levels" && <LevelsSheet current={field} onClose={() => ui.openSheet(null)} onEnter={(f) => ui.setField(f)} />}
-      {ui.sheet === "store" && <StoreSheet onClose={() => ui.openSheet(null)} onPlace={startPlacing} />}
-      {ui.sheet === "inventory" && <InventorySheet editor={editor} onClose={() => ui.openSheet(null)} onPlace={startPlacing} onStore={() => ui.openSheet("store")} />}
+      {ui.sheet === "store" && <StoreSheet onClose={() => ui.openSheet(null)} onPlace={startPlacing} onDragStart={startDrag} />}
+      {ui.sheet === "inventory" && <InventorySheet editor={editor} onClose={() => ui.openSheet(null)} onPlace={startPlacing} onStore={() => ui.openSheet("store")} onDragStart={startDrag} />}
+      {ghost && (
+        <div
+          aria-hidden
+          className={cn("pointer-events-none fixed z-50 -translate-x-1/2 -translate-y-[130%] rounded-full px-3 py-1.5 text-sm font-bold shadow-float-2 transition-colors", ghost.overFarm ? "bg-grass-strong text-white" : "bg-white text-ink")}
+          style={{ left: ghost.x, top: ghost.y }}
+          data-testid="drag-ghost"
+        >
+          {ghost.overFarm ? t("dropHere").regional : t("dragToFarm").regional}
+        </div>
+      )}
 
       {fresh && dismissed !== fresh.id && (
         <div className="absolute inset-0 z-40 grid place-items-center bg-black/35 p-4" data-testid="unlock-celebration">

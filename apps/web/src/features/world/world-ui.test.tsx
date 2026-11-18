@@ -1,4 +1,4 @@
-import { fireEvent, screen, waitFor, within } from "@testing-library/react";
+import { act, fireEvent, screen, waitFor, within } from "@testing-library/react";
 import { vi } from "vitest";
 import { DEMO } from "@/mocks/fake-db";
 import { FIELD_GEOMETRY } from "@/lib/world/fields";
@@ -33,6 +33,7 @@ describe("placement helpers", () => {
   });
 });
 
+// jsdom has no full PointerEvent, so window pointer events are sent as mouse-style events (they carry clientX/Y).
 describe("Farm worlds UI", () => {
   it("Meadow levels show every field with its lock and XP still needed", async () => {
     await renderFarm();
@@ -81,6 +82,44 @@ describe("Farm worlds UI", () => {
     fireEvent.click(screen.getByTestId("open-inventory"));
     const inv = within(await screen.findByTestId("inventory-sheet"));
     await waitFor(() => expect(inv.getByTestId("place-flower-pot")).toBeDisabled());
+  });
+
+  it("drags an item from the inventory onto the farm and places it where it is dropped", async () => {
+    const { groundPicker } = await import("@/three/worlds/ground-picker");
+    groundPicker.pick = (x, y) => (y < 500 ? { x: -6 + x / 1000, z: 18 } : null);     // stand-in for the 3D ground
+    try {
+      await renderFarm();
+      fireEvent.click(screen.getByTestId("open-inventory"));
+      const grip = await within(await screen.findByTestId("inventory-sheet")).findByTestId("drag-inv-flower-pot");
+      fireEvent.pointerDown(grip, { clientX: 300, clientY: 700 });
+      expect(screen.queryByTestId("inventory-sheet")).not.toBeInTheDocument();          // the sheet steps aside
+      act(() => void window.dispatchEvent(new MouseEvent("pointermove", { clientX: 200, clientY: 300 })));
+      expect(useWorldUi.getState().draft).toMatchObject({ item_id: "flower-pot", z: 18 });
+      expect(screen.getByTestId("drag-ghost")).toHaveTextContent(/Drop here|यहाँ छोड़ो/);
+      act(() => void window.dispatchEvent(new MouseEvent("pointerup", { clientX: 200, clientY: 300 })));
+      await waitFor(() => expect(useWorldUi.getState().draft).toBeNull());               // placed and saved
+      fireEvent.click(screen.getByTestId("open-inventory"));
+      const inv = within(await screen.findByTestId("inventory-sheet"));
+      await waitFor(() => expect(inv.getByTestId("place-flower-pot")).toBeDisabled());   // nothing left to place
+    } finally {
+      groundPicker.pick = null;
+    }
+  });
+
+  it("letting go over the menus places nothing", async () => {
+    const { groundPicker } = await import("@/three/worlds/ground-picker");
+    groundPicker.pick = (_x, y) => (y < 500 ? { x: -6, z: 18 } : null);
+    try {
+      await renderFarm();
+      fireEvent.click(screen.getByTestId("open-inventory"));
+      fireEvent.pointerDown(await within(await screen.findByTestId("inventory-sheet")).findByTestId("drag-inv-flower-pot"), { clientX: 300, clientY: 700 });
+      act(() => void window.dispatchEvent(new MouseEvent("pointermove", { clientX: 300, clientY: 300 })));
+      act(() => void window.dispatchEvent(new MouseEvent("pointerup", { clientX: 300, clientY: 800 })));
+      expect(useWorldUi.getState().draft).toBeNull();
+      expect(screen.queryByTestId("drag-ghost")).not.toBeInTheDocument();
+    } finally {
+      groundPicker.pick = null;
+    }
   });
 
   it("cancel drops the draft without saving", async () => {
