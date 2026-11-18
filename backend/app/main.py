@@ -23,6 +23,7 @@ from app.routers import (
     teacher,
     web_compat,
     web_compat_b,
+    web_sim,
 )
 
 setup_logging()
@@ -49,7 +50,7 @@ app.add_middleware(
     # Vercel production + preview deploys (https://<anything>.vercel.app)
     allow_origin_regex=r"https://[a-z0-9-]+\.vercel\.app",
     allow_methods=["GET", "POST", "PATCH", "PUT", "DELETE"],
-    allow_headers=["Authorization", "Content-Type", "Idempotency-Key", "Accept"],
+    allow_headers=["Authorization", "Content-Type", "Idempotency-Key", "Accept", "X-Channel"],
     allow_credentials=False,          # bearer tokens, no cookies
 )
 app.include_router(auth.router, prefix="/v1")
@@ -66,6 +67,7 @@ app.include_router(demo.router, prefix="/v1")
 app.include_router(demo.page)
 app.include_router(web_compat.router)
 app.include_router(web_compat_b.router)
+app.include_router(web_sim.router)
 
 
 @app.get("/health")

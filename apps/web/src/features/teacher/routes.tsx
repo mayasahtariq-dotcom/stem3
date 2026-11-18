@@ -1,4 +1,5 @@
 "use client";
+import { SimActivityCard, useSimActivity } from "@/features/phone-sim/activity";
 import { useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -29,7 +30,13 @@ import { LessonReviewScreen } from "./LessonReviewScreen";
 import { OverviewScreen } from "./OverviewScreen";
 import { AllClassesPanel, MaterialsPanel } from "./OverviewPanels";
 import { ClassDetailScreen, ClassesScreen } from "./ClassesScreen";
-import { useClassInsights, useCreateClass, useDeleteUpload, useMaterials, useTeacherOverview } from "./insights-api";
+import {
+  useClassInsights,
+  useCreateClass,
+  useDeleteUpload,
+  useMaterials,
+  useTeacherOverview,
+} from "./insights-api";
 import { useClassStore } from "./class-store";
 import { useDeleteNote, useTeacherNotes } from "@/features/notes/api";
 import { StudentParentLinkCard } from "@/features/parent/share-link";
@@ -55,6 +62,7 @@ export function OverviewRoute() {
   const dash = useDashboard(classId);
   const consent = useSchoolConsent(classId);
   const all = useTeacherOverview();
+  const sim = useSimActivity(classId ? `/classrooms/${classId}/sim-activity` : null);
   const locale = useLocale();
   return (
     <>
@@ -90,6 +98,14 @@ export function OverviewRoute() {
         onOpenStudent={(id) => router.push(`/teacher/students/${id}`)}
         onRetry={() => void (classes.error ? classes.refetch() : dash.refetch())}
       />
+      {classId && (
+        <SimActivityCard
+          data={sim.data}
+          loading={sim.isLoading}
+          error={sim.error}
+          onRetry={() => void sim.refetch()}
+        />
+      )}
     </>
   );
 }
@@ -153,8 +169,11 @@ export function ClassDetailRoute({ classId }: { classId: string }) {
       notes={notes.data?.filter((n) => n.classroom_id === classId)}
       deletingNoteId={delNote.isPending ? delNote.variables : null}
       onDeleteNote={(note) => {
-        if (!window.confirm(`${nt("deleteConfirm", { title: note.title }).regional}
-${nt("deleteConfirm", { title: note.title }).english}`)) return;
+        if (
+          !window.confirm(`${nt("deleteConfirm", { title: note.title }).regional}
+${nt("deleteConfirm", { title: note.title }).english}`)
+        )
+          return;
         delNote.mutate(note.id, { onSuccess: () => toast("success", nt("deleted")), onError });
       }}
       onShareNotes={() => {
@@ -169,7 +188,13 @@ ${nt("deleteConfirm", { title: note.title }).english}`)) return;
       courseIds={dash.data?.courses.map((c) => c.id) ?? []}
       courseBusyId={toggle.isPending ? toggle.variables.courseId : null}
       onToggleCourse={(courseId, add) =>
-        toggle.mutate({ courseId, add }, { onSuccess: () => toast("success", add ? t("courseAdded") : t("courseRemoved")), onError })
+        toggle.mutate(
+          { courseId, add },
+          {
+            onSuccess: () => toast("success", add ? t("courseAdded") : t("courseRemoved")),
+            onError,
+          },
+        )
       }
       classroom={classroom}
       insights={insights.data}
@@ -220,21 +245,23 @@ export function StudentDetailRoute({ studentId }: { studentId: string }) {
   const detail = useStudentDetail(classId, studentId);
   return (
     <div className="flex flex-col gap-5">
-    <StudentDetailScreen
-      data={detail.data}
-      loading={classes.isLoading || detail.isLoading}
-      error={classes.error ?? detail.error}
-      onBack={() => router.push("/teacher/students")}
-      onRetry={() => void detail.refetch()}
-      formatDate={(iso) =>
-        new Intl.DateTimeFormat(locale === "kn" ? "kn-IN" : "hi-IN", {
-          day: "numeric",
-          month: "short",
-          timeZone: "Asia/Kolkata",
-        }).format(new Date(iso))
-      }
-    />
-    {detail.data && <StudentParentLinkCard classId={classId} studentId={studentId} name={detail.data.name} />}
+      <StudentDetailScreen
+        data={detail.data}
+        loading={classes.isLoading || detail.isLoading}
+        error={classes.error ?? detail.error}
+        onBack={() => router.push("/teacher/students")}
+        onRetry={() => void detail.refetch()}
+        formatDate={(iso) =>
+          new Intl.DateTimeFormat(locale === "kn" ? "kn-IN" : "hi-IN", {
+            day: "numeric",
+            month: "short",
+            timeZone: "Asia/Kolkata",
+          }).format(new Date(iso))
+        }
+      />
+      {detail.data && (
+        <StudentParentLinkCard classId={classId} studentId={studentId} name={detail.data.name} />
+      )}
     </div>
   );
 }
@@ -254,9 +281,15 @@ export function CoursesRoute() {
         onRetry={() => void materials.refetch()}
         deletingId={delUpload.isPending ? delUpload.variables : null}
         onDelete={(m) => {
-          if (!window.confirm(`${mt(m.course_id ? "deleteConfirmCourse" : "deleteConfirm").regional}
-${mt(m.course_id ? "deleteConfirmCourse" : "deleteConfirm").english}`)) return;
-          delUpload.mutate(m.id, { onSuccess: () => toast("success", mt("deleted")), onError: onDeleteError });
+          if (
+            !window.confirm(`${mt(m.course_id ? "deleteConfirmCourse" : "deleteConfirm").regional}
+${mt(m.course_id ? "deleteConfirmCourse" : "deleteConfirm").english}`)
+          )
+            return;
+          delUpload.mutate(m.id, {
+            onSuccess: () => toast("success", mt("deleted")),
+            onError: onDeleteError,
+          });
         }}
       />
       <CoursesScreen

@@ -11,7 +11,7 @@ import re
 from datetime import UTC, datetime, timedelta
 from typing import Annotated, Any
 
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, Header, HTTPException, Request
 from pydantic import BaseModel, Field
 from sqlalchemy import Connection, text
 
@@ -446,14 +446,17 @@ def _correct_answer_out(q: Any) -> dict[str, Any]:
 
 
 @router.post("/attempts")
-def attempt(body: AttemptIn, db: DbDep, user: UserDep) -> dict[str, Any]:
+def attempt(body: AttemptIn, db: DbDep, user: UserDep,
+            x_channel: Annotated[str | None, Header()] = None) -> dict[str, Any]:
+    """X-Channel: phone_simulator marks answers given in the browser call simulator (same student, same XP)."""
     lid = _lid(db, user)
     q = db.execute(text("select id, kind, options, answer from questions where id=:q"),
                    {"q": body.question_id}).mappings().first()
     if q is None:
         raise HTTPException(404, {"code": "NOT_FOUND"})
     given = _to_our_answer(q, body.answer)
-    res = engine.record_attempt(db, user.id, body.question_id, given)
+    res = engine.record_attempt(db, user.id, body.question_id, given,
+                              channel="phone_simulator" if x_channel == "phone_simulator" else "web")
     return {"correct": res["correct"], "correct_answer": _correct_answer_out(q),
             "explanation": {"en": "", "hi": "", "kn": ""}, "xp_delta": res["xp_gained"],
             "heart_lost": not res["correct"], "stats": stats_out(db, lid)}
@@ -538,7 +541,17 @@ class AudioIn(BaseModel):
 
 
 @router.post("/audio")
-def audio(body: AudioIn, request: Request, db: DbDep, user: UserDep) -> dict[str, str]:
-    out = ai_routes.make_audio(ai_routes.AudioIn(text=body.text, language=body.language), db, user)
-    return {"url": str(request.base_url).rstrip("/") + out["url"]}
+def audio(body: AudioIn, request: Request, db: DbDep, user: UserDep,
+          model: Annotated[Any, Depends(ai_routes.llm)]) -> dict[str, str]:
+    """Reads a line aloud in the student's language: English lines are translated first, so the voice
+    never switches to English. `text` is what was spoken (the browser voice uses it as a fallback)."""
+    from app.titles import in_language
+    said = in_language(db, model, body.text, body.language)
+    try:
+        out = ai_routes.make_audio(ai_routes.AudioIn(text=said, language=body.language), db, user)
+    except HTTPException as exc:
+        if exc.status_code != 503:
+            raise
+        return {"url": "", "text": said}              # no server voice: the browser reads `text`
+    return {"url": str(request.base_url).rstrip("/") + out["url"], "text": said}
 

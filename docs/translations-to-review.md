@@ -1489,3 +1489,118 @@ Run `python scripts/export_translations.py` (from backend/) to regenerate `docs/
 | Key | English | Hindi | Kannada | Reviewed |
 |---|---|---|---|---|
 | errors.CONSENT_REQUIRED | Ask your teacher to turn on school consent, or ask your parent to approve. Then you can play. | शिक्षक से स्कूल की सहमति चालू करने को कहो, या माता-पिता से अनुमति दिलवाओ। फिर तुम खेल सकोगे। | ಶಾಲೆಯ ಒಪ್ಪಿಗೆ ಆನ್ ಮಾಡಲು ಶಿಕ್ಷಕರನ್ನು ಕೇಳು, ಅಥವಾ ಪೋಷಕರಿಂದ ಒಪ್ಪಿಗೆ ಪಡೆ. ನಂತರ ನೀನು ಆಡಬಹುದು. | [ ] |
+
+## Phone call simulator
+
+| Key | English | Hindi | Kannada | Reviewed |
+|---|---|---|---|---|
+| phoneSim.back | Back | वापस | ಹಿಂದೆ | [ ] |
+| phoneSim.title | Call simulator | कॉल सिम्युलेटर | ಕರೆ ಸಿಮ್ಯುಲೇಟರ್ | [ ] |
+| phoneSim.simulated | Simulated call, no real phone line | नकली कॉल, असली फ़ोन लाइन नहीं | ಅನುಕರಣೆಯ ಕರೆ, ನಿಜವಾದ ಫೋನ್ ಲೈನ್ ಇಲ್ಲ | [ ] |
+| phoneSim.stIdle | Ready to call | कॉल के लिए तैयार | ಕರೆಗೆ ಸಿದ್ಧ | [ ] |
+| phoneSim.stConnecting | Connecting… | जुड़ रहा है… | ಸಂಪರ್ಕಿಸುತ್ತಿದೆ… | [ ] |
+| phoneSim.stActive | Call active | कॉल चालू | ಕರೆ ಚಾಲ್ತಿಯಲ್ಲಿದೆ | [ ] |
+| phoneSim.stChecking | Checking… | जाँच हो रही है… | ಪರಿಶೀಲಿಸುತ್ತಿದೆ… | [ ] |
+| phoneSim.stAnswering | Answering | जवाब दे रहे हैं | ಉತ್ತರಿಸುತ್ತಿದ್ದಾರೆ | [ ] |
+| phoneSim.stFeedback | Feedback | फ़ीडबैक | ಪ್ರತಿಕ್ರಿಯೆ | [ ] |
+| phoneSim.stCompleted | Lesson completed | पाठ पूरा | ಪಾಠ ಪೂರ್ಣ | [ ] |
+| phoneSim.stEnded | Call ended | कॉल खत्म | ಕರೆ ಮುಗಿದಿದೆ | [ ] |
+| phoneSim.idLabel | Student ID (your phone number) | छात्र ID (आपका फ़ोन नंबर) | ವಿದ್ಯಾರ್ಥಿ ID (ನಿಮ್ಮ ಫೋನ್ ಸಂಖ್ಯೆ) | [ ] |
+| phoneSim.pinLabel | PIN (your login code) | PIN (आपका लॉगिन कोड) | PIN (ನಿಮ್ಮ ಲಾಗಿನ್ ಕೋಡ್) | [ ] |
+| phoneSim.entryHint | # to submit, * to delete | भेजने के लिए #, मिटाने के लिए * | ಕಳುಹಿಸಲು #, ಅಳಿಸಲು * | [ ] |
+| phoneSim.transcript | Call transcript | कॉल की बातचीत | ಕರೆಯ ಪಠ್ಯ | [ ] |
+| phoneSim.transcriptEmpty | Press Call to start. | शुरू करने के लिए कॉल दबाएँ। | ಪ್ರಾರಂಭಿಸಲು ಕರೆ ಒತ್ತಿ. | [ ] |
+| phoneSim.keypad | Keypad | कीपैड | ಕೀಪ್ಯಾಡ್ | [ ] |
+| phoneSim.endCall | End call | कॉल खत्म करें | ಕರೆ ಕೊನೆಗೊಳಿಸಿ | [ ] |
+| phoneSim.call | Call | कॉल करें | ಕರೆ ಮಾಡಿ | [ ] |
+| phoneSim.callAgain | Call again | फिर से कॉल करें | ಮತ್ತೆ ಕರೆ ಮಾಡಿ | [ ] |
+| phoneSim.mute | Mute voice | आवाज़ बंद | ಧ್ವನಿ ಆಫ್ | [ ] |
+| phoneSim.unmute | Voice on | आवाज़ चालू | ಧ್ವನಿ ಆನ್ | [ ] |
+| phoneSim.progress | Lesson progress | पाठ की प्रगति | ಪಾಠದ ಪ್ರಗತಿ | [ ] |
+| phoneSim.fbCorrect | Correct! | सही! | ಸರಿ! | [ ] |
+| phoneSim.fbNotQuite | Not quite | पूरा सही नहीं | ಸರಿಯಾಗಿಲ್ಲ | [ ] |
+| phoneSim.doneTitle | Lesson complete! | पाठ पूरा! | ಪಾಠ ಪೂರ್ಣ! | [ ] |
+| phoneSim.doneScore | {correct} of {total} right, +{xp} XP | {total} में से {correct} सही, +{xp} XP | {total} ರಲ್ಲಿ {correct} ಸರಿ, +{xp} XP | [ ] |
+| phoneSim.seeInApp | See your progress in the app | ऐप में अपनी प्रगति देखें | ಆ್ಯಪ್‌ನಲ್ಲಿ ನಿಮ್ಮ ಪ್ರಗತಿ ನೋಡಿ | [ ] |
+| phoneSim.panelIdle | A student without a smartphone calls the tutor and learns by voice and keypad. | बिना स्मार्टफ़ोन वाला छात्र ट्यूटर को कॉल करके आवाज़ और कीपैड से सीखता है। | ಸ್ಮಾರ್ಟ್‌ಫೋನ್ ಇಲ್ಲದ ವಿದ್ಯಾರ್ಥಿ ಟ್ಯೂಟರ್‌ಗೆ ಕರೆ ಮಾಡಿ ಧ್ವನಿ ಮತ್ತು ಕೀಪ್ಯಾಡ್ ಮೂಲಕ ಕಲಿಯುತ್ತಾರೆ. | [ ] |
+| phoneSim.panelLive | Listen to the tutor and answer with the keypad. The question appears here. | ट्यूटर को सुनें और कीपैड से जवाब दें। सवाल यहाँ दिखेगा। | ಟ್ಯೂಟರ್ ಕೇಳಿ, ಕೀಪ್ಯಾಡ್‌ನಿಂದ ಉತ್ತರಿಸಿ. ಪ್ರಶ್ನೆ ಇಲ್ಲಿ ಕಾಣುತ್ತದೆ. | [ ] |
+| phoneSim.howTo | Press Call, enter your student ID and PIN, then pick a lesson. | कॉल दबाएँ, अपना छात्र ID और PIN डालें, फिर पाठ चुनें। | ಕರೆ ಒತ್ತಿ, ವಿದ್ಯಾರ್ಥಿ ID ಮತ್ತು PIN ನಮೂದಿಸಿ, ನಂತರ ಪಾಠ ಆರಿಸಿ. | [ ] |
+| phoneSim.keysTitle | Keys | बटन | ಕೀಗಳು | [ ] |
+| phoneSim.k15 | 1–5: choose an option | 1–5: विकल्प चुनें | 1–5: ಆಯ್ಕೆ ಮಾಡಿ | [ ] |
+| phoneSim.k6 | 6: repeat the question | 6: सवाल दोहराएँ | 6: ಪ್ರಶ್ನೆ ಮತ್ತೆ ಕೇಳಿ | [ ] |
+| phoneSim.k7 | 7: hear my choice | 7: मेरा चुनाव सुनें | 7: ನನ್ನ ಆಯ್ಕೆ ಕೇಳಿ | [ ] |
+| phoneSim.k8 | 8: clear my choice | 8: चुनाव मिटाएँ | 8: ಆಯ್ಕೆ ಅಳಿಸಿ | [ ] |
+| phoneSim.k9 | 9: confirm answer | 9: जवाब पक्का करें | 9: ಉತ್ತರ ದೃಢೀಕರಿಸಿ | [ ] |
+| phoneSim.k0 | 0: hear the keys again | 0: बटन फिर से सुनें | 0: ಕೀಗಳನ್ನು ಮತ್ತೆ ಕೇಳಿ | [ ] |
+| phoneSim.kHash | #: submit ID or PIN | #: ID या PIN भेजें | #: ID ಅಥವಾ PIN ಕಳುಹಿಸಿ | [ ] |
+| phoneSim.kStar | *: delete a digit | *: एक अंक मिटाएँ | *: ಒಂದು ಅಂಕಿ ಅಳಿಸಿ | [ ] |
+| phoneSim.keyboardToo | Your computer keyboard works too: 0–9, * and #, Enter for #, Backspace for *. | आपका कीबोर्ड भी चलेगा। | ನಿಮ್ಮ ಕೀಬೋರ್ಡ್ ಕೂಡ ಕೆಲಸ ಮಾಡುತ್ತದೆ. | [ ] |
+| phoneSim.demoTag | Demo shortcut | डेमो शॉर्टकट | ಡೆಮೊ ಶಾರ್ಟ್‌ಕಟ್ | [ ] |
+| phoneSim.demoHint | Signs in the existing demo student {id} with the demo PIN, as if typed. | मौजूदा डेमो छात्र {id} को डेमो PIN से साइन इन करता है। | ಈಗಿರುವ ಡೆಮೊ ವಿದ್ಯಾರ್ಥಿ {id} ಅನ್ನು ಡೆಮೊ PIN ನಿಂದ ಸೈನ್ ಇನ್ ಮಾಡುತ್ತದೆ. | [ ] |
+| phoneSim.demoButton | Use demo student | डेमो छात्र से चलाएँ | ಡೆಮೊ ವಿದ್ಯಾರ್ಥಿ ಬಳಸಿ | [ ] |
+| phoneSim.pressed | Pressed {key} | {key} दबाया | {key} ಒತ್ತಿದೆ | [ ] |
+| phoneSim.connecting | Connecting to STEM Tutor… | STEM ट्यूटर से जुड़ रहे हैं… | STEM ಟ್ಯೂಟರ್‌ಗೆ ಸಂಪರ್ಕಿಸುತ್ತಿದೆ… | [ ] |
+| phoneSim.greeting | Namaste! This is Aaroh, your science tutor. | नमस्ते! मैं आरोह हूँ, आपका विज्ञान ट्यूटर। | ನಮಸ್ಕಾರ! ನಾನು ಆರೋಹ, ನಿಮ್ಮ ವಿಜ್ಞಾನ ಟ್ಯೂಟರ್. | [ ] |
+| phoneSim.askId | Type your student ID, your 10-digit phone number, then press hash. | अपना छात्र ID, यानी 10 अंकों का फ़ोन नंबर डालें, फिर हैश दबाएँ। | ನಿಮ್ಮ ವಿದ್ಯಾರ್ಥಿ ID, 10 ಅಂಕಿಯ ಫೋನ್ ಸಂಖ್ಯೆ ಟೈಪ್ ಮಾಡಿ, ನಂತರ ಹ್ಯಾಶ್ ಒತ್ತಿ. | [ ] |
+| phoneSim.badId | A student ID has 10 digits. Please try again. | छात्र ID में 10 अंक होते हैं। फिर से कोशिश करें। | ವಿದ್ಯಾರ್ಥಿ ID ಯಲ್ಲಿ 10 ಅಂಕಿಗಳಿವೆ. ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ. | [ ] |
+| phoneSim.unknownId | I couldn't find that student ID. | यह छात्र ID नहीं मिला। | ಆ ವಿದ್ಯಾರ್ಥಿ ID ಸಿಗಲಿಲ್ಲ. | [ ] |
+| phoneSim.authFailed | Sorry, I couldn't check that right now. | माफ़ कीजिए, अभी जाँच नहीं हो पाई। | ಕ್ಷಮಿಸಿ, ಈಗ ಪರಿಶೀಲಿಸಲು ಆಗಲಿಲ್ಲ. | [ ] |
+| phoneSim.askPin | Now type your PIN and press hash. | अब अपना PIN डालें और हैश दबाएँ। | ಈಗ ನಿಮ್ಮ PIN ಟೈಪ್ ಮಾಡಿ ಹ್ಯಾಶ್ ಒತ್ತಿ. | [ ] |
+| phoneSim.badPin | A PIN has 4 to 6 digits. | PIN में 4 से 6 अंक होते हैं। | PIN ನಲ್ಲಿ 4 ರಿಂದ 6 ಅಂಕಿಗಳಿವೆ. | [ ] |
+| phoneSim.badPinTryAgain | That PIN didn't match. | PIN मेल नहीं खाया। | PIN ಹೊಂದಿಕೆಯಾಗಲಿಲ್ಲ. | [ ] |
+| phoneSim.notStudent | That ID isn't a registered student. | यह ID किसी पंजीकृत छात्र का नहीं है। | ಆ ID ನೋಂದಾಯಿತ ವಿದ್ಯಾರ್ಥಿಯದಲ್ಲ. | [ ] |
+| phoneSim.welcome | Welcome back, {name}! | फिर से स्वागत है, {name}! | ಮತ್ತೆ ಸ್ವಾಗತ, {name}! | [ ] |
+| phoneSim.loadFailed | Sorry, that didn't load. Press 0 to try again. | माफ़ कीजिए, लोड नहीं हुआ। फिर से कोशिश के लिए 0 दबाएँ। | ಕ್ಷಮಿಸಿ, ಲೋಡ್ ಆಗಲಿಲ್ಲ. ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಲು 0 ಒತ್ತಿ. | [ ] |
+| phoneSim.noCourses | You have no courses yet. Ask your teacher to add one. | अभी आपका कोई कोर्स नहीं है। अपने शिक्षक से कहें। | ನಿಮಗೆ ಇನ್ನೂ ಕೋರ್ಸ್ ಇಲ್ಲ. ನಿಮ್ಮ ಶಿಕ್ಷಕರನ್ನು ಕೇಳಿ. | [ ] |
+| phoneSim.menuContinue | Press 1 to continue {lesson}. Press 2 to choose a course. | {lesson} जारी रखने के लिए 1 दबाएँ। कोर्स चुनने के लिए 2 दबाएँ। | {lesson} ಮುಂದುವರಿಸಲು 1 ಒತ್ತಿ. ಕೋರ್ಸ್ ಆರಿಸಲು 2 ಒತ್ತಿ. | [ ] |
+| phoneSim.menuNoContinue | Press 2 to choose a course. | कोर्स चुनने के लिए 2 दबाएँ। | ಕೋರ್ಸ್ ಆರಿಸಲು 2 ಒತ್ತಿ. | [ ] |
+| phoneSim.pickCourse | Choose a course. | एक कोर्स चुनें। | ಒಂದು ಕೋರ್ಸ್ ಆರಿಸಿ. | [ ] |
+| phoneSim.pickLesson | Choose a lesson. | एक पाठ चुनें। | ಒಂದು ಪಾಠ ಆರಿಸಿ. | [ ] |
+| phoneSim.listItem | Press {n} for {title}. | {title} के लिए {n} दबाएँ। | {title} ಗಾಗಿ {n} ಒತ್ತಿ. | [ ] |
+| phoneSim.listHint | Press 0 to hear this again. | फिर से सुनने के लिए 0 दबाएँ। | ಮತ್ತೆ ಕೇಳಲು 0 ಒತ್ತಿ. | [ ] |
+| phoneSim.noSuchChoice | There is no choice {n}. | विकल्प {n} नहीं है। | ಆಯ್ಕೆ {n} ಇಲ್ಲ. | [ ] |
+| phoneSim.noLessons | This course has no lessons open yet. | इस कोर्स में अभी कोई पाठ खुला नहीं है। | ಈ ಕೋರ್ಸ್‌ನಲ್ಲಿ ಇನ್ನೂ ಪಾಠ ತೆರೆದಿಲ್ಲ. | [ ] |
+| phoneSim.notPhoneReady | This lesson needs a screen. Please choose another. | इस पाठ के लिए स्क्रीन चाहिए। दूसरा चुनें। | ಈ ಪಾಠಕ್ಕೆ ಪರದೆ ಬೇಕು. ಬೇರೆ ಆರಿಸಿ. | [ ] |
+| phoneSim.starting | Starting {lesson}: {count} questions. | {lesson} शुरू: {count} सवाल। | {lesson} ಪ್ರಾರಂಭ: {count} ಪ್ರಶ್ನೆಗಳು. | [ ] |
+| phoneSim.resuming | Picking up {lesson} at question {n}. | {lesson} सवाल {n} से जारी। | {lesson} ಪ್ರಶ್ನೆ {n} ರಿಂದ ಮುಂದುವರಿಕೆ. | [ ] |
+| phoneSim.keyHelpShort | Press 1 to 5 to choose, 9 to confirm, 0 for help. | चुनने के लिए 1 से 5, पक्का करने के लिए 9, मदद के लिए 0। | ಆರಿಸಲು 1 ರಿಂದ 5, ದೃಢೀಕರಿಸಲು 9, ಸಹಾಯಕ್ಕೆ 0. | [ ] |
+| phoneSim.keyHelp | 1 to 5 choose. 6 repeats the question. 7 reads your choice. 8 clears it. 9 confirms. 0 repeats these keys. | 1 से 5 चुनें। 6 सवाल दोहराता है। 7 आपका चुनाव पढ़ता है। 8 मिटाता है। 9 पक्का करता है। 0 ये बटन दोहराता है। | 1 ರಿಂದ 5 ಆರಿಸಿ. 6 ಪ್ರಶ್ನೆ ಪುನರಾವರ್ತಿಸುತ್ತದೆ. 7 ನಿಮ್ಮ ಆಯ್ಕೆ ಓದುತ್ತದೆ. 8 ಅಳಿಸುತ್ತದೆ. 9 ದೃಢೀಕರಿಸುತ್ತದೆ. 0 ಈ ಕೀಗಳನ್ನು ಪುನರಾವರ್ತಿಸುತ್ತದೆ. | [ ] |
+| phoneSim.questionN | Question {n} of {of}. | सवाल {n}, कुल {of}। | ಪ್ರಶ್ನೆ {n} / {of}. | [ ] |
+| phoneSim.option | {n}: {title}. | {n}: {title}। | {n}: {title}. | [ ] |
+| phoneSim.noSuchOption | There is no option {n}. Choose 1 to {max}. | विकल्प {n} नहीं है। 1 से {max} चुनें। | ಆಯ್ಕೆ {n} ಇಲ್ಲ. 1 ರಿಂದ {max} ಆರಿಸಿ. | [ ] |
+| phoneSim.alreadySelected | Option {n} is already chosen. | विकल्प {n} पहले से चुना है। | ಆಯ್ಕೆ {n} ಈಗಾಗಲೇ ಆರಿಸಲಾಗಿದೆ. | [ ] |
+| phoneSim.tooMany | You can choose up to {max}. | आप {max} तक चुन सकते हैं। | ನೀವು {max} ವರೆಗೆ ಆರಿಸಬಹುದು. | [ ] |
+| phoneSim.selected | You chose {n}: {title}. | आपने {n} चुना: {title}। | ನೀವು {n} ಆರಿಸಿದಿರಿ: {title}. | [ ] |
+| phoneSim.confirmHint | Press 9 to confirm or 8 to clear. | पक्का करने के लिए 9, मिटाने के लिए 8 दबाएँ। | ದೃಢೀಕರಿಸಲು 9, ಅಳಿಸಲು 8 ಒತ್ತಿ. | [ ] |
+| phoneSim.nothingSelected | You haven't chosen anything yet. | आपने अभी कुछ नहीं चुना। | ನೀವು ಇನ್ನೂ ಏನನ್ನೂ ಆರಿಸಿಲ್ಲ. | [ ] |
+| phoneSim.yourSelection | Your choice: | आपका चुनाव: | ನಿಮ್ಮ ಆಯ್ಕೆ: | [ ] |
+| phoneSim.cleared | Choice cleared. Choose again. | चुनाव मिटा दिया। फिर से चुनें। | ಆಯ್ಕೆ ಅಳಿಸಲಾಗಿದೆ. ಮತ್ತೆ ಆರಿಸಿ. | [ ] |
+| phoneSim.chooseFirst | Please choose an option first, with keys 1 to 5. | पहले 1 से 5 बटन से विकल्प चुनें। | ಮೊದಲು 1 ರಿಂದ 5 ಕೀಯಿಂದ ಆಯ್ಕೆ ಮಾಡಿ. | [ ] |
+| phoneSim.correct | Correct! Plus {xp} XP. | सही! {xp} XP मिले। | ಸರಿ! {xp} XP ಸಿಕ್ಕಿತು. | [ ] |
+| phoneSim.notQuite | Not quite. | पूरा सही नहीं। | ಸರಿಯಾಗಿಲ್ಲ. | [ ] |
+| phoneSim.notQuiteAnswer | Not quite. The answer is {n}: {title}. | पूरा सही नहीं। सही जवाब {n} है: {title}। | ಸರಿಯಾಗಿಲ್ಲ. ಸರಿಯಾದ ಉತ್ತರ {n}: {title}. | [ ] |
+| phoneSim.nextHint | Next question. | अगला सवाल। | ಮುಂದಿನ ಪ್ರಶ್ನೆ. | [ ] |
+| phoneSim.lastDone | That was the last question. | यह आखिरी सवाल था। | ಅದು ಕೊನೆಯ ಪ್ರಶ್ನೆ. | [ ] |
+| phoneSim.saveFailed | Sorry, I couldn't save that. Press 9 to try again. | माफ़ कीजिए, सेव नहीं हुआ। फिर से कोशिश के लिए 9 दबाएँ। | ಕ್ಷಮಿಸಿ, ಉಳಿಸಲಾಗಲಿಲ್ಲ. ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಲು 9 ಒತ್ತಿ. | [ ] |
+| phoneSim.lessonDone | Lesson complete! {correct} of {total} right, {xp} XP earned. | पाठ पूरा! {total} में से {correct} सही, {xp} XP मिले। | ಪಾಠ ಪೂರ್ಣ! {total} ರಲ್ಲಿ {correct} ಸರಿ, {xp} XP ಗಳಿಸಿದಿರಿ. | [ ] |
+| phoneSim.afterLesson | Press 1 for another lesson, or hash to end the call. | दूसरे पाठ के लिए 1, या कॉल खत्म करने के लिए हैश दबाएँ। | ಇನ್ನೊಂದು ಪಾಠಕ್ಕೆ 1, ಕರೆ ಮುಗಿಸಲು ಹ್ಯಾಶ್ ಒತ್ತಿ. | [ ] |
+| phoneSim.goodbye | Goodbye! Your progress is saved. | अलविदा! आपकी प्रगति सेव हो गई। | ವಿದಾಯ! ನಿಮ್ಮ ಪ್ರಗತಿ ಉಳಿಸಲಾಗಿದೆ. | [ ] |
+| phoneSim.actTitle | Phone simulator activity | फ़ोन सिम्युलेटर गतिविधि | ಫೋನ್ ಸಿಮ್ಯುಲೇಟರ್ ಚಟುವಟಿಕೆ | [ ] |
+| phoneSim.actUsers | Simulator users | सिम्युलेटर उपयोगकर्ता | ಸಿಮ್ಯುಲೇಟರ್ ಬಳಕೆದಾರರು | [ ] |
+| phoneSim.actSessions | Call sessions | कॉल सत्र | ಕರೆ ಅವಧಿಗಳು | [ ] |
+| phoneSim.actLessons | Lessons by phone | फ़ोन से पाठ | ಫೋನ್ ಮೂಲಕ ಪಾಠಗಳು | [ ] |
+| phoneSim.actCorrect | Correct | सही | ಸರಿ | [ ] |
+| phoneSim.actIncorrect | Not quite | पूरा सही नहीं | ಸರಿಯಾಗಿಲ್ಲ | [ ] |
+| phoneSim.actMinutes | Call minutes | कॉल मिनट | ಕರೆ ನಿಮಿಷಗಳು | [ ] |
+| phoneSim.actInterrupted | Interrupted | बीच में रुके | ಮಧ್ಯದಲ್ಲಿ ನಿಂತವು | [ ] |
+| phoneSim.actByChannel | Answers by channel | चैनल के अनुसार जवाब | ಚಾನೆಲ್ ಪ್ರಕಾರ ಉತ್ತರಗಳು | [ ] |
+| phoneSim.chApp | App | ऐप | ಆ್ಯಪ್ | [ ] |
+| phoneSim.chPhone | Phone simulator | फ़ोन सिम्युलेटर | ಫೋನ್ ಸಿಮ್ಯುಲೇಟರ್ | [ ] |
+| phoneSim.actRecent | Recent calls | हाल की कॉल | ಇತ್ತೀಚಿನ ಕರೆಗಳು | [ ] |
+| phoneSim.actEmpty | No simulator calls yet. | अभी कोई सिम्युलेटर कॉल नहीं। | ಇನ್ನೂ ಸಿಮ್ಯುಲೇಟರ್ ಕರೆಗಳಿಲ್ಲ. | [ ] |
+| phoneSim.sCompleted | completed | पूरा | ಪೂರ್ಣ | [ ] |
+| phoneSim.sInterrupted | interrupted | बीच में रुका | ಮಧ್ಯದಲ್ಲಿ ನಿಂತಿತು | [ ] |
+| phoneSim.sActive | in call | कॉल पर | ಕರೆಯಲ್ಲಿ | [ ] |
+| phoneSim.openSim | Open the call simulator | कॉल सिम्युलेटर खोलें | ಕರೆ ಸಿಮ್ಯುಲೇಟರ್ ತೆರೆಯಿರಿ | [ ] |
+| phoneSim.actAnswers | Answers | जवाब | ಉತ್ತರಗಳು | [ ] |
+| phoneSim.retryLater | We'll try this one again at the end. | यह सवाल आखिर में फिर से आएगा। | ಈ ಪ್ರಶ್ನೆ ಕೊನೆಯಲ್ಲಿ ಮತ್ತೆ ಬರುತ್ತದೆ. | [ ] |

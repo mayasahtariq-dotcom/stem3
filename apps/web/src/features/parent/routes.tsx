@@ -1,4 +1,5 @@
 "use client";
+import { SimActivityCard, useSimActivity } from "@/features/phone-sim/activity";
 import { useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -7,7 +8,18 @@ import { toast } from "@/components/ui";
 import { useSpeak } from "@/features/learning/use-speak";
 import { asApiError } from "@/lib/api/errors";
 import { useBilingual } from "@/lib/i18n/use-bilingual";
-import { isFullCode, normalizeCode, useApproveConsent, useChildDashboard, useChildren, useLinkChild, useLinkPreview, useRequestDeletion, useRevokeConsent, useUnlinkChild } from "./api";
+import {
+  isFullCode,
+  normalizeCode,
+  useApproveConsent,
+  useChildDashboard,
+  useChildren,
+  useLinkChild,
+  useLinkPreview,
+  useRequestDeletion,
+  useRevokeConsent,
+  useUnlinkChild,
+} from "./api";
 import { ChildScreen } from "./ChildScreen";
 import { ParentHomeScreen } from "./ParentHomeScreen";
 
@@ -56,6 +68,7 @@ export function ChildRoute({ childId }: { childId: string }) {
   const router = useRouter();
   const locale = useLocale();
   const dash = useChildDashboard(childId);
+  const sim = useSimActivity(`/parent/children/${childId}/sim-activity`);
   const approve = useApproveConsent();
   const revoke = useRevokeConsent();
   const unlink = useUnlinkChild();
@@ -64,29 +77,57 @@ export function ChildRoute({ childId }: { childId: string }) {
   const [deleted, setDeleted] = useState<Schemas["DeletionOut"] | null>(null);
   const onError = (e: unknown) => toast("error", errors(asApiError(e).code));
   return (
-    <ChildScreen
-      data={dash.data}
-      loading={dash.isLoading}
-      error={dash.error}
-      consentBusy={approve.isPending || revoke.isPending}
-      removing={unlink.isPending}
-      deletion={deleted}
-      speaking={speaking}
-      onApprove={() => !approve.isPending && approve.mutate(childId, { onSuccess: () => toast("success", t("approved")), onError })}
-      onRevoke={() => !revoke.isPending && revoke.mutate(childId, { onSuccess: () => toast("info", t("revoked")), onError })}
-      onUnlink={() =>
-        unlink.mutate(childId, {
-          onSuccess: () => {
-            toast("info", t("unlinked"));
-            router.push("/parent");
-          },
-          onError,
-        })
-      }
-      onDelete={() => !deletion.isPending && deletion.mutate(childId, { onSuccess: (out) => setDeleted(out), onError })}
-      onListen={(text) => void speak(text)}
-      onRetry={() => void dash.refetch()}
-      formatDate={(iso) => new Intl.DateTimeFormat(locale === "kn" ? "kn-IN" : "hi-IN", { day: "numeric", month: "short", timeZone: "Asia/Kolkata" }).format(new Date(iso))}
-    />
+    <>
+      <ChildScreen
+        data={dash.data}
+        loading={dash.isLoading}
+        error={dash.error}
+        consentBusy={approve.isPending || revoke.isPending}
+        removing={unlink.isPending}
+        deletion={deleted}
+        speaking={speaking}
+        onApprove={() =>
+          !approve.isPending &&
+          approve.mutate(childId, { onSuccess: () => toast("success", t("approved")), onError })
+        }
+        onRevoke={() =>
+          !revoke.isPending &&
+          revoke.mutate(childId, { onSuccess: () => toast("info", t("revoked")), onError })
+        }
+        onUnlink={() =>
+          unlink.mutate(childId, {
+            onSuccess: () => {
+              toast("info", t("unlinked"));
+              router.push("/parent");
+            },
+            onError,
+          })
+        }
+        onDelete={() =>
+          !deletion.isPending &&
+          deletion.mutate(childId, { onSuccess: (out) => setDeleted(out), onError })
+        }
+        onListen={(text) => void speak(text)}
+        onRetry={() => void dash.refetch()}
+        formatDate={(iso) =>
+          new Intl.DateTimeFormat(locale === "kn" ? "kn-IN" : "hi-IN", {
+            day: "numeric",
+            month: "short",
+            timeZone: "Asia/Kolkata",
+          }).format(new Date(iso))
+        }
+      />
+      {!deleted && (
+        <div className="mx-auto w-full max-w-3xl px-4 pb-8">
+          <SimActivityCard
+            showUsers={false}
+            data={sim.data}
+            loading={sim.isLoading}
+            error={sim.error}
+            onRetry={() => void sim.refetch()}
+          />
+        </div>
+      )}
+    </>
   );
 }

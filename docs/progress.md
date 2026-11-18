@@ -19,3 +19,12 @@
 - [x] Free placement per field: drag, rotate, confirm, cancel, move, put away, validated (water, paths, buildings, slope, bounds, overlap)
 - [x] Layouts saved per field with version conflicts handled (fake backend)
 - [ ] Real backend endpoints (see docs/web/backend-handoff.md)
+
+## Web: browser phone call simulator + unified digital twin
+- [x] Call simulator page (/phone): phone UI, shared simulated number, call status and timer, keypad, transcript, current question
+- [x] Call flow: connecting, student ID + PIN against existing students, welcome, continue lesson or pick course and lesson
+- [x] Keypad 1-5 choose, 6 repeat, 7 read choice, 8 clear, 9 confirm, 0 help; physical keyboard too
+- [x] Real lesson questions, server grading, attempts saved as they happen, lesson completion and XP on the same student
+- [x] Answers tagged PHONE_SIMULATOR (X-Channel), session log with interrupted calls, resume where the student stopped
+- [x] Teacher and parent "Phone simulator activity" cards with App vs Phone simulator split
+- [x] Voice in the student's language (server voice translates English lines first); parent link codes are 6 characters

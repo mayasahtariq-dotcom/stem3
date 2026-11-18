@@ -427,7 +427,7 @@ def call_student_link_code(cs_id: str, db: DbDep, user: Teacher) -> dict[str, st
 
 
 def make_link_code(db: Connection, learner_id: Any) -> str:
-    code = new_key(8)
+    code = new_key(6)                     # the parent screen asks for 6 characters
     db.execute(text("insert into link_codes(code, learner_id, expires_at) values "
                     "(:c,:l, now() + interval '7 days')"), {"c": code, "l": learner_id})
     return code

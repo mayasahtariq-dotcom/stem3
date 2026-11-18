@@ -10,6 +10,7 @@ import { makeWorldHandlers } from "./world/handlers";
 import { rosterOf } from "./teacher/state";
 import { makeParentHandlers } from "./parent/handlers";
 import { makeCallHandlers } from "./calls/handlers";
+import { makePhoneSimHandlers } from "./phone-sim/handlers";
 
 const err = (status: number, code: string) => HttpResponse.json({ detail: { code } }, { status });
 
@@ -60,6 +61,7 @@ export function makeHandlers(base = FAKE_API_BASE_URL) {
     ...makeWorldHandlers(base),
     ...makeParentHandlers(base),
     ...makeCallHandlers(base),
+    ...makePhoneSimHandlers(base),
     // MOCK ONLY: endpoints the backend hasn't built yet.
     ...makeGameHandlers(base),
     http.get(`${base}/me`, ({ request }) => {

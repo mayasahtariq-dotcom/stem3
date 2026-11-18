@@ -72,3 +72,40 @@ def translate_course(db: Connection, llm: Any, course_id: Any) -> int:
     db.commit()
     load(db)
     return added
+
+
+LINE_SCHEMA = {"type": "OBJECT", "properties": {"en": {"type": "STRING"}, "hi": {"type": "STRING"},
+                                                "kn": {"type": "STRING"}}, "required": ["en", "hi", "kn"]}
+LINE_SYSTEM = ("You translate one short line for an Indian school student into English (en), Hindi in Devanagari "
+               "only (hi) and Kannada in Kannada script only (kn). Keep numbers and science terms correct and "
+               "keep it short and friendly.")
+
+
+def has_script(s: str, lang: str) -> bool:
+    """True when the text is already written in Hindi (Devanagari) or Kannada script."""
+    lo, hi = (0x0C80, 0x0CFF) if lang == "kn" else (0x0900, 0x097F)
+    return any(lo <= ord(ch) <= hi for ch in s)
+
+
+def in_language(db: Connection, llm: Any, s: str, lang: str) -> str:
+    """The line in the student's language, for reading aloud. English text (content not yet translated, or an
+    English summary) is translated once and cached; on any failure the original text is kept."""
+    if lang not in ("hi", "kn") or not s.strip() or has_script(s, lang):
+        return s
+    known = lookup(s)
+    if known and has_script(known.get(lang, ""), lang):
+        return known[lang]
+    try:
+        out = llm.generate_json(s, LINE_SCHEMA, system=LINE_SYSTEM)
+        line = str(out.get(lang, "")).strip()
+        if not has_script(line, lang):
+            return s
+        db.execute(text("insert into text_translations(source, en, hi, kn) values (:s,:en,:hi,:kn) "
+                        "on conflict (source) do nothing"),
+                   {"s": s, "en": str(out.get("en") or s), "hi": str(out.get("hi") or s),
+                    "kn": str(out.get("kn") or s)})
+        CACHE[s] = {"en": str(out.get("en") or s), "hi": str(out.get("hi") or s), "kn": str(out.get("kn") or s)}
+        return line
+    except Exception:
+        log.warning("could not translate a line for audio", exc_info=True)
+        return s

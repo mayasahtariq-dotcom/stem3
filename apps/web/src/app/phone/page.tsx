@@ -1,6 +1,6 @@
-import { CallAarohScreen } from "@/features/calls/CallAaroh";
+import { PhoneCallRoute } from "@/features/phone-sim/PhoneCallRoute";
 
-/** "Call Aaroh": a student without a smartphone dials in from their number (simulated in the browser). */
-export default function CallAarohPage() {
-  return <CallAarohScreen />;
+/** Call simulator: how a student without a smartphone would learn by phone call (simulated in the browser). */
+export default function PhoneCallPage() {
+  return <PhoneCallRoute />;
 }

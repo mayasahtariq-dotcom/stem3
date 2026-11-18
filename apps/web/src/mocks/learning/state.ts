@@ -27,7 +27,7 @@ export interface LearnerState {
   longestStreak: number;
   lastActiveDate: string | null;
   progress: Map<string, { startedAt: number; completedAt?: number; bestAccuracy: number }>;
-  attempts: { lessonId: string; questionId: string; correct: boolean; firstTry: boolean; at: number }[];
+  attempts: { lessonId: string; questionId: string; correct: boolean; firstTry: boolean; at: number; channel?: "app" | "phone_simulator" }[];
   savedTerms: Set<string>;
   doubts: number[];
 }

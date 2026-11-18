@@ -16,7 +16,8 @@ export function useSpeak() {
     async (text: string) => {
       setSpeaking(true);
       try {
-        const res = await audio.mutateAsync({ text, language: locale === "kn" ? "kn" : "hi" }).catch(() => ({ url: "" }));
+        // the server translates an English line first, so the voice stays in the student's language
+        const res: { url?: string; text?: string } = await audio.mutateAsync({ text, language: locale === "kn" ? "kn" : "hi" }).catch(() => ({ url: "" }));
         if (res.url) {
           const el = new Audio(res.url);
           el.onended = () => setSpeaking(false);
@@ -24,7 +25,7 @@ export function useSpeak() {
           return;
         }
         if (typeof window !== "undefined" && "speechSynthesis" in window) {
-          const u = new SpeechSynthesisUtterance(text);
+          const u = new SpeechSynthesisUtterance(res.text || text);
           u.lang = locale === "kn" ? "kn-IN" : "hi-IN";
           u.onend = () => setSpeaking(false);
           window.speechSynthesis.cancel();

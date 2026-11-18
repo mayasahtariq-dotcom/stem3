@@ -52,3 +52,15 @@
 - Teacher and parent dashboards do not show field progress yet, because their API responses have no total XP. The store and editing are student-only (other roles get 403 NOT_A_STUDENT).
 - The unlock celebration is a pop-up card with a sound, not a cinematic camera move.
 - The old primitive farm (src/three/world/FarmWorld.tsx) is kept for its scene tests; the student farm now renders src/three/worlds/WorldScene.tsx.
+
+## Browser phone call simulator (2026-11-18)
+- The simulator replaces the old caller-ID "Call Aaroh" page at /phone. It never places a real call and says so on screen. The teacher Calls page keeps its server-driven simulator for call students.
+- The lesson engine (apps/web/src/features/phone-sim/engine.ts) has no keypad, speech or React code. The keypad and physical keyboard go through keypad.ts `pressKey`; a real DTMF webhook would call the same engine methods.
+- Student ID is the student's phone number and the PIN is their normal login code (demo mode: 123456), so the simulator uses existing accounts only. Signing in signs that browser in as the student. Unregistered numbers and non-students are refused, so no second record is made. The demo shortcut is labelled and only types the demo student's ID and PIN.
+- Answers and completion use the same /web/attempts and /web/lessons/* endpoints as the app, so XP, streak, lesson progress and the twin are one record. Answers carry `X-Channel: phone_simulator`, stored in answer_attempts.channel = 'phone_simulator' (the spec's PHONE_SIMULATOR).
+- The server only finishes a lesson when every question is right, so a question answered wrongly is asked again at the end, like the app.
+- Only questions that work by voice are used (multiple choice up to 5 options, true/false, fill-in chips). Match-the-pairs needs a screen and is skipped. No current question type has several right answers; the engine supports multi-select (`maxSelections`) for when one does.
+- Sessions live in sim_sessions. A call counts as interrupted when it was hung up before the lesson finished or went quiet for 2 minutes. Lessons by phone come from sessions; app lessons are the rest.
+- Resume points are kept in the browser (per student ID). The server keeps the attempts themselves.
+- Voice: POST /web/audio now translates a line that is not in the student's script (for example untranslated content or the English parent summary) into Hindi or Kannada before speaking, and returns that text for the browser voice when the server voice is off.
+- Parent link codes are now 6 characters (the parent screen asks for 6); codes made earlier with 8 characters expire on their own.

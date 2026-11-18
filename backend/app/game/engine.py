@@ -163,7 +163,7 @@ def start_lesson(db: Connection, user_id: str, lesson_id: str,
 
 # ---------- attempts ----------
 def record_attempt(db: Connection, user_id: str, question_id: str, given: Any,
-                   now: datetime | None = None) -> dict[str, Any]:
+                   now: datetime | None = None, channel: str = "web") -> dict[str, Any]:
     now = now or utcnow()
     lid = learner_id_for(db, user_id)
     q = db.execute(text("select id, kind, answer, concept, lesson_id from questions where id=:q"),
@@ -212,9 +212,9 @@ def record_attempt(db: Connection, user_id: str, question_id: str, given: Any,
 
     db.execute(text(
         "insert into answer_attempts(learner_id, question_id, correct, first_try, channel, "
-        "lesson_id, xp, suspicious, chosen) values (:l,:q,:c,:f,'web',:le,:x,:s, "
+        "lesson_id, xp, suspicious, chosen) values (:l,:q,:c,:f,:chan,:le,:x,:s, "
         "cast(:ch as jsonb))"),
-        {"l": lid, "q": question_id, "c": correct, "f": first_try, "le": q["lesson_id"],
+        {"l": lid, "q": question_id, "c": correct, "f": first_try, "le": q["lesson_id"], "chan": channel,
          "x": total_xp, "s": suspicious, "ch": json.dumps(given)})
     db.execute(text(
         "update lesson_progress set combo=:c, max_combo=greatest(max_combo,:c), "

@@ -154,7 +154,7 @@ export function makeLearningHandlers(base: string) {
         if (heartLost) loseHeart(s);
         s.xpTotal += xp;
         s.xpToday += xp;
-        s.attempts.push({ lessonId: found.lesson.id, questionId: found.question.id, correct: result.correct, firstTry: !body.retry, at: fakeNow() });
+        s.attempts.push({ lessonId: found.lesson.id, questionId: found.question.id, correct: result.correct, firstTry: !body.retry, at: fakeNow(), channel: request.headers.get("X-Channel") === "phone_simulator" ? "phone_simulator" : "app" });
         const out: Schemas["AttemptOut"] = { correct: result.correct, correct_answer: result.correct_answer, explanation: (found.question.content.explanation as Record<string, string>) ?? {}, xp_delta: xp, heart_lost: heartLost, stats: statsOut(s) };
         return json(out);
       });
