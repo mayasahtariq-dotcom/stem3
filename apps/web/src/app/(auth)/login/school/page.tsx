@@ -1,5 +1,6 @@
 "use client";
 import { Suspense } from "react";
+import { LanguageFirst } from "@/features/onboarding/LanguageFirst";
 import { SchoolLoginScreen, useSchoolLogin } from "@/features/auth/SchoolLoginScreen";
 import { usePostSignIn } from "@/features/auth/use-post-sign-in";
 
@@ -11,7 +12,9 @@ function SchoolLogin() {
 export default function SchoolLoginPage() {
   return (
     <Suspense>
-      <SchoolLogin />
+      <LanguageFirst>
+        <SchoolLogin />
+      </LanguageFirst>
     </Suspense>
   );
 }

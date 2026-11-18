@@ -1,5 +1,6 @@
 "use client";
 import { Suspense } from "react";
+import { LanguageFirst } from "@/features/onboarding/LanguageFirst";
 import { RoleScreen, useRoleScreen } from "@/features/onboarding/RoleScreen";
 
 function Role() {
@@ -10,7 +11,9 @@ function Role() {
 export default function RolePage() {
   return (
     <Suspense>
-      <Role />
+      <LanguageFirst>
+        <Role />
+      </LanguageFirst>
     </Suspense>
   );
 }

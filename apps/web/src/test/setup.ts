@@ -11,6 +11,8 @@ afterEach(() => {
   resetFakeDb();
   localStorage.clear();
   sessionStorage.clear();
+  // Tests start as if the language was already picked on this visit; the language-first tests clear it.
+  sessionStorage.setItem("aaroh.languagePicked", "1");
   document.cookie = "mooshala_lang=; max-age=0; path=/";
 });
 afterAll(() => server.close());
