@@ -1,9 +1,9 @@
 "use client";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { StickerIcon } from "@/components/ui";
 import type { LanguageMode } from "@/features/auth/types";
 import { useBilingual } from "@/lib/i18n/use-bilingual";
-import { writeLanguageCookie } from "@/lib/i18n/language";
+import { markLanguagePicked, writeLanguageCookie } from "@/lib/i18n/language";
 import { useAppStore } from "@/lib/store/app-store";
 import { ROUTES } from "@/features/auth/routing";
 import { AuthFrame, ChoiceCard } from "./AuthFrame";
@@ -11,6 +11,7 @@ import { AuthFrame, ChoiceCard } from "./AuthFrame";
 /** View-model: stores the choice (device + cookie for server rendering) and moves on. */
 export function useLanguageScreen() {
   const router = useRouter();
+  const next = useSearchParams().get("next");
   const selected = useAppStore((s) => s.draftLanguage);
   const setDraft = useAppStore((s) => s.setDraftLanguage);
   return {
@@ -18,7 +19,9 @@ export function useLanguageScreen() {
     choose(mode: LanguageMode) {
       setDraft(mode);
       writeLanguageCookie(mode);
-      router.push(ROUTES.role);
+      markLanguagePicked();
+      // back to the sign-in screen that sent us here (same-app paths only), else "who are you?"
+      router.push(next && next.startsWith("/") && !next.startsWith("//") ? next : ROUTES.role);
       router.refresh(); // re-render server components in the chosen language
     },
   };

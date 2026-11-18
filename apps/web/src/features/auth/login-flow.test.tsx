@@ -9,6 +9,24 @@ import { useAuthStore } from "./auth-store";
 
 beforeEach(resetAuthStore);
 
+describe("language first", () => {
+  it("shows the language picker in place of the login screen until a language is picked", async () => {
+    sessionStorage.removeItem("aaroh.languagePicked");
+    useAuthStore.getState().setSession(null);
+    renderWithProviders(<LoginPage />);
+    await userEvent.click(await screen.findByRole("button", { name: /Kannada/ }));
+    expect(await screen.findByLabelText(/Phone number/)).toBeInTheDocument();
+    expect(sessionStorage.getItem("aaroh.languagePicked")).toBe("1");
+    expect(document.cookie).toContain("mooshala_lang=kannada");
+  });
+
+  it("goes straight to the login screen once a language was picked on this visit", async () => {
+    renderWithProviders(<LoginPage />);
+    expect(await screen.findByLabelText(/Phone number/)).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Kannada/ })).not.toBeInTheDocument();
+  });
+});
+
 describe("phone OTP login", () => {
   it("validates the number before sending", async () => {
     renderWithProviders(<LoginPage />);

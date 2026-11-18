@@ -1,5 +1,6 @@
 "use client";
 import { Suspense } from "react";
+import { LanguageFirst } from "@/features/onboarding/LanguageFirst";
 import { PhoneLoginScreen, usePhoneLogin } from "@/features/auth/PhoneLoginScreen";
 import { usePostSignIn } from "@/features/auth/use-post-sign-in";
 import { useAppStore } from "@/lib/store/app-store";
@@ -16,7 +17,9 @@ function PhoneLogin() {
 export default function LoginPage() {
   return (
     <Suspense>
-      <PhoneLogin />
+      <LanguageFirst>
+        <PhoneLogin />
+      </LanguageFirst>
     </Suspense>
   );
 }

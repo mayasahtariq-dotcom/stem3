@@ -21,3 +21,22 @@ export function readLanguageCookie(): LanguageMode | null {
   const m = document.cookie.match(new RegExp(`(?:^|; )${LANGUAGE_COOKIE}=([^;]*)`));
   return modeFor(m?.[1]);
 }
+
+/** Set when the user picks Hindi + English or Kannada + English on this visit (lasts until the tab closes). */
+const PICKED_KEY = "aaroh.languagePicked";
+
+export function markLanguagePicked() {
+  try {
+    sessionStorage.setItem(PICKED_KEY, "1");
+  } catch {
+    /* storage blocked: the picker just shows again */
+  }
+}
+
+export function languagePickedThisVisit(): boolean {
+  try {
+    return sessionStorage.getItem(PICKED_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
