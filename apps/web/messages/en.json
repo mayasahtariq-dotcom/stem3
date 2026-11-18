@@ -1009,7 +1009,7 @@
     "keyHelpShort": "Press 1 to 5 to choose, 9 to confirm, 0 for help.",
     "keyHelp": "1 to 5 choose. 6 repeats the question. 7 reads your choice. 8 clears it. 9 confirms. 0 repeats these keys.",
     "questionN": "Question {n} of {of}.",
-    "option": "{n}: {title}.",
+    "option": "Option {n}: {title}.",
     "noSuchOption": "There is no option {n}. Choose 1 to {max}.",
     "alreadySelected": "Option {n} is already chosen.",
     "tooMany": "You can choose up to {max}.",
@@ -1046,6 +1046,7 @@
     "sActive": "in call",
     "openSim": "Open the call simulator",
     "actAnswers": "Answers",
-    "retryLater": "We'll try this one again at the end."
+    "retryLater": "We'll try this one again at the end.",
+    "pressNumber": "To answer, press the option number on your keypad."
   }
 }

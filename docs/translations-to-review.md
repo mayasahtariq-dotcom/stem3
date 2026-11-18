@@ -1604,3 +1604,5 @@ Run `python scripts/export_translations.py` (from backend/) to regenerate `docs/
 | phoneSim.openSim | Open the call simulator | कॉल सिम्युलेटर खोलें | ಕರೆ ಸಿಮ್ಯುಲೇಟರ್ ತೆರೆಯಿರಿ | [ ] |
 | phoneSim.actAnswers | Answers | जवाब | ಉತ್ತರಗಳು | [ ] |
 | phoneSim.retryLater | We'll try this one again at the end. | यह सवाल आखिर में फिर से आएगा। | ಈ ಪ್ರಶ್ನೆ ಕೊನೆಯಲ್ಲಿ ಮತ್ತೆ ಬರುತ್ತದೆ. | [ ] |
+| phoneSim.option | Option {n}: {title}. | विकल्प {n}: {title}। | ಆಯ್ಕೆ {n}: {title}. | [ ] |
+| phoneSim.pressNumber | To answer, press the option number on your keypad. | जवाब देने के लिए कीपैड पर विकल्प का नंबर दबाएँ। | ಉತ್ತರಿಸಲು ಕೀಪ್ಯಾಡ್‌ನಲ್ಲಿ ಆಯ್ಕೆಯ ಸಂಖ್ಯೆ ಒತ್ತಿ. | [ ] |

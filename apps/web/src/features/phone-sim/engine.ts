@@ -431,13 +431,14 @@ export class CallEngine {
       p("questionN", { n: this.state.index + 1, of: this.state.questions.length }),
       { tri: q.prompt },
       ...q.options.map((title, i) => p("option", { n: i + 1, title })),
+      p("pressNumber"),
     );
   }
 
   repeatQuestion() {
     const q = this.question;
     if (!q || (this.state.phase !== "answering" && this.state.phase !== "feedback")) return;
-    this.say({ tri: q.prompt }, ...q.options.map((title, i) => p("option", { n: i + 1, title })));
+    this.say({ tri: q.prompt }, ...q.options.map((title, i) => p("option", { n: i + 1, title })), p("pressNumber"));
   }
 
   selectOption(n: number) {
