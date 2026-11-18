@@ -2,7 +2,6 @@
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { ErrorState, LoadingState, MeadowScene } from "@/components/ui";
-import { readLanguageCookie } from "@/lib/i18n/language";
 import { useAppStore } from "@/lib/store/app-store";
 import { useAuth, useProfile } from "./hooks";
 import { ROUTES, nextRouteFor } from "./routing";
@@ -17,8 +16,8 @@ export function EntryGate() {
   useEffect(() => {
     if (status === "restoring") return;
     if (status === "signedOut") {
-      // Signed out: always start at "who are you?" (student, teacher or parent).
-      router.replace(readLanguageCookie() ? ROUTES.role : ROUTES.language);
+      // Signed out: pick the language first (Hindi + English or Kannada + English), then "who are you?".
+      router.replace(ROUTES.language);
       return;
     }
     if (profile.data) router.replace(nextRouteFor(profile.data, lastRole));

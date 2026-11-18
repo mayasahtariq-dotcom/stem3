@@ -278,10 +278,9 @@ def make_audio(body: AudioIn, db: DbDep, user: UserDep) -> dict[str, str]:
 @router.get("/audio/{audio_id}")
 def get_audio(audio_id: str, db: DbDep) -> Response:
     """Public by unguessable id so an <audio> tag can play it without headers."""
-    path = db.execute(text("select storage_path from audio_cache where id=cast(:i as uuid)"),
-                      {"i": audio_id}).scalar()
-    if path is None:
+    wav = speech_cache.read(db, audio_id)
+    if wav is None:
         raise HTTPException(404, "Audio not found")
-    return Response(storage.read(path), media_type="audio/wav",
+    return Response(wav, media_type="audio/wav",
                     headers={"Cache-Control": "public, max-age=31536000, immutable"})
 

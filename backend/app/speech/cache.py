@@ -18,16 +18,41 @@ def cache_key(body: str, rate: int) -> str:
 
 
 def lookup(db: Connection, body: str, lang: str, rate: int) -> Any | None:
-    return db.execute(text("select id from audio_cache where text_hash=:h and language=:l"),
-                      {"h": cache_key(body, rate), "l": lang}).scalar()
+    """A cached clip we can still play (its sound is in the row, or its file is still on disk)."""
+    row = db.execute(text("select id, storage_path, data is not null as has_data from audio_cache "
+                          "where text_hash=:h and language=:l"), {"h": cache_key(body, rate), "l": lang}).mappings().first()
+    if row is None:
+        return None
+    if row["has_data"]:
+        return row["id"]
+    try:                                   # older rows: copy the file into the row while it still exists
+        wav = storage.read(row["storage_path"])
+    except (OSError, ValueError):
+        return None                        # file gone (disk wiped): make it again
+    db.execute(text("update audio_cache set data=:d where id=:i"), {"d": wav, "i": row["id"]})
+    return row["id"]
 
 
 def store(db: Connection, body: str, lang: str, rate: int, wav: bytes) -> Any:
     path = storage.save(wav, ".wav", folder="audio")
     return db.execute(text(
-        "insert into audio_cache(text_hash, language, storage_path) values (:h,:l,:p) "
-        "on conflict (text_hash, language) do update set storage_path=excluded.storage_path "
-        "returning id"), {"h": cache_key(body, rate), "l": lang, "p": path}).scalar_one()
+        "insert into audio_cache(text_hash, language, storage_path, data) values (:h,:l,:p,:d) "
+        "on conflict (text_hash, language) do update set storage_path=excluded.storage_path, data=excluded.data "
+        "returning id"), {"h": cache_key(body, rate), "l": lang, "p": path, "d": wav}).scalar_one()
+
+
+def read(db: Connection, audio_id: str) -> bytes | None:
+    """The clip's sound, from the row (or the file for rows made before sound was kept in the database)."""
+    row = db.execute(text("select storage_path, data from audio_cache where id=cast(:i as uuid)"),
+                     {"i": audio_id}).mappings().first()
+    if row is None:
+        return None
+    if row["data"] is not None:
+        return bytes(row["data"])
+    try:
+        return storage.read(row["storage_path"])
+    except (OSError, ValueError):
+        return None
 
 
 def get_or_make(db: Connection, body: str, lang: str, rate: int = WEB_RATE) -> Any:

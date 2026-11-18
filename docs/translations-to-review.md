@@ -1383,3 +1383,17 @@ Run `python scripts/export_translations.py` (from backend/) to regenerate `docs/
 | teacher.heroJoin | Class key {key} | क्लास की {key} | ತರಗತಿ ಕೀ {key} | [ ] |
 | teacher.topLearners | Top learners | सबसे आगे | ಮುಂಚೂಣಿಯವರು | [ ] |
 | parent.heroTitle | Watch them grow | उन्हें बढ़ते देखें | ಅವರು ಬೆಳೆಯುವುದನ್ನು ನೋಡಿ | [ ] |
+
+## Classroom courses
+| Key | English | Hindi | Kannada | Reviewed |
+|---|---|---|---|---|
+| classes.coursesTitle | Courses in this class | इस क्लास के कोर्स | ಈ ತರಗತಿಯ ಕೋರ್ಸ್‌ಗಳು | [ ] |
+| classes.addCourse | Add to class | क्लास में जोड़ें | ತರಗತಿಗೆ ಸೇರಿಸಿ | [ ] |
+| classes.removeCourse | Remove | हटाएँ | ತೆಗೆದುಹಾಕಿ | [ ] |
+| classes.inClass | In this class | इस क्लास में | ಈ ತರಗತಿಯಲ್ಲಿ | [ ] |
+| classes.published | Published: students can play it | प्रकाशित: छात्र खेल सकते हैं | ಪ್ರಕಟಿತ: ವಿದ್ಯಾರ್ಥಿಗಳು ಆಡಬಹುದು | [ ] |
+| classes.draftNote | Draft: students see it after you publish | ड्राफ़्ट: प्रकाशित करने के बाद छात्र देखेंगे | ಕರಡು: ಪ್ರಕಟಿಸಿದ ನಂತರ ವಿದ್ಯಾರ್ಥಿಗಳು ನೋಡುತ್ತಾರೆ | [ ] |
+| classes.noCoursesYet | No courses yet. Upload your notes to make one. | अभी कोई कोर्स नहीं। एक बनाने के लिए नोट्स अपलोड करें। | ಇನ್ನೂ ಕೋರ್ಸ್ ಇಲ್ಲ. ಒಂದನ್ನು ಮಾಡಲು ನೋಟ್ಸ್ ಅಪ್‌ಲೋಡ್ ಮಾಡಿ. | [ ] |
+| classes.uploadNotes | Upload notes | नोट्स अपलोड करें | ನೋಟ್ಸ್ ಅಪ್‌ಲೋಡ್ ಮಾಡಿ | [ ] |
+| classes.courseAdded | Course added to the class | कोर्स क्लास में जुड़ गया | ಕೋರ್ಸ್ ತರಗತಿಗೆ ಸೇರಿತು | [ ] |
+| classes.courseRemoved | Course removed from the class | कोर्स क्लास से हटा दिया | ಕೋರ್ಸ್ ತರಗತಿಯಿಂದ ತೆಗೆಯಲಾಗಿದೆ | [ ] |

@@ -272,3 +272,31 @@ def test_call_console(conn: Connection, client: TestClient) -> None:
     bad = client.post(f"/web/classrooms/{w['classroom']}/call-students", headers=h, json={
         "name": "X", "parent_phone": "+919876500002", "language": "hindi", "window": {"start": "08:00", "end": "10:00"}, "days": [1]})
     assert bad.status_code == 422
+
+
+def test_teacher_adds_and_removes_a_course_from_a_class(conn: Connection, client: TestClient) -> None:
+    w = make_world(conn)
+    h = w["teacher"]["headers"]
+    k2 = client.post("/web/classrooms", headers=h, json={"name": "8C", "subject": "BI", "grade": 8}).json()["id"]
+    added = client.post(f"/web/courses/{w['course']}/assign", headers=h, json={"classroom_ids": [k2], "due_at": None}).json()
+    assert k2 in added["assigned_classroom_ids"]
+    assert any(c["id"] == w["course"] for c in client.get(f"/web/classrooms/{k2}/dashboard", headers=h).json()["courses"])
+    gone = client.post(f"/web/courses/{w['course']}/unassign", headers=h, json={"classroom_ids": [k2]}).json()
+    assert k2 not in gone["assigned_classroom_ids"] and w["classroom"] in gone["assigned_classroom_ids"]
+    other = make_user(conn, "teacher")
+    assert client.post(f"/web/courses/{w['course']}/unassign", headers=other["headers"],
+                       json={"classroom_ids": [k2]}).status_code == 404
+
+
+def test_question_audio_survives_a_wiped_disk(conn: Connection, client: TestClient) -> None:
+    from app import storage
+    w = make_world(conn)
+    r = client.post("/web/audio", headers=w["student"]["headers"], json={"text": "कोशिका क्या है?", "language": "hi"})
+    assert r.status_code == 200, r.text
+    url = r.json()["url"]
+    assert url.startswith("http") and "/v1/audio/" in url                      # absolute: works from another site
+    path = conn.execute(text("select storage_path from audio_cache where id=cast(:i as uuid)"),
+                        {"i": url.rsplit("/", 1)[1]}).scalar_one()
+    (storage.root() / path).unlink()                                             # like a redeploy wiping the disk
+    clip = client.get(url.split("testserver")[-1])
+    assert clip.status_code == 200 and len(clip.content) > 0
