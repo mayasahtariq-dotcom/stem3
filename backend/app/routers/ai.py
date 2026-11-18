@@ -1,5 +1,6 @@
 """P3 AI routes: notes upload to course, question generation, doubt chatbot, text to speech."""
 import json
+import logging
 import re
 from collections.abc import Callable
 from typing import Annotated, Any
@@ -42,8 +43,19 @@ LLMDep = Annotated[LLMProvider, Depends(llm)]
 
 
 def _background(upload_id: str) -> None:
+    from app.ai.pipeline import fill_empty_lessons
     with get_engine().connect() as conn:
-        run_pipeline(conn, get_llm(get_settings()), upload_id)
+        llm = get_llm(get_settings())
+        run_pipeline(conn, llm, upload_id)
+        course = conn.execute(text("select course_id from uploads where id=:u"), {"u": upload_id}).scalar()
+        if course:                       # the course is ready to review; now its titles in every language,
+            from app.titles import translate_course
+            try:
+                translate_course(conn, llm, course)
+            except Exception:
+                conn.rollback()
+                logging.getLogger(__name__).warning("title translation failed", exc_info=True)
+            fill_empty_lessons(conn, llm, course)   # and quizzes for the later lessons
 
 
 def pipeline_runner() -> Callable[[str], None]:

@@ -47,8 +47,20 @@ QUESTIONS_SCHEMA = {"type": "OBJECT", "properties": {"questions": {"type": "ARRA
 SYSTEM = ("You make short, accurate science lessons for Indian students in Classes 6 to 10, from the "
           "teacher's own notes. Use only facts that appear in the notes. Write every student-facing "
           "text in Hindi (hi), Kannada (kn) and English (en). Keep sentences short and simple. "
-          "Give each question a confidence from 0 to 1: lower it when the notes are unclear.")
+          "Give each question a confidence from 0 to 1: lower it when the notes are unclear. "
+          "Script rule: hi is written only in Devanagari and kn only in Kannada script (never mix the two); "
+          "English science words may stay in English.")
 LANG = {"hi": "Hindi", "kn": "Kannada", "en": "English"}
+
+
+def notes_language(notes: str) -> str | None:
+    """The notes' language from their script: Kannada letters -> kn, Devanagari -> hi, mostly Latin -> en."""
+    kn = sum(1 for ch in notes if "ಀ" <= ch <= "೿")
+    hi = sum(1 for ch in notes if "ऀ" <= ch <= "ॿ")
+    latin = sum(1 for ch in notes if ch.isascii() and ch.isalpha())
+    if max(kn, hi, latin) == 0:
+        return None
+    return "kn" if kn >= max(hi, latin) else "hi" if hi >= latin else "en"
 
 
 def set_status(db: Connection, upload_id: str, status: str, **extra: Any) -> None:
@@ -111,8 +123,11 @@ def _run(db: Connection, llm: LLMProvider, upload_id: str) -> None:
     set_status(db, upload_id, "outline")
     notes = "\n\n".join(f"[PAGE {p['n']}]\n{p['text']}" for p in pages)[:MAX_OCR_CHARS]
     level = f"Class {up['class_level']}" if up["class_level"] else "Classes 6 to 10"
+    medium = notes_language(notes) or up["language"]          # what the notes are really written in
+    if medium != up["language"]:
+        db.execute(text("update uploads set language=:l where id=:u"), {"l": medium, "u": upload_id})
     course = llm.generate_json(
-        f"Teacher's notes ({LANG.get(up['language'], 'Hindi')} medium, {level}):\n{notes}\n\n"
+        f"Teacher's notes ({LANG.get(medium, 'Hindi')} medium, {level}):\n{notes}\n\n"
         "Make a course: a title, the subject, 1 to 3 units, each with 2 to 4 short lessons. "
         "For the FIRST lesson only, write a short reading (2 to 4 sentences) and 6 to 8 questions "
         "(mostly multiple choice with 3 options, some true/false); use answer_index for the right "
@@ -213,3 +228,22 @@ def generate_more(db: Connection, llm: LLMProvider, lesson_id: str, count: int =
         f"'{row['title']}' (multiple choice with 3 options, some true/false).", QUESTIONS_SCHEMA,
         system=SYSTEM)
     return insert_questions(db, lesson_id, out.get("questions") or [], pages, start=int(existing) + 1)
+
+
+def fill_empty_lessons(db: Connection, llm: LLMProvider, course_id: Any, count: int = 6) -> int:
+    """Gives every lesson of a course that has no questions yet a quiz, from the same notes. The pipeline only
+    writes the first lesson's questions; without this, students reach lesson 2 and find no quiz.
+    Each lesson is committed on its own, so one slow or failed lesson does not undo the others."""
+    import logging
+    empty = db.execute(text(
+        "select l.id from lessons l join units u on u.id=l.unit_id where u.course_id=:c and not exists "
+        "(select 1 from questions q where q.lesson_id=l.id) order by u.position, l.position"), {"c": course_id}).scalars().all()
+    added = 0
+    for lesson_id in empty:
+        try:
+            added += generate_more(db, llm, str(lesson_id), count)
+            db.commit()
+        except Exception:
+            db.rollback()
+            logging.getLogger(__name__).exception("could not make questions for lesson %s", lesson_id)
+    return added

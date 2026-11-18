@@ -1476,3 +1476,11 @@ Run `python scripts/export_translations.py` (from backend/) to regenerate `docs/
 | notes.deleteNote | Delete | हटाएँ | ಅಳಿಸಿ | [ ] |
 | notes.deleteConfirm | Delete "{title}"? Students will no longer see it. | "{title}" हटाएँ? छात्र इसे फिर नहीं देख पाएँगे। | "{title}" ಅಳಿಸುವುದೇ? ವಿದ್ಯಾರ್ಥಿಗಳು ಇದನ್ನು ಇನ್ನು ನೋಡುವುದಿಲ್ಲ. | [ ] |
 | notes.deleted | Note deleted | नोट हटा दिया | ನೋಟ್ ಅಳಿಸಲಾಗಿದೆ | [ ] |
+
+## Delete uploads
+| Key | English | Hindi | Kannada | Reviewed |
+|---|---|---|---|---|
+| materials.deleteFiles | Delete | हटाएँ | ಅಳಿಸಿ | [ ] |
+| materials.deleteConfirm | Delete these uploaded files? | ये अपलोड की गई फ़ाइलें हटाएँ? | ಈ ಅಪ್‌ಲೋಡ್ ಮಾಡಿದ ಫೈಲ್‌ಗಳನ್ನು ಅಳಿಸುವುದೇ? | [ ] |
+| materials.deleteConfirmCourse | Delete these uploaded files? The course made from them stays. | ये अपलोड की गई फ़ाइलें हटाएँ? इनसे बना कोर्स बना रहेगा। | ಈ ಅಪ್‌ಲೋಡ್ ಫೈಲ್‌ಗಳನ್ನು ಅಳಿಸುವುದೇ? ಇವುಗಳಿಂದ ಮಾಡಿದ ಕೋರ್ಸ್ ಉಳಿಯುತ್ತದೆ. | [ ] |
+| materials.deleted | Files deleted | फ़ाइलें हटा दीं | ಫೈಲ್‌ಗಳನ್ನು ಅಳಿಸಲಾಗಿದೆ | [ ] |

@@ -828,7 +828,11 @@
     "status_processing": "Making lessons",
     "status_review": "Waiting for your review",
     "status_published": "Published",
-    "review": "Review"
+    "review": "Review",
+    "deleteFiles": "Delete",
+    "deleteConfirm": "Delete these uploaded files?",
+    "deleteConfirmCourse": "Delete these uploaded files? The course made from them stays.",
+    "deleted": "Files deleted"
   },
   "notes": {
     "teacherTitle": "Class notes",

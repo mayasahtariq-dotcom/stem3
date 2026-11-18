@@ -2,7 +2,7 @@ import { http, HttpResponse } from "msw";
 import type { Schemas } from "@mooshala/api-client";
 import { fakeDb, userForToken } from "../fake-db";
 import { fakeNow, lessonById, questionById, removeFakeQuestion } from "../learning/state";
-import { classInsights, courseById, courseOut, courseSummary, dashboard, lessonSummaryOut, materials, newJoinKey, nextId, ownsClassroom, rosterOf, studentDetail, teacherOverview, teacherState, UPLOAD_LIMITS, uploadStatus } from "./state";
+import { classInsights, courseById, courseOut, courseSummary, dashboard, lessonSummaryOut, deleteUpload, materials, newJoinKey, nextId, ownsClassroom, rosterOf, studentDetail, teacherOverview, teacherState, UPLOAD_LIMITS, uploadStatus } from "./state";
 
 /**
  * Fakes for the teacher endpoints that exist in the backend
@@ -90,6 +90,11 @@ export function makeTeacherHandlers(base: string) {
       const t = teacher(request);
       if (t.error) return t.error;
       return json(materials(t.user.id));
+    }),
+    http.delete(`${base}/uploads/:id`, ({ request, params }) => {
+      const t = teacher(request);
+      if (t.error) return t.error;
+      return deleteUpload(t.user.id, String(params.id)) ? new HttpResponse(null, { status: 204 }) : json({ detail: { code: "NOT_FOUND" } }, { status: 404 });
     }),
 
     http.get(`${base}/classrooms/:id/dashboard`, ({ request, params }) => {

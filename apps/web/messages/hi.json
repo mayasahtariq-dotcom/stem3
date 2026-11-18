@@ -828,7 +828,11 @@
     "status_processing": "पाठ बन रहे हैं",
     "status_review": "आपकी जाँच बाकी",
     "status_published": "प्रकाशित",
-    "review": "जाँचिए"
+    "review": "जाँचिए",
+    "deleteFiles": "हटाएँ",
+    "deleteConfirm": "ये अपलोड की गई फ़ाइलें हटाएँ?",
+    "deleteConfirmCourse": "ये अपलोड की गई फ़ाइलें हटाएँ? इनसे बना कोर्स बना रहेगा।",
+    "deleted": "फ़ाइलें हटा दीं"
   },
   "notes": {
     "teacherTitle": "कक्षा के नोट्स",

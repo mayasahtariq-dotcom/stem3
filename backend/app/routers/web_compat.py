@@ -6,6 +6,7 @@ backend's real logic (engine, twin, AI, calls), so the frontend only changes its
 login adapter. Shapes: three-language text {en, hi, kn}, subjects BI/CH/PH, language modes
 hindi/kannada, question types multiple_choice/true_false/match_pairs/fill_formula."""
 import json
+import logging
 import re
 from datetime import UTC, datetime, timedelta
 from typing import Annotated, Any
@@ -25,6 +26,7 @@ from app.routers import ai as ai_routes
 from app.routers.auth import UserOut
 from app.twin import read as twin_read
 
+log = logging.getLogger(__name__)
 router = APIRouter(prefix="/web", tags=["web-compat"])
 SUBJECT_CODE = {"biology": "BI", "chemistry": "CH", "physics": "PH"}
 LANG_MODE = {"hi": "hindi", "kn": "kannada", "en": "hindi"}
@@ -40,7 +42,8 @@ def tri(v: Any) -> dict[str, str]:
         return {"en": str(en), "hi": str(v.get("hi") or v.get("regional") or en),
                 "kn": str(v.get("kn") or v.get("regional") or en)}
     s = "" if v is None else str(v)
-    return {"en": s, "hi": s, "kn": s}
+    from app.titles import lookup  # a course/lesson title translated into every language
+    return dict(lookup(s) or {"en": s, "hi": s, "kn": s})
 
 
 def match_key(o: Any) -> str:
@@ -375,8 +378,17 @@ def me_home(db: DbDep, user: UserDep) -> dict[str, Any]:
 
 
 @router.post("/lessons/{lesson_id}/start")
-def start(lesson_id: str, db: DbDep, user: UserDep) -> dict[str, Any]:
+def start(lesson_id: str, db: DbDep, user: UserDep,
+          model: Annotated[Any, Depends(ai_routes.llm)]) -> dict[str, Any]:
     lid = _lid(db, user)
+    engine.check_lesson_access(db, user.id, lesson_id)
+    if db.execute(text("select not exists (select 1 from questions where lesson_id=:l)"), {"l": lesson_id}).scalar():
+        # a lesson with no quiz yet (older courses): make its questions now, from the class notes
+        from app.ai.pipeline import generate_more
+        try:
+            generate_more(db, model, lesson_id, 6)
+        except Exception:
+            log.warning("could not make questions for lesson %s", lesson_id, exc_info=True)
     served = engine.start_lesson(db, user.id, lesson_id)
     ids = {q["id"] for q in served}
     course = db.execute(text("select u.course_id from lessons l join units u on u.id=l.unit_id where l.id=:l"),

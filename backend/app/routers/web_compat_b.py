@@ -888,8 +888,24 @@ def t_publish(lesson_id: str, body: PublishIn, background: BackgroundTasks, db: 
         db.execute(text("insert into course_assignments values (:c,:k) on conflict do nothing"), {"c": c["id"], "k": k})
     for k in db.execute(text("select classroom_id from course_assignments where course_id=:c"), {"c": c["id"]}).scalars():
         share_course_notes(db, c["id"], k)
+    background.add_task(_fill_course_lessons, str(c["id"]))     # every lesson gets a quiz, not only the first
     units = _lesson_summaries(db, _own_course(db, user, str(course)))
     return next(le for u in units for le in u["lessons"] if le["id"] == lesson_id)
+
+
+def _fill_course_lessons(course_id: str) -> None:
+    from app.ai.pipeline import fill_empty_lessons
+    from app.config import get_settings
+    from app.db.session import get_engine
+    from app.providers import get_llm
+    from app.titles import translate_course
+    with get_engine().connect() as conn:
+        llm = get_llm(get_settings())
+        try:
+            translate_course(conn, llm, course_id)
+        except Exception:  # noqa: BLE001 - translation is extra; quizzes still get made
+            conn.rollback()
+        fill_empty_lessons(conn, llm, course_id)
 
 
 class AssignIn(BaseModel):
@@ -959,6 +975,22 @@ def t_insights(classroom_id: str, db: DbDep, user: UserDep) -> dict[str, Any]:
             "trend": [], "topics": [{"name": w["name"], "accuracy": w["accuracy"]} for w in d["weak_topics"]],
             "doing_well": [_ref(x) for x in rows if (x["accuracy"] or 0) >= 0.7][:5],
             "needs_attention": [_ref(x) for x in rows if x["idle"] or x["behind"]][:5], "missed": []}
+
+
+@router.delete("/uploads/{upload_id}", status_code=204)
+def t_delete_upload(upload_id: str, db: DbDep, user: UserDep) -> None:
+    """The teacher deletes files they uploaded. A course already made from them stays (its questions and the
+    notes shared with classes keep working); only the uploaded pages go."""
+    _teacher(user)
+    paths = db.execute(text("select p.storage_path from upload_pages p join uploads u on u.id=p.upload_id "
+                            "where u.id=:u and u.teacher_id=:t"), {"u": upload_id, "t": user.id}).scalars().all()
+    if not db.execute(text("delete from uploads where id=:u and teacher_id=:t"), {"u": upload_id, "t": user.id}).rowcount:
+        raise HTTPException(404, {"code": "NOT_FOUND"})
+    for path in paths:                     # best effort: the host's disk may already be wiped
+        try:
+            (storage.root() / path).unlink(missing_ok=True)
+        except (OSError, ValueError):
+            pass
 
 
 @router.get("/teacher/materials")

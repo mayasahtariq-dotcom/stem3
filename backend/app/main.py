@@ -31,6 +31,9 @@ register_all()
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
+    from app import titles
+    from app.db.session import get_engine
+    titles.refresh_if_stale(get_engine())      # translated course titles into memory
     task = None
     if get_settings().scheduler_enabled:       # the PRD's 5-minute job
         task = asyncio.create_task(scheduler_loop(get_settings().scheduler_interval))
@@ -68,3 +71,12 @@ app.include_router(web_compat_b.router)
 @app.get("/health")
 async def health() -> dict[str, str]:
     return {"status": "ok"}
+
+
+@app.middleware("http")
+async def keep_titles_fresh(request, call_next):  # type: ignore[no-untyped-def]
+    """Reload translated titles every couple of minutes (other processes may add some)."""
+    from app import titles
+    from app.db.session import get_engine
+    titles.refresh_if_stale(get_engine())
+    return await call_next(request)

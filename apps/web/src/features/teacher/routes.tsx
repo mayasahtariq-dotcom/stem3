@@ -29,7 +29,7 @@ import { LessonReviewScreen } from "./LessonReviewScreen";
 import { OverviewScreen } from "./OverviewScreen";
 import { AllClassesPanel, MaterialsPanel } from "./OverviewPanels";
 import { ClassDetailScreen, ClassesScreen } from "./ClassesScreen";
-import { useClassInsights, useCreateClass, useMaterials, useTeacherOverview } from "./insights-api";
+import { useClassInsights, useCreateClass, useDeleteUpload, useMaterials, useTeacherOverview } from "./insights-api";
 import { useClassStore } from "./class-store";
 import { useDeleteNote, useTeacherNotes } from "@/features/notes/api";
 import { StudentParentLinkCard } from "@/features/parent/share-link";
@@ -242,6 +242,9 @@ export function StudentDetailRoute({ studentId }: { studentId: string }) {
 export function CoursesRoute() {
   const courses = useCourses();
   const materials = useMaterials();
+  const delUpload = useDeleteUpload();
+  const mt = useBilingual("materials");
+  const onDeleteError = useErrorToast();
   return (
     <>
       <MaterialsPanel
@@ -249,6 +252,12 @@ export function CoursesRoute() {
         loading={materials.isLoading}
         error={materials.error}
         onRetry={() => void materials.refetch()}
+        deletingId={delUpload.isPending ? delUpload.variables : null}
+        onDelete={(m) => {
+          if (!window.confirm(`${mt(m.course_id ? "deleteConfirmCourse" : "deleteConfirm").regional}
+${mt(m.course_id ? "deleteConfirmCourse" : "deleteConfirm").english}`)) return;
+          delUpload.mutate(m.id, { onSuccess: () => toast("success", mt("deleted")), onError: onDeleteError });
+        }}
       />
       <CoursesScreen
         courses={courses.data}

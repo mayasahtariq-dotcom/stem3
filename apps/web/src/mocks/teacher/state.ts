@@ -341,6 +341,14 @@ export function teacherOverview(teacherName: string | null) {
 }
 
 /** Uploaded materials with file names and where they stand (pending contract: Material). */
+/** The teacher deletes one of their uploads (the course made from it stays). */
+export function deleteUpload(ownerId: string, id: string): boolean {
+  const u = st.uploads.get(id);
+  if (!u || u.ownerId !== ownerId) return false;
+  st.uploads.delete(id);
+  return true;
+}
+
 export function materials(ownerId: string) {
   return [...st.uploads.values()]
     .filter((u) => u.ownerId === ownerId)

@@ -365,3 +365,51 @@ def test_student_dials_in_from_their_number_in_demo_mode(conn: Connection, clien
                                                 "session": g["session"], "digits": "1"}).status_code == 404
     unknown = client.post("/web/phone/call", json={"from_phone": "9876500444"}).json()
     assert unknown["hangup"] and not unknown["gather"]                     # unknown number: told and hung up
+
+
+def test_a_lesson_without_questions_gets_a_quiz_when_a_student_opens_it(conn: Connection, client: TestClient) -> None:
+    w = make_world(conn, n_lessons=1)
+    conn.execute(text("delete from questions where lesson_id=:l"), {"l": w["lessons"][0]})     # like lessons 2+ used to be
+    r = client.post(f"/web/lessons/{w['lessons'][0]}/start", headers=w["student"]["headers"])
+    assert r.status_code == 200, r.text
+    assert len(r.json()["lesson"]["questions"]) >= 1                                          # the quiz is there
+
+
+def test_fill_empty_lessons_gives_every_lesson_questions(conn: Connection) -> None:
+    from app.ai.pipeline import fill_empty_lessons
+    from app.ai.provider import FakeLLMProvider
+    w = make_world(conn, n_lessons=2)
+    conn.execute(text("delete from questions where lesson_id=:l"), {"l": w["lessons"][1]})
+    added = fill_empty_lessons(NoCommit(conn), FakeLLMProvider(), w["course"])                 # type: ignore[arg-type]
+    assert added >= 1
+    assert conn.execute(text("select count(*) from questions where lesson_id=:l"), {"l": w["lessons"][1]}).scalar_one() >= 1
+
+
+def test_teacher_deletes_their_uploaded_files(conn: Connection, client: TestClient) -> None:
+    t = make_user(conn, "teacher")
+    up = client.post("/web/uploads", headers=t["headers"], json={"pages": [{"kind": "text", "text": "Cells."}]}).json()
+    assert any(m["id"] == up["id"] for m in client.get("/web/teacher/materials", headers=t["headers"]).json())
+    other = make_user(conn, "teacher")
+    assert client.delete(f"/web/uploads/{up['id']}", headers=other["headers"]).status_code == 404   # not theirs
+    assert client.delete(f"/web/uploads/{up['id']}", headers=t["headers"]).status_code == 204
+    assert not any(m["id"] == up["id"] for m in client.get("/web/teacher/materials", headers=t["headers"]).json())
+
+
+def test_notes_language_comes_from_the_script() -> None:
+    from app.ai.pipeline import notes_language
+    assert notes_language("ವಿದ್ಯುತ್ ಪ್ರವಾಹ ಮತ್ತು ಅದರ ಪರಿಣಾಮಗಳು [PAGE 1]") == "kn"
+    assert notes_language("विद्युत धारा और उसके प्रभाव [PAGE 1]") == "hi"
+    assert notes_language("Electric current and its effects") == "en"
+    assert notes_language("   ") is None
+
+
+def test_course_titles_are_shown_in_the_students_language(conn: Connection, client: TestClient) -> None:
+    from app import titles
+    from app.ai.provider import FakeLLMProvider
+    w = make_world(conn, n_lessons=1)
+    course_title = conn.execute(text("select title from courses where id=:c"), {"c": w["course"]}).scalar_one()
+    added = titles.translate_course(NoCommit(conn), FakeLLMProvider(), w["course"])   # type: ignore[arg-type]
+    assert added >= 2
+    path = client.get(f"/web/courses/{w['course']}/path", headers=w["student"]["headers"]).json()
+    assert path["title"] == {"en": f"EN {course_title}", "hi": f"HI {course_title}", "kn": f"KN {course_title}"}
+    titles.CACHE.clear()                                                                 # leave no test titles behind

@@ -32,6 +32,16 @@ export function useMaterials() {
   return useQuery({ queryKey: insightKeys.materials, enabled: useSignedIn(), queryFn: () => pending.get<Material[]>("/teacher/materials") });
 }
 
+/** DELETE /uploads/{id}: the teacher deletes files they uploaded (a course made from them stays). */
+export function useDeleteUpload() {
+  const { pending } = useServices();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (uploadId: string) => pending.del(`/uploads/${encodeURIComponent(uploadId)}`),
+    onSuccess: () => void qc.invalidateQueries({ queryKey: insightKeys.materials }),
+  });
+}
+
 export type NewClass = Schemas["ClassroomCreate"];
 
 /** POST /classrooms (exists in the backend). */

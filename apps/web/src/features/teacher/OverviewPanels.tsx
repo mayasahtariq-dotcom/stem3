@@ -2,7 +2,7 @@
 import Link from "next/link";
 import type { Material, TeacherOverview } from "@mooshala/api-client";
 import { Hero } from "@/components/playful";
-import { BilingualText, Card, ErrorState, LoadingState, StickerIcon } from "@/components/ui";
+import { BilingualText, Card, ChunkyButton, ErrorState, LoadingState, StickerIcon } from "@/components/ui";
 import { useBilingual } from "@/lib/i18n/use-bilingual";
 import { useTri } from "@/lib/i18n/use-tri";
 import { MeterRow, Ring } from "./charts";
@@ -99,7 +99,7 @@ export function AllClassesPanel({ data, loading, error, onRetry, formatTime }: {
 }
 
 /** Stateless: uploaded materials with file names, formats and where they stand. */
-export function MaterialsPanel({ items, loading, error, onRetry }: { items: Material[] | undefined; loading: boolean; error: unknown; onRetry: () => void }) {
+export function MaterialsPanel({ items, loading, error, onRetry, onDelete, deletingId }: { items: Material[] | undefined; loading: boolean; error: unknown; onRetry: () => void; onDelete?: (m: Material) => void; deletingId?: string | null }) {
   const t = useBilingual("materials");
   if (loading) return <LoadingState />;
   if (error) return <ErrorState error={error} onRetry={onRetry} />;
@@ -135,6 +135,12 @@ export function MaterialsPanel({ items, loading, error, onRetry }: { items: Mate
                 <Link href={`/teacher/courses/${m.course_id}`} className="text-sm font-bold text-sky-strong underline">
                   {t("review").regional} · {t("review").english}
                 </Link>
+              )}
+              {onDelete && (
+                <ChunkyButton size="sm" variant="ghost" loading={deletingId === m.id} onClick={() => onDelete(m)} aria-label={t("deleteFiles").english} title={t("deleteFiles").english} data-testid={`delete-upload-${m.id}`}>
+                  <StickerIcon name="trash" size={18} />
+                  <span className="text-sm font-bold text-coral-strong">{t("deleteFiles").regional}</span>
+                </ChunkyButton>
               )}
             </li>
           ))}

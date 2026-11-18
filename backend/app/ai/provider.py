@@ -71,6 +71,9 @@ class FakeLLMProvider:
                                    "hi": "पौधों में कोशिकाएँ होती हैं।", "kn": "Plants have cells."},
                                    "options": [], "answer_index": 0, "answer_bool": True,
                                    "concept": "cell", "source_page": 1, "confidence": 0.9}]}
+        if "items" in props:                                   # title translations
+            titles = [ln[2:].strip() for ln in prompt.splitlines() if ln.startswith("- ")]
+            return {"items": [{"source": t, "en": f"EN {t}", "hi": f"HI {t}", "kn": f"KN {t}"} for t in titles]}
         if "summary" in props:                                 # notes summary
             return {"summary": {"en": "Cells are the smallest units of life.", "hi": "कोशिका जीवन की सबसे छोटी इकाई है।",
                                 "kn": "ಕೋಶವು ಜೀವದ ಅತ್ಯಂತ ಚಿಕ್ಕ ಘಟಕ."}}
