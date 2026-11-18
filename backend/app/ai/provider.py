@@ -80,7 +80,9 @@ class FakeLLMProvider:
         if "supported" in props:                               # chatbot fact check
             return {"supported": "not supported" not in prompt}
         if "answer" in props:                                  # doubt chatbot
-            found = "(none found)" not in prompt
+            notes, _, doubt = prompt.partition("Student's doubt:")
+            words = {w for w in re.findall(r"\w+", doubt.lower()) if len(w) > 3}
+            found = "(none found)" not in prompt and any(w in notes.lower() for w in words)
             return {"answer": "A cell is the smallest unit of life. (from your notes)" if found
                     else "This is not in your notes. Ask your teacher!",
                     "in_notes": found, "used_page": 1 if found else 0}
@@ -162,3 +164,68 @@ class GeminiProvider:
                 raise AIUnavailable("The AI answer could not be read. Please try again.") from None
             out = json.loads(m.group(0))
         return out if isinstance(out, dict) else {}
+
+
+def _json_schema(s: Any) -> Any:
+    """Gemini-style schema (type 'OBJECT', 'STRING', ...) as a standard JSON schema for Ollama."""
+    if isinstance(s, dict):
+        out = {k: _json_schema(v) for k, v in s.items()}
+        if isinstance(out.get("type"), str):
+            out["type"] = out["type"].lower()
+        return out
+    if isinstance(s, list):
+        return [_json_schema(x) for x in s]
+    return s
+
+
+class OllamaProvider:
+    """A model running on this computer with Ollama (for example gemma4, which handles Kannada, Hindi and
+    English). No internet or API key needed. Text only (no photos or PDFs)."""
+
+    local = True
+
+    def __init__(self, url: str, model: str, timeout: float = 240.0) -> None:
+        self.url = url.rstrip("/")
+        self.model = model
+        self.timeout = timeout
+
+    def _chat(self, prompt: str, system: str | None, fmt: Any = None) -> str:
+        msgs = ([{"role": "system", "content": system}] if system else []) + [{"role": "user", "content": prompt}]
+        body: dict[str, Any] = {"model": self.model, "stream": False, "messages": msgs,
+                                "options": {"temperature": 0.2}, "keep_alive": "30m"}
+        if fmt is not None:
+            body["format"] = fmt
+        try:
+            r = httpx.post(f"{self.url}/api/chat", json=body, timeout=self.timeout)
+        except httpx.HTTPError as exc:
+            raise AIUnavailable(f"The local model is not answering ({type(exc).__name__}).") from exc
+        if r.status_code != 200:
+            raise AIUnavailable(f"Local model: HTTP {r.status_code} {r.text[:200]}")
+        return str(r.json().get("message", {}).get("content", ""))
+
+    def complete(self, prompt: str, system: str | None = None) -> str:
+        return self._chat(prompt, system)
+
+    def generate_json(self, prompt: str, schema: dict[str, Any], parts: list[Part] | None = None,
+                      system: str | None = None) -> dict[str, Any]:
+        if parts:
+            raise AIUnavailable("The local model reads text only.")
+        textv = self._chat(prompt, system, _json_schema(schema))
+        try:
+            out = json.loads(textv)
+        except json.JSONDecodeError:
+            m = re.search(r"\{.*\}", textv, re.DOTALL)
+            if not m:
+                raise AIUnavailable("The local model did not return JSON.") from None
+            out = json.loads(m.group(0))
+        return out if isinstance(out, dict) else {}
+
+
+def local_model_ready(url: str, model: str) -> bool:
+    """True when Ollama is running here and has the model (a quick check, so the chatbot can fall back to Gemini)."""
+    try:
+        r = httpx.get(f"{url.rstrip('/')}/api/tags", timeout=1.5)
+        return r.status_code == 200 and any(m.get("name") == model or m.get("model") == model
+                                            for m in r.json().get("models", []))
+    except httpx.HTTPError:
+        return False

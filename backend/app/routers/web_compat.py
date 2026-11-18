@@ -524,9 +524,9 @@ class DoubtIn(BaseModel):
 
 @router.post("/doubts")
 def doubt(body: DoubtIn, db: DbDep, user: UserDep,
-          model: Annotated[Any, Depends(ai_routes.llm)]) -> dict[str, Any]:
+          model: Annotated[Any, Depends(ai_routes.doubt_llm)]) -> dict[str, Any]:
     _lid(db, user)
-    res = ai_routes.ask_doubt(ai_routes.DoubtIn(text=body.text), db, user, model)
+    res = ai_routes.ask_doubt(ai_routes.DoubtIn(text=body.text, course_id=getattr(body, "course_id", None)), db, user, model)
     used = db.execute(text("select count(*) from doubts d join learners l on l.id=d.learner_id "
                            "where l.user_id=:u and d.created_at > now() - interval '1 day'"),
                       {"u": user.id}).scalar_one()

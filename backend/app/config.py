@@ -25,6 +25,9 @@ class Settings(BaseSettings):
     demo_mode: bool = False
     gemini_api_key: str = ""
     gemini_model: str = "gemini-3.8-flash"
+    doubt_llm: str = "gemini"         # "ollama": Ask Golu uses a model on this computer (falls back to Gemini)
+    ollama_url: str = "http://127.0.0.1:11434"
+    ollama_model: str = "gemma4:latest"
     sarvam_api_key: str = ""
     sarvam_model: str = "bulbul:v3"
     sarvam_speaker: str = "shubh"

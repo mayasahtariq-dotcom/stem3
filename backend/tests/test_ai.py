@@ -198,22 +198,61 @@ class Spy(FakeLLMProvider):
 
 
 def _ask(client: TestClient, h: dict[str, str], spy: Spy, q: str) -> dict[str, Any]:
-    app.dependency_overrides[llm] = lambda: spy
+    from app.routers.ai import doubt_llm
+    app.dependency_overrides[doubt_llm] = lambda: spy
     try:
         out: dict[str, Any] = client.post("/v1/doubts", headers=h, json={"text": q}).json()
         return out
     finally:
-        app.dependency_overrides.pop(llm, None)
+        app.dependency_overrides.pop(doubt_llm, None)
 
 
 @needs_db
-def test_chatbot_refuses_without_asking_ai_when_notes_dont_cover_it(
+def test_chatbot_refuses_when_notes_dont_cover_it(
+        conn: Connection, client: TestClient, inline_pipeline: Any) -> None:
+    # The AI now reads the course notes even when no words match (an English doubt about Kannada notes), so it is
+    # asked; when it says the notes don't cover the doubt, the fixed reply is used and nothing is cited.
+    h = _class_with_notes(conn, client)
+    spy = Spy(answer={"answer": "India won it.", "in_notes": False, "used_page": 0})
+    a = _ask(client, h, spy, "Who won the cricket world cup?")
+    assert spy.calls == ["answer"] and a["citation"] is None and a["from_notes"] is False
+    assert "India" not in a["answer"] and "नोट्स में नहीं" in a["answer"]   # fixed reply in the student's language
+
+
+@needs_db
+def test_chatbot_answers_a_doubt_in_another_language_than_the_notes(
         conn: Connection, client: TestClient, inline_pipeline: Any) -> None:
     h = _class_with_notes(conn, client)
-    spy = Spy()
-    a = _ask(client, h, spy, "Who won the cricket world cup?")
-    assert spy.calls == [] and a["citation"] is None and a["from_notes"] is False
-    assert "नोट्स में नहीं" in a["answer"]                      # fixed reply in the student's language
+    spy = Spy(answer={"answer": "कोशिका जीवन की सबसे छोटी इकाई है।", "in_notes": True, "used_page": 1})
+    a = _ask(client, h, spy, "कोशिका क्या है?")                     # no shared words with the English notes
+    assert spy.calls == ["answer", "check"] and a["from_notes"] is True and a["citation"]
+
+
+class LocalSpy(Spy):
+    """Like a model on this computer: quotes the line it used instead of a second fact-check call."""
+    local = True
+
+
+@needs_db
+def test_local_model_answer_needs_a_real_quote_from_the_notes(
+        conn: Connection, client: TestClient, inline_pipeline: Any) -> None:
+    h = _class_with_notes(conn, client)
+    good = LocalSpy(answer={"answer": "The cell is the smallest unit of life.", "in_notes": True, "used_page": 1,
+                            "evidence": "The cell is the smallest unit of life."})
+    a = _ask(client, h, good, "smallest unit of life?")
+    assert a["from_notes"] is True and good.calls == ["answer"]                  # no second AI call
+    made_up = LocalSpy(answer={"answer": "Cells glow in the dark.", "in_notes": True, "used_page": 1,
+                               "evidence": "Cells glow in the dark at night."})
+    b = _ask(client, h, made_up, "do cells glow?")
+    assert b["from_notes"] is False and b["citation"] is None                     # quote not in the notes: refused
+
+
+def test_quoted_from_ignores_spacing_but_not_made_up_lines() -> None:
+    from app.routers.ai import quoted_from
+    notes = "ಗಾಜು ವಿದ್ಯುತ್ ಅವಾಹಕವಾಗಿದೆ. ತಾಮ್ರ ಉತ್ತಮ ವಾಹಕ."
+    assert quoted_from("ಗಾಜು  ವಿದ್ಯುತ್ ಅವಾಹಕವಾಗಿದೆ", notes)
+    assert not quoted_from("ಗಾಜು ಉತ್ತಮ ವಾಹಕ ಮತ್ತು ಬಿಸಿ", notes)
+    assert not quoted_from("", notes)
 
 
 @needs_db

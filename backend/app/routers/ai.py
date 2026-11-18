@@ -17,6 +17,7 @@ from fastapi import (
 )
 from pydantic import BaseModel, Field
 from sqlalchemy import text
+from sqlalchemy.exc import OperationalError
 
 from app import storage
 from app.ai.pipeline import QUESTIONS_SCHEMA, SYSTEM, generate_more, insert_questions, run_pipeline
@@ -40,6 +41,15 @@ def llm() -> LLMProvider:
 
 
 LLMDep = Annotated[LLMProvider, Depends(llm)]
+
+
+def doubt_llm() -> LLMProvider:
+    """Ask Golu's model: the one on this computer (Ollama) when DOUBT_LLM=ollama and it is running, else Gemini."""
+    from app.ai.provider import OllamaProvider, local_model_ready
+    s = get_settings()
+    if s.doubt_llm == "ollama" and not s.use_fake_ai and local_model_ready(s.ollama_url, s.ollama_model):
+        return OllamaProvider(s.ollama_url, s.ollama_model)
+    return get_llm(s)
 
 
 def _background(upload_id: str) -> None:
@@ -161,11 +171,36 @@ def regenerate_question(question_id: str, db: DbDep, user: Teacher, model: LLMDe
 class DoubtIn(BaseModel):
     text: str = Field(min_length=2, max_length=500)
     lesson_id: str | None = None
+    course_id: str | None = None          # the course the doubt is about (its notes are searched first)
 
 
 ANSWER_SCHEMA = {"type": "OBJECT", "properties": {
     "answer": {"type": "STRING"}, "in_notes": {"type": "BOOLEAN"}, "used_page": {"type": "INTEGER"}},
     "required": ["answer", "in_notes", "used_page"]}
+LOCAL_ANSWER_SCHEMA = {"type": "OBJECT", "properties": {
+    "answer": {"type": "STRING"}, "in_notes": {"type": "BOOLEAN"}, "used_page": {"type": "INTEGER"},
+    "evidence": {"type": "STRING"}}, "required": ["answer", "in_notes", "used_page", "evidence"]}
+LOCAL_RULE = (" Also copy into 'evidence' the exact sentence from the notes that answers the doubt, word for word in the "
+              "notes' own language (empty when in_notes is false).")
+LOCAL_NOTES_CHARS = 5000                  # a smaller slice for a model on this computer (faster answers)
+
+
+def _norm(s: str) -> str:
+    return re.sub(r"[\W_]+", "", s.lower())
+
+
+def quoted_from(evidence: str, notes: str) -> bool:
+    """The quoted line really is in the notes (spacing and punctuation ignored; most of its words if reworded)."""
+    ev = _norm(evidence)
+    if len(ev) < 6:
+        return False
+    if ev in _norm(notes):
+        return True
+    words = [w for w in re.findall(r"\w+", evidence.lower()) if len(w) > 2]
+    have = set(re.findall(r"\w+", notes.lower()))
+    return bool(words) and sum(w in have for w in words) / len(words) >= 0.8
+
+
 CHECK_SCHEMA = {"type": "OBJECT", "properties": {"supported": {"type": "BOOLEAN"}}, "required": ["supported"]}
 TUTOR = ("You are Golu, a kind cow who helps Indian school children (Classes 6 to 10) with doubts about "
          "their CLASS NOTES. Strict rules: (1) Use ONLY the class notes given below. Never use your own "
@@ -185,6 +220,7 @@ NOT_IN_NOTES = {
     "en": "This is not in your class notes. I only answer from your notes, so please ask your teacher!",
 }
 LANG = {"hi": "Hindi", "kn": "Kannada", "en": "English"}
+MAX_NOTES_CHARS = 12000                   # how much of a course's notes the AI reads when no words match
 ACCESSIBLE = ("c.status='published' and exists (select 1 from course_assignments a "
               "join memberships m on m.classroom_id=a.classroom_id where a.course_id=c.id and m.user_id=:u)")
 
@@ -207,7 +243,8 @@ def _words(s: str) -> set[str]:
 
 
 @router.post("/doubts")
-def ask_doubt(body: DoubtIn, db: DbDep, user: Student, model: LLMDep) -> dict[str, Any]:
+def ask_doubt(body: DoubtIn, db: DbDep, user: Student,
+              model: Annotated[LLMProvider, Depends(doubt_llm)]) -> dict[str, Any]:
     """Answers ONLY from the teacher's class notes (OCR pages and terms of the student's courses).
 
     1. No related notes found: a fixed reply, the AI is not asked at all.
@@ -219,33 +256,57 @@ def ask_doubt(body: DoubtIn, db: DbDep, user: Student, model: LLMDep) -> dict[st
     q = body.text
     refusal = NOT_IN_NOTES.get(user.language, NOT_IN_NOTES["hi"])
     pages = db.execute(text(
-        f"select p.id, p.page_no, p.ocr_text, c.title from upload_pages p join uploads up on up.id=p.upload_id "
+        f"select p.id, p.page_no, p.ocr_text, c.title, c.id as course_id from upload_pages p join uploads up on up.id=p.upload_id "
         f"join courses c on c.id=up.course_id where {ACCESSIBLE} and p.ocr_text is not null"),
         {"u": user.id}).mappings().all()
     terms = db.execute(text(f"select t.regional, t.english, t.definition, c.title from terms t "
                             f"join courses c on c.id=t.course_id where {ACCESSIBLE}"), {"u": user.id}).mappings().all()
+    if body.course_id:                                   # the course being studied comes first
+        pages = sorted(pages, key=lambda p: str(p["course_id"]) != body.course_id)
     qw = _words(q)
     ranked = sorted(pages, key=lambda p: len(qw & _words(p["ocr_text"])), reverse=True)[:3]
     ranked = [p for p in ranked if qw & _words(p["ocr_text"])]
+    local = bool(getattr(model, "local", False))
+    cap = LOCAL_NOTES_CHARS if local else MAX_NOTES_CHARS
+    if pages:
+        # Word matching alone misses answers: the doubt may be in another language than the notes (an English
+        # question about Kannada notes), or share only a common word with the wrong pages. Notes are short, so the
+        # AI reads the best matches first and then the rest of this course's notes; the guards below still allow
+        # only answers the notes support, so off-topic doubts are still refused.
+        course = body.course_id or str((ranked or pages)[0]["course_id"])
+        rest = ([p for p in pages if str(p["course_id"]) == course and p not in ranked]
+                or [p for p in pages if p not in ranked])
+        size = sum(min(len(p["ocr_text"]), 3000) for p in ranked)
+        for p in rest:
+            if size > cap:
+                break
+            ranked.append(p)
+            size += min(len(p["ocr_text"]), 3000)
     hits = [t for t in terms if (t["english"] and t["english"].lower() in q.lower())
             or (t["regional"] and t["regional"] in q)]
     answer, citation, grounded = refusal, None, False
+    # End the read transaction before the (possibly slow, e.g. local) AI call: the database pooler closes
+    # connections left idle inside a transaction, which made saving the answer fail afterwards.
+    db.commit()
     if ranked or hits:                                   # (1) nothing related: never ask the AI
         notes = "\n\n".join(f"[PAGE {i + 1}] ({p['title']}, page {p['page_no']})\n{p['ocr_text'][:3000]}"
                              for i, p in enumerate(ranked))
         notes += "".join(f"\n[TERM] {t['english']} ({t['regional']}): {_def_text(t['definition'], 'en')}"
                          for t in hits)
         try:
+            system = TUTOR.replace("{lang}", LANG.get(user.language, "Hindi")) + (LOCAL_RULE if local else "")
             out = model.generate_json(f"Class notes:\n{notes}\n\nStudent's doubt: {q}",
-                                      ANSWER_SCHEMA, system=TUTOR.replace("{lang}", LANG.get(user.language, "Hindi")))
-            draft = str(out.get("answer") or "").strip()
+                                      LOCAL_ANSWER_SCHEMA if local else ANSWER_SCHEMA, system=system)
+            draft = re.sub(r"\s*\[(?:PAGE \d+|TERM)\]", "", str(out.get("answer") or "")).strip()   # no internal markers
             used = int(out.get("used_page") or 0)
             if out.get("in_notes") and draft:            # (2) the AI itself says it's in the notes
                 if 1 <= used <= len(ranked):             # (4) it must point at a real page or term
                     citation = {"course": ranked[used - 1]["title"], "page": ranked[used - 1]["page_no"]}
                 elif hits:
                     citation = {"course": hits[0]["title"], "term": hits[0]["english"]}
-                if citation:                             # (3) fact check against the same notes
+                if citation and local:                   # (3) local model: its quoted line must really be in the notes
+                    grounded = quoted_from(str(out.get("evidence") or ""), notes)
+                elif citation:                           # (3) fact check against the same notes
                     check = model.generate_json(f"Notes:\n{notes}\n\nAnswer to check:\n{draft}",
                                                 CHECK_SCHEMA, system=CHECKER)
                     grounded = bool(check.get("supported"))
@@ -255,10 +316,15 @@ def ask_doubt(body: DoubtIn, db: DbDep, user: Student, model: LLMDep) -> dict[st
                 citation = None
         except AIUnavailable as exc:
             raise HTTPException(503, "Golu is busy right now. Please ask again in a minute.") from exc
-    did = db.execute(text("insert into doubts(learner_id, text, lesson_id, answer, citation) "
-                          "values (:l,:t,:le,:a,cast(:c as jsonb)) returning id"),
-                     {"l": lid, "t": q, "le": body.lesson_id, "a": answer,
-                      "c": json.dumps(citation) if citation else None}).scalar_one()
+    save = text("insert into doubts(learner_id, text, lesson_id, answer, citation) "
+                "values (:l,:t,:le,:a,cast(:c as jsonb)) returning id")
+    row = {"l": lid, "t": q, "le": body.lesson_id, "a": answer, "c": json.dumps(citation) if citation else None}
+    try:
+        did = db.execute(save, row).scalar_one()
+    except OperationalError:
+        # A slow (local) model can outlast the pooled connection, which the server then closes; save on a new one.
+        with get_engine().begin() as fresh:
+            did = fresh.execute(save, row).scalar_one()
     return {"id": str(did), "answer": answer, "citation": citation, "from_notes": grounded}
 
 
